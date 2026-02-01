@@ -1,8 +1,21 @@
-# Claude Code local settings
-.claude/
+# Dependencies
+node_modules/
 
-# Serena MCP settings
-.serena/
+# Build outputs
+dist/
+.astro/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
 # OS files
 .DS_Store
@@ -14,26 +27,17 @@ Thumbs.db
 *.swp
 *.swo
 
-# Playwright test screenshots
-.playwright-mcp/
+# Claude Code local settings
+.claude/
+
+# Serena MCP settings
+.serena/
 
 # Netlify local
 .netlify/
 
-# Node modules (if any at root)
-node_modules/
+# Test screenshots
+.playwright-mcp/
 
-# Build outputs
-dist/
-.astro/
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-
-# Environment
-.env
-.env.local
-.env.production
+# Temp folders
+roblox-tutor/
