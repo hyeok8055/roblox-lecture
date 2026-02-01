@@ -1,0 +1,55 @@
+---
+interface Props {
+    type?: 'hint' | 'info' | 'warning' | 'tip';
+    title?: string;
+}
+
+const { type = 'hint', title } = Astro.props;
+
+const config = {
+    hint: {
+        bg: 'from-amber-50 to-amber-100',
+        border: 'border-l-amber-400',
+        icon: '💡',
+        defaultTitle: '힌트'
+    },
+    info: {
+        bg: 'from-violet-50 to-violet-100',
+        border: 'border-l-violet-400',
+        icon: '🔍',
+        defaultTitle: '정보'
+    },
+    warning: {
+        bg: 'from-orange-50 to-orange-100',
+        border: 'border-l-orange-400',
+        icon: '⚠️',
+        defaultTitle: '주의'
+    },
+    tip: {
+        bg: 'from-cyan-50 to-cyan-100',
+        border: 'border-l-cyan-400',
+        icon: '✨',
+        defaultTitle: '팁'
+    }
+};
+
+const { bg, border, icon, defaultTitle } = config[type];
+const displayTitle = title || defaultTitle;
+---
+
+<div class={`bg-gradient-to-r ${bg} ${border} border-l-4 rounded-r-2xl p-4 my-4`}>
+    <div class="flex items-start gap-3">
+        <span class="text-xl">{icon}</span>
+        <div>
+            <strong class="text-ink-deep">{displayTitle}</strong>
+            <div class="text-ink-light text-sm mt-1">
+                <slot />
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-ink-deep { color: var(--ink-deep, #1a1625); }
+    .text-ink-light { color: var(--ink-light, #3d3654); }
+</style>

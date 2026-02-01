@@ -1,0 +1,39 @@
+# Claude Code local settings
+.claude/
+
+# Serena MCP settings
+.serena/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Playwright test screenshots
+.playwright-mcp/
+
+# Netlify local
+.netlify/
+
+# Node modules (if any at root)
+node_modules/
+
+# Build outputs
+dist/
+.astro/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.production

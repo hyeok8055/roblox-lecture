@@ -1,0 +1,176 @@
+---
+import LessonLayout from '../../layouts/LessonLayout.astro';
+
+// 에디터 초기 코드
+const editorCode = `-- 여기에 코드를 작성하세요
+print('안녕하세요!')`;
+
+const editorHints = JSON.stringify(["print() 함수 사용하기", "문자열은 작은따옴표나 큰따옴표로 감싸요"]);
+
+const quiz1Options = JSON.stringify(["Properties", "Explorer", "Toolbox", "Output"]);
+const quiz2Options = JSON.stringify(["local", "var", "let", "dim"]);
+---
+
+<LessonLayout title="스튜디오 적응" lessonNumber={1} totalSlides={5}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">1차시</span>
+                <h1 class="title-display mb-4">
+                    로블록스 스튜디오<br>
+                    <span class="text-neon-mint">적응하기</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    Explorer, Properties 패널 사용법과<br>
+                    파트 조작의 기초를 배워봅니다
+                </p>
+                <div class="flex gap-4 justify-center">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⏱️ 약 40분</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📚 5 슬라이드</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Explorer 패널 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Explorer 패널이란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-sky">folder_open</span>
+                            게임의 모든 것이 담긴 폴더
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            Explorer는 게임에 있는 모든 오브젝트를 보여주는 패널입니다.
+                            마치 컴퓨터의 파일 탐색기처럼 폴더 구조로 정리되어 있어요.
+                        </p>
+                        <div class="hint-box">
+                            <strong>💡 팁:</strong> View 탭에서 Explorer를 켜고 끌 수 있어요!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">주요 폴더들</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-3">
+                                <span class="w-8 h-8 bg-neon-sky/20 rounded-lg flex items-center justify-center flex-shrink-0">🌍</span>
+                                <div>
+                                    <strong>Workspace</strong>
+                                    <p class="text-sm text-ink-light">게임에 보이는 모든 물체</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-8 h-8 bg-neon-mint/20 rounded-lg flex items-center justify-center flex-shrink-0">👥</span>
+                                <div>
+                                    <strong>Players</strong>
+                                    <p class="text-sm text-ink-light">접속한 플레이어들</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-3">
+                                <span class="w-8 h-8 bg-neon-gold/20 rounded-lg flex items-center justify-center flex-shrink-0">📦</span>
+                                <div>
+                                    <strong>ReplicatedStorage</strong>
+                                    <p class="text-sm text-ink-light">공유되는 에셋 저장소</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 코드 블록 데모 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">Lua 코드</span>
+                <h2 class="title-section mb-6">첫 번째 스크립트</h2>
+            </div>
+
+            <div class="animate-in mb-8">
+                <p class="text-lg text-ink-light mb-6">
+                    로블록스에서 코드는 <code>Script</code> 오브젝트 안에 작성합니다.
+                    아래는 가장 기본적인 "Hello World" 코드예요.
+                </p>
+
+                <lua-code-block title="HelloWorld.lua" show-line-numbers>
+-- 첫 번째 Lua 스크립트
+local message = "Hello, Roblox!"
+print(message)
+
+-- 파트의 색상 바꾸기
+local part = script.Parent
+part.BrickColor = BrickColor.new("Bright red")
+                </lua-code-block>
+            </div>
+
+            <div class="animate-in info-box">
+                <strong>🔍 코드 설명</strong>
+                <ul class="mt-2 space-y-1 text-sm">
+                    <li><code>local</code> - 변수를 만드는 키워드</li>
+                    <li><code>print()</code> - 출력창에 텍스트 표시</li>
+                    <li><code>script.Parent</code> - 스크립트가 들어있는 오브젝트</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 에디터 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="print 함수로 자신의 이름을 출력해보세요"
+            initial-code={editorCode}
+            hints={editorHints}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용을 확인해볼까요?</h2>
+            </div>
+
+            <div class="animate-in mb-8">
+                <quiz-question
+                    question="로블록스에서 게임의 모든 오브젝트를 보여주는 패널은?"
+                    correct="B"
+                    options={quiz1Options}
+                    correct-explanation="맞아요! Explorer 패널에서 게임의 모든 오브젝트를 볼 수 있습니다."
+                    wrong-explanation="Explorer 패널이 정답이에요. 게임의 구조를 트리 형태로 보여줍니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in">
+                <quiz-question
+                    question="Lua에서 변수를 만들 때 사용하는 키워드는?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="정답! Lua에서는 local 키워드로 변수를 선언합니다."
+                    wrong-explanation="Lua에서는 local 키워드를 사용해요. var는 JavaScript, let은 JavaScript/Swift에서 사용합니다."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

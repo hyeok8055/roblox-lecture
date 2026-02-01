@@ -1,0 +1,35 @@
+---
+interface Props {
+    variant?: 'lesson' | 'quiz' | 'lua' | 'roblox' | 'success' | 'default';
+    size?: 'sm' | 'md';
+}
+
+const { variant = 'default', size = 'md' } = Astro.props;
+
+const variants = {
+    lesson: 'bg-ink-deep text-white',
+    quiz: 'bg-neon-gold text-ink-deep',
+    lua: 'bg-gradient-to-r from-blue-900 to-blue-700 text-white',
+    roblox: 'bg-roblox-red text-white',
+    success: 'bg-neon-mint text-ink-deep',
+    default: 'bg-ink-pale text-ink-deep'
+};
+
+const sizes = {
+    sm: 'text-xs px-2 py-1',
+    md: 'text-sm px-3 py-1.5'
+};
+---
+
+<span class={`inline-flex items-center gap-1.5 rounded-full font-semibold ${variants[variant]} ${sizes[size]}`}>
+    <slot />
+</span>
+
+<style>
+    .bg-ink-deep { background: var(--ink-deep, #1a1625); }
+    .bg-ink-pale { background: var(--ink-pale, #f8f6f4); }
+    .bg-neon-gold { background: var(--neon-gold, #FFD93D); }
+    .bg-neon-mint { background: var(--neon-mint, #3DFFA2); }
+    .bg-roblox-red { background: var(--roblox-red, #E2231A); }
+    .text-ink-deep { color: var(--ink-deep, #1a1625); }
+</style>

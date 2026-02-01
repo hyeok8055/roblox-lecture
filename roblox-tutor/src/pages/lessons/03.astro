@@ -1,0 +1,231 @@
+---
+import LessonLayout from '../../layouts/LessonLayout.astro';
+import HintBox from '../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["Touched", "Click", "Enter", "Collision"]);
+const quiz2Options = JSON.stringify(["function", "def", "func", "fn"]);
+
+// 에디터 코드
+const editorCode1 = `-- 함수 만들기
+local function sayHello()
+    print("안녕하세요!")
+end
+
+-- 함수 호출
+sayHello()`;
+
+const editorCode2 = `-- Touched 이벤트 예시
+local part = script.Parent
+
+local function onTouched(otherPart)
+    print("무언가 닿았어요!")
+    print("닿은 물체:", otherPart.Name)
+end
+
+part.Touched:Connect(onTouched)
+print("이벤트 연결 완료!")`;
+---
+
+<LessonLayout title="함수와 이벤트" lessonNumber={3} totalSlides={6}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">3차시</span>
+                <h1 class="title-display mb-4">
+                    함수와 <span class="text-neon-mint">이벤트</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    코드를 재사용하는 함수와<br>
+                    게임의 상호작용을 만드는 이벤트를 배워요
+                </p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔧 function</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">👆 Touched</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔗 Connect</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 함수란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">함수(Function)란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🔧</span>
+                            반복되는 코드 묶음
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            함수는 <strong>여러 줄의 코드를 하나로 묶어</strong> 이름을 붙인 거예요.
+                            필요할 때마다 그 이름을 부르면 코드가 실행됩니다!
+                        </p>
+                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4">
+                            <div class="text-sm text-ink-light mb-2">비유하자면...</div>
+                            <div class="font-bold">📱 "전화걸기" 버튼</div>
+                            <div class="text-sm text-ink-light mt-1">
+                                버튼 하나로 복잡한 통화 연결 과정이 자동 실행!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">함수 만들기</h3>
+                        <lua-code-block title="함수 기본 형태">
+-- 함수 정의
+local function 함수이름()
+    -- 실행할 코드
+end
+
+-- 함수 호출 (실행)
+함수이름()
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="함수 이름 짓기">
+                함수 이름은 <strong>동사</strong>로 시작하면 좋아요!
+                예: <code>sayHello</code>, <code>killPlayer</code>, <code>givePoints</code>
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 함수 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="함수를 만들고 호출해보세요"
+            initial-code={editorCode1}
+            hints='["function 키워드로 함수를 만들어요", "함수이름() 으로 호출해요"]'
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 4: 이벤트란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">이벤트</span>
+                <h2 class="title-section mb-6">이벤트(Event)란?</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light mb-6">
+                    이벤트는 <strong>"어떤 일이 일어났을 때"</strong> 코드를 실행하는 방법이에요.
+                    게임에서 상호작용을 만드는 핵심 기능입니다!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in mb-8">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-sky">자주 쓰는 이벤트</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">👆</span>
+                            <div>
+                                <code class="text-sm">Touched</code>
+                                <p class="text-xs text-ink-light">무언가 닿았을 때</p>
+                            </div>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">🖱️</span>
+                            <div>
+                                <code class="text-sm">MouseClick</code>
+                                <p class="text-xs text-ink-light">클릭했을 때</p>
+                            </div>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">👤</span>
+                            <div>
+                                <code class="text-sm">PlayerAdded</code>
+                                <p class="text-xs text-ink-light">플레이어 입장 시</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">이벤트 연결 방법</h4>
+                    <lua-code-block>
+-- 이벤트:Connect(함수)
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                    <div class="mt-4 text-sm text-ink-light">
+                        <code>:Connect()</code>로 이벤트와 함수를 연결해요!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: Touched 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="Touched 이벤트로 닿은 물체 이름 출력하기 (시뮬레이터에서는 이벤트 연결만 확인 가능)"
+            initial-code={editorCode2}
+            hints='["함수 안에서 otherPart로 닿은 물체에 접근해요", "Connect로 이벤트와 함수를 연결해요"]'
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 6: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트에 무언가 닿았을 때 발생하는 이벤트는?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! Touched 이벤트는 파트에 무언가 닿으면 발생해요."
+                        wrong-explanation="Touched가 정답이에요. part.Touched:Connect(함수)로 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="Lua에서 함수를 만들 때 사용하는 키워드는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! Lua에서는 function 키워드로 함수를 만들어요."
+                        wrong-explanation="function이 정답이에요. local function 함수이름() end 형태로 사용합니다."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-mint/20 to-neon-sky/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">3차시 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 조건문(if-then-end)을 배워요
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
