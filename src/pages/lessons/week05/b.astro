@@ -1,0 +1,809 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["조건이 참인 동안", "무한 반복", "1번만 실행", "랜덤 실행"]);
+const quiz2Options = JSON.stringify(["task.wait()", "stop()", "break", "return"]);
+
+// 힌트 데이터 - 빈칸 채우기 실습용
+const hints1 = JSON.stringify([
+    "💡 while 조건 do = 조건이 참인 동안 반복",
+    "count <= 5 = count가 5 이하인 동안",
+    "count = count + 1 로 매번 1씩 증가!"
+]);
+
+// 빈칸 채우기 1 - 개념 설명 포함
+const editorCode1 = `-- ========================================
+-- 🔄 while 반복문 기초
+-- ========================================
+-- 💡 while 조건 do = 조건이 참인 동안 반복
+-- 💡 for와 다르게 직접 조건을 만들어요!
+-- ========================================
+
+local count = 1
+
+-- count가 5 이하인 동안 반복
+while count <= ___ do
+    print("카운트:", count)
+    -- 💡 직접 숫자를 증가시켜야 해요!
+    count = count + 1
+end
+
+print("반복 종료!")`;
+
+// =========================================
+// 로블록스 퀴즈 예제 데이터
+// =========================================
+
+// 회전 장애물
+const spinBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "true", options: ["true", "false", "1", "nil"] },
+    { id: "b3", correct: "speed", options: ["part", "speed", "CFrame", "0.03"] }
+]);
+const spinTemplate = `local part = [b1]
+local speed = 2
+
+while [b2] do
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad([b3]), 0)
+    task.wait(0.03)
+end`;
+const spinFullCode = `local part = script.Parent
+local speed = 2
+
+while true do
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(speed), 0)
+    task.wait(0.03)
+end`;
+
+// 점멸 파트
+const blinkBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "part"] },
+    { id: "b2", correct: "true", options: ["true", "false", "1", "blinkSpeed"] },
+    { id: "b3", correct: "1", options: ["0", "0.5", "1", "2"] },
+    { id: "b4", correct: "0", options: ["0", "0.5", "1", "2"] }
+]);
+const blinkTemplate = `local part = [b1]
+local blinkSpeed = 0.5
+
+while [b2] do
+    part.Transparency = [b3]
+    task.wait(blinkSpeed)
+
+    part.Transparency = [b4]
+    task.wait(blinkSpeed)
+end`;
+const blinkFullCode = `local part = script.Parent
+local blinkSpeed = 0.5
+
+while true do
+    part.Transparency = 1
+    task.wait(blinkSpeed)
+
+    part.Transparency = 0
+    task.wait(blinkSpeed)
+end`;
+
+// 크기 펄스
+const pulseBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "true", options: ["true", "false", "1", "nil"] },
+    { id: "b3", correct: "math.sin", options: ["math.sin", "math.cos", "math.rad", "math.random"] },
+    { id: "b4", correct: "scale", options: ["baseSize", "scale", "i", "4"] }
+]);
+const pulseTemplate = `local part = [b1]
+local baseSize = 4
+
+while [b2] do
+    for i = 0, 20 do
+        local scale = baseSize + [b3](i * 0.3)
+        part.Size = Vector3.new([b4], [b4], [b4])
+        task.wait(0.05)
+    end
+end`;
+const pulseFullCode = `local part = script.Parent
+local baseSize = 4
+
+while true do
+    for i = 0, 20 do
+        local scale = baseSize + math.sin(i * 0.3)
+        part.Size = Vector3.new(scale, scale, scale)
+        task.wait(0.05)
+    end
+end`;
+
+// 3축 회전
+const spin3dBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "true", options: ["true", "false", "1", "nil"] },
+    { id: "b3", correct: "math.rad", options: ["math.rad", "math.sin", "math.cos", "math.abs"] }
+]);
+const spin3dTemplate = `local part = [b1]
+
+while [b2] do
+    part.CFrame = part.CFrame * CFrame.Angles(
+        [b3](1),
+        [b3](2),
+        [b3](0.5)
+    )
+    task.wait(0.03)
+end`;
+const spin3dFullCode = `local part = script.Parent
+
+while true do
+    part.CFrame = part.CFrame * CFrame.Angles(
+        math.rad(1),
+        math.rad(2),
+        math.rad(0.5)
+    )
+    task.wait(0.03)
+end`;
+
+// 움직이는 플랫폼
+const platformBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "true", options: ["true", "false", "1", "nil"] },
+    { id: "b3", correct: "moveDistance", options: ["10", "moveDistance", "moveSpeed", "i"] },
+    { id: "b4", correct: "Vector3.new", options: ["Vector3.new", "CFrame.new", "Position.new", "Part.new"] }
+]);
+const platformTemplate = `local part = [b1]
+local moveDistance = 10
+local moveSpeed = 0.5
+
+while [b2] do
+    for i = 1, [b3] do
+        part.Position = part.Position + [b4](moveSpeed, 0, 0)
+        task.wait(0.05)
+    end
+    task.wait(0.5)
+    for i = 1, [b3] do
+        part.Position = part.Position - [b4](moveSpeed, 0, 0)
+        task.wait(0.05)
+    end
+    task.wait(0.5)
+end`;
+const platformFullCode = `local part = script.Parent
+local moveDistance = 10
+local moveSpeed = 0.5
+
+while true do
+    for i = 1, moveDistance do
+        part.Position = part.Position + Vector3.new(moveSpeed, 0, 0)
+        task.wait(0.05)
+    end
+    task.wait(0.5)
+    for i = 1, moveDistance do
+        part.Position = part.Position - Vector3.new(moveSpeed, 0, 0)
+        task.wait(0.05)
+    end
+    task.wait(0.5)
+end`;
+
+---
+
+<LessonLayout title="반복문 (while)" lessonNumber={5} totalSlides={12}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">5주차 B</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-mint">while</span> 반복문
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    조건이 참인 동안 계속 반복하는 방법!<br>
+                    게임의 핵심 기능을 만들어요
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔄 while true do</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🌀 회전 장애물</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">💡 점멸 파트</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🚂 움직이는 플랫폼</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ while 반복문 문법 이해하기</li>
+                        <li>✓ while true do (무한 반복) 사용하기</li>
+                        <li>✓ 회전/점멸/이동 장애물 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: while 반복문 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">while 반복문</span>
+                <h2 class="title-section mb-6">while - 조건이 참인 동안 반복</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">기본 형태</h3>
+                        <lua-code-block title="while 문법">
+while 조건 do
+    -- 조건이 참이면 계속 반복
+end
+                        </lua-code-block>
+
+                        <div class="mt-4 p-4 bg-amber-50 rounded-xl">
+                            <div class="text-sm font-bold text-amber-700 mb-2">⚠️ 주의!</div>
+                            <p class="text-sm text-amber-600">
+                                조건이 <strong>항상 참</strong>이면 무한 루프!<br>
+                                탈출 조건을 만들거나 <code>task.wait()</code>을 꼭 넣어야 해요.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">예시: 1부터 5까지 출력</h3>
+                        <lua-code-block show-line-numbers>
+local count = 1
+
+while count &lt;= 5 do
+    print(count)
+    count = count + 1
+end
+-- 출력: 1, 2, 3, 4, 5
+                        </lua-code-block>
+
+                        <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                            <div class="p-3 bg-neon-sky/10 rounded-lg text-center">
+                                <div class="font-bold text-neon-sky">①</div>
+                                <div class="text-xs">count = 1로 시작</div>
+                            </div>
+                            <div class="p-3 bg-neon-mint/10 rounded-lg text-center">
+                                <div class="font-bold text-neon-mint">②</div>
+                                <div class="text-xs">5 이하면 반복</div>
+                            </div>
+                            <div class="p-3 bg-neon-gold/10 rounded-lg text-center">
+                                <div class="font-bold text-neon-gold">③</div>
+                                <div class="text-xs">매번 1씩 증가</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="info" title="for vs while 언제 사용?">
+                <strong>for</strong>: 몇 번 반복할지 알 때 → "5번 출력해", "10개 처리해"<br>
+                <strong>while</strong>: 조건에 따라 반복할 때 → "체력이 0이 될 때까지", "영원히"
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 빈칸 채우기 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 1부터 5까지 출력하세요! (___에 숫자 5 넣기)"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 4: while true do -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">while true do = 무한 반복</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">게임에서 무한 반복이 필요할 때</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl">
+                            <div class="text-2xl mb-2">🌀</div>
+                            <div class="font-bold">회전 장애물</div>
+                            <div class="text-xs text-ink-light">계속 돌아가야 함</div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl">
+                            <div class="text-2xl mb-2">💡</div>
+                            <div class="font-bold">깜빡이는 조명</div>
+                            <div class="text-xs text-ink-light">계속 깜빡여야 함</div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl">
+                            <div class="text-2xl mb-2">🚂</div>
+                            <div class="font-bold">움직이는 발판</div>
+                            <div class="text-xs text-ink-light">계속 왔다갔다</div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                            <div class="text-2xl mb-2">🎨</div>
+                            <div class="font-bold">색상 변화</div>
+                            <div class="text-xs text-ink-light">계속 바뀌어야 함</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">기본 패턴</h3>
+                    <lua-code-block show-line-numbers>
+while true do
+    -- 반복할 동작
+
+    task.wait(0.03)  -- 필수!
+end
+                    </lua-code-block>
+
+                    <div class="mt-4 p-4 bg-red-50 rounded-xl">
+                        <div class="text-sm font-bold text-red-700 mb-2">⚠️ task.wait() 필수!</div>
+                        <p class="text-sm text-red-600">
+                            <code>task.wait()</code>가 없으면 게임이 멈춰버려요!<br>
+                            무한 반복 안에는 <strong>반드시</strong> wait를 넣으세요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 스튜디오 가이드 - 회전 장애물 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 실습</span>
+                <h2 class="title-section mb-6">스튜디오에서 회전 장애물 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🌀</span>
+                        따라하기: 회전 장애물
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div><strong>Part 생성</strong>: Home → Part → Block</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div><strong>Anchored 체크</strong>: Properties에서 Anchored ✓</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div><strong>Script 추가</strong>: Part 우클릭 → Insert Object → Script</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div><strong>코드 붙여넣기</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <div><strong>F5</strong>로 테스트 → 파트가 회전!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">복사할 코드</h4>
+                    <lua-code-block title="회전 장애물" show-line-numbers>
+local part = script.Parent
+local speed = 2  -- 회전 속도
+
+while true do
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(speed), 0)
+    task.wait(0.03)
+end
+                    </lua-code-block>
+                    <div class="mt-3 text-sm text-ink-light">
+                        <code>CFrame.Angles(X, Y, Z)</code> - 각 축으로 회전<br>
+                        <code>math.rad(숫자)</code> - 도(°)를 라디안으로 변환
+                    </div>
+                </div>
+
+                <!-- 복사-붙여넣기 예제들 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트! (추가 예제)
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드 중 하나를 복사해서 F5!
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">💡 깜빡이는 파트</div>
+                            <lua-code-block title="BlinkPart.lua">
+-- ========================================
+-- 💡 깜빡이는 조명
+-- ========================================
+-- 📦 Part (Anchored ✓, Neon 재질) + Script
+-- 💡 Transparency = 투명도
+--    0 = 보임, 1 = 안보임
+-- ========================================
+local part = script.Parent
+
+while true do
+    part.Transparency = 0    -- 보이게
+    task.wait(0.5)
+    part.Transparency = 0.8  -- 거의 투명
+    task.wait(0.5)
+end
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">🚂 움직이는 플랫폼</div>
+                            <lua-code-block title="MovingPlatform.lua">
+-- ========================================
+-- 🚂 움직이는 플랫폼 (좌우)
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 +Vector3 = 한 방향으로
+-- 💡 -Vector3 = 반대 방향으로
+-- ========================================
+local part = script.Parent
+local distance = 10  -- 이동 횟수
+
+while true do
+    -- 오른쪽으로 (+ X)
+    for i = 1, distance do
+        part.Position = part.Position + Vector3.new(0.5, 0, 0)
+        task.wait(0.05)
+    end
+    -- 왼쪽으로 (- X)
+    for i = 1, distance do
+        part.Position = part.Position - Vector3.new(0.5, 0, 0)
+        task.wait(0.05)
+    end
+end
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🎯 위아래 떠다니기</div>
+                            <lua-code-block title="Floating.lua">
+-- ========================================
+-- 🎯 둥둥 떠다니는 파트
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 sin 함수로 부드러운 위아래 이동
+-- ========================================
+local part = script.Parent
+local startY = part.Position.Y  -- 시작 높이 저장
+local floatHeight = 3  -- 떠오르는 높이
+local speed = 2        -- 속도
+
+while true do
+    -- 0°에서 360°까지 (한 바퀴)
+    for i = 0, 360, speed do
+        -- 💡 sin으로 -1 ~ 1 → * 3으로 -3 ~ 3
+        local offset = math.sin(math.rad(i)) * floatHeight
+        part.Position = Vector3.new(
+            part.Position.X,
+            startY + offset,  -- 시작 높이 + 오프셋
+            part.Position.Z
+        )
+        task.wait(0.03)
+    end
+end
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">🌊 파도 효과</div>
+                            <lua-code-block title="WaveEffect.lua">
+-- ========================================
+-- 🌊 파도처럼 출렁이는 파트
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 sin + cos = 파도 움직임
+-- ========================================
+local part = script.Parent
+local startY = part.Position.Y
+local waveHeight = 2
+local counter = 0
+
+while true do
+    counter = counter + 0.1
+    -- 💡 sin으로 위아래 움직임
+    local offset = math.sin(counter) * waveHeight
+
+    part.Position = Vector3.new(
+        part.Position.X,
+        startY + offset,
+        part.Position.Z
+    )
+
+    -- 💡 cos로 앞뒤 기울기 (파도 느낌)
+    part.CFrame = part.CFrame * CFrame.Angles(
+        math.rad(math.cos(counter) * 5), 0, 0
+    )
+    task.wait(0.03)
+end
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">⚡ 랜덤 텔레포트</div>
+                            <lua-code-block title="RandomTeleport.lua">
+-- ========================================
+-- ⚡ 랜덤 순간이동 파트
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 math.random(-10, 10) = -10~10 랜덤
+-- ========================================
+local part = script.Parent
+local center = part.Position  -- 중심 위치 저장
+local range = 10  -- 이동 범위
+
+while true do
+    task.wait(2)  -- 2초마다
+
+    -- 💡 랜덤 위치 계산
+    local randomX = math.random(-range, range)
+    local randomZ = math.random(-range, range)
+
+    -- 중심에서 랜덤 거리만큼 이동
+    part.Position = center + Vector3.new(randomX, 0, randomZ)
+    part.BrickColor = BrickColor.Random()
+    print("텔레포트!")
+end
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="text-sm text-neon-mint font-bold mb-2">🎮 오비(Obby) 회전 장애물</div>
+                        <lua-code-block title="ObbySpinner.lua">
+-- ========================================
+-- 🎮 오비 회전 장애물 (방향 전환!)
+-- ========================================
+-- 📦 Part (Anchored ✓, 길쭉하게) + Script
+-- 💡 task.spawn() = 동시에 다른 코드 실행
+-- 💡 direction * -1 = 방향 반전
+-- ========================================
+local part = script.Parent
+local spinSpeed = 3
+local direction = 1  -- 1 = 정방향, -1 = 역방향
+
+-- 💡 task.spawn = 별도로 동시 실행
+-- 5초마다 방향 전환
+task.spawn(function()
+    while true do
+        task.wait(5)
+        direction = direction * -1  -- 방향 반전!
+        print("방향 전환!")
+    end
+end)
+
+-- 💡 메인 루프: 계속 회전
+while true do
+    -- direction이 -1이면 반대로 회전
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(spinSpeed * direction), 0)
+    task.wait(0.03)
+end
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 회전 장애물 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🌀 회전 장애물"
+                setup="Part 1개 (Anchored ✓, 길쭉하게 추천)"
+                concepts='["script.Parent", "CFrame", "CFrame.Angles", "math.rad", "while", "task.wait"]'
+                blanks={spinBlanks}
+                template={spinTemplate}
+                full-code={spinFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 점멸 파트 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💡 점멸 파트 (깜빡이는 조명)"
+                setup="Part 1개 (Anchored ✓, Material: Neon 추천)"
+                concepts='["script.Parent", "Transparency", "while", "task.wait"]'
+                blanks={blinkBlanks}
+                template={blinkTemplate}
+                full-code={blinkFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 크기 펄스 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💓 크기 펄스 (심장처럼 뛰어요!)"
+                setup="Part 1개 (Anchored ✓, 정육면체 추천)"
+                concepts='["script.Parent", "Vector3", "math.sin", "while", "for"]'
+                blanks={pulseBlanks}
+                template={pulseTemplate}
+                full-code={pulseFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 3축 회전 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔄 3축 동시 회전 (3D 스핀!)"
+                setup="Part 1개 (Anchored ✓, 직육면체 추천)"
+                concepts='["script.Parent", "CFrame", "CFrame.Angles", "math.rad", "while"]'
+                blanks={spin3dBlanks}
+                template={spin3dTemplate}
+                full-code={spin3dFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 로블록스 예제들 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">예제 모음</span>
+                <h2 class="title-section mb-6">while true do로 만들 수 있는 것들</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🎨</span> 무지개 색상 변경
+                    </h4>
+                    <lua-code-block>
+local colors = {"Bright red", "Bright green", "Bright blue"}
+
+while true do
+    for i = 1, #colors do
+        part.BrickColor = BrickColor.new(colors[i])
+        task.wait(0.5)
+    end
+end
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🚂</span> 움직이는 플랫폼
+                    </h4>
+                    <lua-code-block>
+while true do
+    for i = 1, 10 do
+        part.Position = part.Position + Vector3.new(0.5, 0, 0)
+        task.wait(0.05)
+    end
+    for i = 1, 10 do
+        part.Position = part.Position - Vector3.new(0.5, 0, 0)
+        task.wait(0.05)
+    end
+end
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📏</span> 크기 변화
+                    </h4>
+                    <lua-code-block>
+while true do
+    part.Size = Vector3.new(4, 4, 4)
+    task.wait(1)
+    part.Size = Vector3.new(2, 2, 2)
+    task.wait(1)
+end
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">⬆️</span> 위아래 이동
+                    </h4>
+                    <lua-code-block>
+while true do
+    for i = 1, 20 do
+        part.Position = part.Position + Vector3.new(0, 0.2, 0)
+        task.wait(0.03)
+    end
+    for i = 1, 20 do
+        part.Position = part.Position - Vector3.new(0, 0.2, 0)
+        task.wait(0.03)
+    end
+end
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 움직이는 플랫폼 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🚂 움직이는 플랫폼"
+                setup="Part 1개 (Anchored ✓, 넓은 발판 모양 Size: 10, 1, 5)"
+                concepts='["script.Parent", "Vector3", "Position", "while", "for"]'
+                blanks={platformBlanks}
+                template={platformTemplate}
+                full-code={platformFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="while 조건 do 에서 코드가 실행되는 조건은?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="맞아요! while은 조건이 참(true)인 동안 계속 반복해요."
+                        wrong-explanation="while은 '조건이 참인 동안' 반복해요. while true do는 영원히 반복됩니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="while true do 안에 꼭 넣어야 게임이 안 멈추는 것은?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="정답! task.wait()가 없으면 게임이 멈춰버려요. 필수로 넣어야 해요!"
+                        wrong-explanation="task.wait()가 정답이에요. 이게 없으면 무한루프로 게임이 멈춥니다."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8">
+                <div class="bg-gradient-to-r from-neon-mint/20 via-neon-sky/20 to-neon-gold/20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-3">🎉</div>
+                    <h3 class="font-bold text-xl mb-2">5주차 완료!</h3>
+                    <p class="text-ink-light mb-4">
+                        for와 while 반복문을 마스터했어요!<br>
+                        이제 게임에서 자동으로 돌아가는 모든 기능을 만들 수 있어요.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <span class="badge badge-success">for 반복문</span>
+                        <span class="badge badge-success">while 반복문</span>
+                        <span class="badge badge-success">회전 장애물</span>
+                        <span class="badge badge-success">점멸 파트</span>
+                        <span class="badge badge-success">움직이는 플랫폼</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

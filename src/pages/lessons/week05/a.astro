@@ -1,0 +1,665 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["for", "while", "repeat", "loop"]);
+const quiz2Options = JSON.stringify(["시작, 끝, 증가량", "조건, 실행, 종료", "변수, 값, 타입", "함수, 매개변수, 반환"]);
+
+// 힌트 데이터 - 초등학생 눈높이 개념 설명 포함
+const hints1 = JSON.stringify([
+    "💡 for i = 시작, 끝 do = 시작부터 끝까지 반복",
+    "___ 부분에 5를 넣으면 1부터 5까지 반복해요",
+    "for i = 1, 5 do → i가 1, 2, 3, 4, 5 순서로 바뀌면서 반복!"
+]);
+const hints2 = JSON.stringify([
+    "💡 for i = 1, 10 do = 1부터 10까지 (증가량 생략 = 1씩)",
+    "💡 for i = 2, 10, 2 do = 2부터 10까지 2씩 증가",
+    "💡 for i = 5, 1, -1 do = 5부터 1까지 거꾸로! (카운트다운)"
+]);
+const hints3 = JSON.stringify([
+    "💡 task.wait(1) = 1초 기다리기",
+    "countdownTime을 5로 바꾸면 5초 카운트다운",
+    "task.wait(0.5)로 바꾸면 2배 빠르게!"
+]);
+const hints4 = JSON.stringify([
+    "💡 totalCoins = totalCoins + coinPerSecond",
+    "   = 현재 코인에 추가로 더하기",
+    "coinPerSecond를 10으로 바꾸면 초당 10코인!"
+]);
+
+// 점점 커지기 - 로블록스 퀴즈 데이터
+const growBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game.Parent", "workspace"] },
+    { id: "b2", correct: "10", options: ["5", "10", "15", "20"] },
+    { id: "b3", correct: "i", options: ["1", "i", "10", "size"] }
+]);
+const growTemplate = `local part = [b1]
+
+print("=== 파트가 커지기 시작! ===")
+
+for i = 1, [b2] do
+    part.Size = Vector3.new([b3], [b3], [b3])
+    print("현재 크기:", i)
+    task.wait(0.3)
+end
+
+print("=== 최대 크기 도달! ===")`;
+const growFullCode = `local part = script.Parent
+
+print("=== 파트가 커지기 시작! ===")
+
+for i = 1, 10 do
+    part.Size = Vector3.new(i, i, i)
+    print("현재 크기:", i)
+    task.wait(0.3)
+end
+
+print("=== 최대 크기 도달! ===")`;
+
+// 무지개 색상 - 로블록스 퀴즈 데이터
+const rainbowBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "#colors", options: ["6", "#colors", "colors", "colors.length"] },
+    { id: "b3", correct: "colors[i]", options: ["colors", "colors[1]", "colors[i]", "i"] }
+]);
+const rainbowTemplate = `local part = [b1]
+
+local colors = {
+    "Bright red",
+    "Bright orange",
+    "Bright yellow",
+    "Lime green",
+    "Bright blue",
+    "Bright violet"
+}
+
+print("=== 무지개 시작! ===")
+
+for i = 1, [b2] do
+    part.BrickColor = BrickColor.new([b3])
+    print(i .. "번째 색상")
+    task.wait(0.5)
+end
+
+print("=== 무지개 완료! ===")`;
+const rainbowFullCode = `local part = script.Parent
+
+local colors = {
+    "Bright red",
+    "Bright orange",
+    "Bright yellow",
+    "Lime green",
+    "Bright blue",
+    "Bright violet"
+}
+
+print("=== 무지개 시작! ===")
+
+for i = 1, #colors do
+    part.BrickColor = BrickColor.new(colors[i])
+    print(i .. "번째 색상")
+    task.wait(0.5)
+end
+
+print("=== 무지개 완료! ===")`;
+
+
+// 빈칸 채우기 1 - 개념 설명 포함
+const editorCode1 = `-- ========================================
+-- 🔢 for 반복문 기초
+-- ========================================
+-- 💡 for 변수 = 시작, 끝 do
+--    시작부터 끝까지 반복해요!
+--
+-- 💡 i = 반복 변수 (1, 2, 3, 4... 자동으로 증가)
+-- ========================================
+
+-- 빈칸을 채워 1부터 5까지 출력하세요!
+for i = 1, ___ do
+    print("숫자:", i)
+end
+
+print("반복 종료!")`;
+
+// for 기초 - 상세 설명 포함
+const editorCode2 = `-- ========================================
+-- 🔢 for 반복문 다양한 형태
+-- ========================================
+-- 💡 for i = 시작, 끝, 증가량 do
+--    증가량 생략하면 1씩 증가!
+-- ========================================
+
+-- 1부터 5까지 (1씩 증가)
+for i = 1, 5 do
+    print("숫자:", i)
+end
+
+print("--- 구분선 ---")
+
+-- 💡 2씩 증가 = 짝수만 출력!
+-- for i = 2, 10, 2 → 2, 4, 6, 8, 10
+for i = 2, 10, 2 do
+    print("짝수:", i)
+end
+
+print("--- 구분선 ---")
+
+-- 💡 -1씩 = 거꾸로! (카운트다운)
+-- for i = 5, 1, -1 → 5, 4, 3, 2, 1
+for i = 5, 1, -1 do
+    print(i, "...")
+end
+print("발사!")`;
+
+// 카운트다운 타이머 - 상세 설명 포함
+const editorCode3 = `-- ========================================
+-- ⏱️ 카운트다운 타이머
+-- ========================================
+-- 💡 for i = 10, 1, -1 do
+--    = 10부터 1까지 거꾸로!
+-- 💡 task.wait(1) = 1초 기다리기
+-- ========================================
+
+local countdownTime = 10  -- 👈 이 숫자를 바꿔보세요!
+
+print("=== 게임 시작 준비 ===")
+
+-- 10, 9, 8, 7, 6, 5, 4, 3, 2, 1
+for i = countdownTime, 1, -1 do
+    -- 💡 .. 은 문자열을 연결해요
+    print(i .. "초 남음...")
+    task.wait(1)  -- 1초 기다리기
+end
+
+print("게임 시작!")
+print("================")`;
+
+// 자동 코인 지급 - 상세 설명 포함
+const editorCode4 = `-- ========================================
+-- 💰 자동 코인 지급 시스템
+-- ========================================
+-- 💡 누적 = 기존 값에 더하기
+--    totalCoins = totalCoins + 5
+--    = 현재 코인 + 5
+-- ========================================
+
+local coinPerSecond = 5  -- 초당 코인
+local totalCoins = 0     -- 총 코인
+
+print("=== 자동 수입 시스템 시작 ===")
+
+-- 💡 for i = 1, 10 = 10번 반복
+for i = 1, 10 do
+    -- 💡 현재 코인에 coinPerSecond 더하기
+    totalCoins = totalCoins + coinPerSecond
+    print("+" .. coinPerSecond .. " 코인! (총: " .. totalCoins .. ")")
+    task.wait(1)
+end
+
+print("=== 10초 후 총 코인: " .. totalCoins .. " ===")`;
+---
+
+<LessonLayout title="반복문 (for)" lessonNumber={5} totalSlides={11}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">5주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-sky">for</span> 반복문
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    정해진 횟수만큼 반복하는 방법을 배워요
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔢 for i = 1, 10</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⏱️ 카운트다운</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">💰 자동 코인</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ for 반복문 문법 이해하기</li>
+                        <li>✓ 증가량과 역순 반복 사용하기</li>
+                        <li>✓ 카운트다운 타이머 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 반복문이란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">반복문이란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🔄</span>
+                            같은 일을 반복하기
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            반복문은 <strong>같은 코드를 여러 번</strong> 실행하게 해요.
+                            게임에서 정말 많이 사용됩니다!
+                        </p>
+                        <div class="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-4">
+                            <div class="text-sm font-bold mb-2">🎮 게임에서 반복문이 필요한 예:</div>
+                            <ul class="text-sm space-y-1">
+                                <li>⏱️ 타이머 <strong>카운트다운</strong></li>
+                                <li>💰 <strong>매초마다</strong> 돈 지급하기</li>
+                                <li>🎨 색상을 <strong>순서대로</strong> 바꾸기</li>
+                                <li>🔢 점수를 <strong>10번</strong> 더하기</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">반복문 없이 vs 있이</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-sm text-red-500 mb-1">❌ 반복문 없이 (비효율)</div>
+                                <lua-code-block>
+print("안녕!")
+print("안녕!")
+print("안녕!")
+print("안녕!")
+print("안녕!")
+                                </lua-code-block>
+                            </div>
+                            <div>
+                                <div class="text-sm text-green-500 mb-1">✅ 반복문 사용 (효율)</div>
+                                <lua-code-block>
+for i = 1, 5 do
+    print("안녕!")
+end
+                                </lua-code-block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: for 반복문 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">for 반복문</span>
+                <h2 class="title-section mb-6">for - 정해진 횟수만큼 반복</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light">
+                    for 반복문은 <strong>몇 번 반복할지</strong> 정확히 알 때 사용해요!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">기본 형태</h3>
+                    <lua-code-block title="for 문법">
+for 변수 = 시작, 끝, 증가량 do
+    -- 반복할 코드
+end
+                    </lua-code-block>
+
+                    <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                        <div class="p-3 bg-violet-50 rounded-lg text-center">
+                            <div class="font-bold text-violet-600">시작</div>
+                            <div class="text-xs text-ink-light">반복 시작 숫자</div>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded-lg text-center">
+                            <div class="font-bold text-blue-600">끝</div>
+                            <div class="text-xs text-ink-light">여기까지 반복</div>
+                        </div>
+                        <div class="p-3 bg-sky-50 rounded-lg text-center">
+                            <div class="font-bold text-sky-600">증가량</div>
+                            <div class="text-xs text-ink-light">생략하면 1</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">다양한 예시</h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div>
+                            <div class="text-xs text-ink-light mb-1">1부터 5까지</div>
+                            <lua-code-block>
+for i = 1, 5 do
+    print(i)
+end
+-- 1, 2, 3, 4, 5
+                            </lua-code-block>
+                        </div>
+                        <div>
+                            <div class="text-xs text-ink-light mb-1">2씩 증가 (짝수)</div>
+                            <lua-code-block>
+for i = 2, 10, 2 do
+    print(i)
+end
+-- 2, 4, 6, 8, 10
+                            </lua-code-block>
+                        </div>
+                        <div>
+                            <div class="text-xs text-ink-light mb-1">거꾸로 (카운트다운)</div>
+                            <lua-code-block>
+for i = 5, 1, -1 do
+    print(i)
+end
+-- 5, 4, 3, 2, 1
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 빈칸 채우기 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 1부터 5까지 출력하세요! (___에 숫자 5 넣기)"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: for 확장 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="for 반복문을 수정해보세요! 1~10까지, 3씩 증가, 10부터 1까지 역순 등"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 6: 스튜디오 가이드 - 카운트다운 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 실습</span>
+                <h2 class="title-section mb-6">스튜디오에서 카운트다운 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">⏱️</span>
+                        카운트다운 타이머
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div><strong>ServerScriptService</strong> 우클릭 → Insert Object → Script</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div><strong>아래 코드</strong> 붙여넣기</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div><strong>F5</strong>로 플레이 → Output 창에서 카운트다운 확인!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">복사할 코드</h4>
+                    <lua-code-block title="카운트다운 타이머" show-line-numbers>
+-- 게임 시작 전 카운트다운
+local countdownTime = 10
+
+print("=== 게임 시작 준비 ===")
+
+for i = countdownTime, 1, -1 do
+    print(i .. "초 남음...")
+    task.wait(1)
+end
+
+print("게임 시작!")
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="tip" title="GUI와 연결하면?">
+                    TextLabel과 연결하면 화면에 카운트다운을 표시할 수 있어요!<br>
+                    7차시(GUI)에서 배웁니다.
+                </HintBox>
+
+                <!-- 복사-붙여넣기 예제들 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트! (추가 예제)
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드 중 하나를 복사해서 F5!
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🧱 파트 여러개 생성</div>
+                            <lua-code-block title="SpawnParts.lua">
+-- ========================================
+-- 🧱 파트 여러개 생성
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 Instance.new("Part") = 새 파트 생성
+-- 💡 BrickColor.Random() = 랜덤 색상
+-- ========================================
+local parent = script.Parent
+
+for i = 1, 5 do
+    -- 💡 새 파트 만들기
+    local newPart = Instance.new("Part")
+    newPart.Size = Vector3.new(2, 2, 2)
+    -- 💡 i * 3 = 3칸씩 떨어뜨려 배치
+    newPart.Position = parent.Position + Vector3.new(i * 3, 0, 0)
+    newPart.Anchored = true
+    newPart.BrickColor = BrickColor.Random()
+    -- 💡 workspace에 넣어야 화면에 보여요!
+    newPart.Parent = workspace
+    print(i .. "번째 파트 생성!")
+    task.wait(0.3)
+end
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">📊 점수 누적 시스템</div>
+                            <lua-code-block title="ScoreSystem.lua">
+local totalScore = 0
+local scorePerRound = 10
+
+print("=== 점수 누적 시뮬레이션 ===")
+
+for round = 1, 5 do
+    local bonus = round * 5
+    local earnedScore = scorePerRound + bonus
+    totalScore = totalScore + earnedScore
+
+    print("라운드 " .. round .. ": +" .. earnedScore)
+    print("  → 총점: " .. totalScore)
+    task.wait(0.5)
+end
+
+print("=== 최종 점수: " .. totalScore .. " ===")
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">🪜 계단 생성기</div>
+                            <lua-code-block title="StairBuilder.lua">
+-- ========================================
+-- 🪜 계단 자동 생성
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 i = 0, 1, 2... 9 (10개 계단)
+-- 💡 Y = 높이, Z = 깊이 방향
+-- ========================================
+local startPos = script.Parent.Position
+
+for i = 0, 9 do
+    local step = Instance.new("Part")
+    step.Size = Vector3.new(4, 1, 4)
+    -- 💡 i만큼 위로(Y), i*2만큼 앞으로(Z)
+    step.Position = startPos + Vector3.new(0, i, i * 2)
+    step.Anchored = true
+    step.BrickColor = BrickColor.new("Medium stone grey")
+    step.Parent = workspace
+    task.wait(0.2)
+end
+print("계단 완성!")
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">💫 원형 배치</div>
+                            <lua-code-block title="CircleSpawn.lua">
+-- ========================================
+-- 💫 원형으로 파트 배치
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 math.cos, math.sin = 원 위치 계산
+-- 💡 math.pi = 원주율 (3.14...)
+-- ========================================
+local center = script.Parent.Position
+local radius = 10     -- 원의 반지름
+local partCount = 8   -- 파트 개수
+
+for i = 1, partCount do
+    -- 💡 각도 계산 (원을 8등분)
+    local angle = (i / partCount) * math.pi * 2
+    -- 💡 삼각함수로 원 위의 위치 계산
+    local x = math.cos(angle) * radius
+    local z = math.sin(angle) * radius
+
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(2, 2, 2)
+    part.Position = center + Vector3.new(x, 0, z)
+    part.Anchored = true
+    part.BrickColor = BrickColor.Random()
+    part.Parent = workspace
+    task.wait(0.2)
+end
+print("원형 배치 완료!")
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 카운트다운 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="카운트다운 타이머! countdownTime을 5로 바꾸거나 task.wait(0.5)로 빠르게!"
+            initial-code={editorCode3}
+            hints={hints3}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 8: 자동 코인 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="자동 코인 지급! coinPerSecond를 10으로 바꾸거나 반복 횟수를 늘려보세요!"
+            initial-code={editorCode4}
+            hints={hints4}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 9: 점점 커지기 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="📈 점점 커지는 파트"
+                setup="Part 1개 (Anchored ✓, 작은 크기로 시작)"
+                concepts='["script.Parent", "Vector3", "for", "task.wait"]'
+                blanks={growBlanks}
+                template={growTemplate}
+                full-code={growFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 무지개 색상 (로블록스 퀴즈) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🌈 무지개 색상 순환"
+                setup="Part 1개 (Anchored ✓)"
+                concepts='["script.Parent", "BrickColor", "for"]'
+                blanks={rainbowBlanks}
+                template={rainbowTemplate}
+                full-code={rainbowFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="정해진 횟수만큼 반복할 때 사용하는 반복문은?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! for 반복문은 시작, 끝, 증가량을 지정해서 정확한 횟수만큼 반복해요."
+                        wrong-explanation="for 반복문이 정답이에요. for i = 1, 10 do 처럼 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="for i = 시작, 끝, 증가량 do 에서 지정하는 세 가지는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! for 문은 시작값, 끝값, 증가량(생략 가능)을 지정해요."
+                        wrong-explanation="for 문은 '시작, 끝, 증가량'을 지정합니다. 예: for i = 1, 10, 2 do"
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-sky/20 to-neon-mint/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">5주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 while 반복문을 배워요!<br>
+                        조건이 참인 동안 영원히 반복하는 방법 ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

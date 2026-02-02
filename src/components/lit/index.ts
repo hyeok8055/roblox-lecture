@@ -6,6 +6,7 @@
 export { LuaCodeBlock } from './LuaCodeBlock';
 export { LuaEditor } from './LuaEditor';
 export { QuizQuestion } from './QuizQuestion';
+export { RobloxQuizExample } from './RobloxQuizExample';
 
 // 타입 재export
 export type { LuaOutput, LuaExecutionResult } from '../../lib/lua-runtime';
