@@ -1,0 +1,484 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+const quiz1Options = JSON.stringify(["Properties", "Explorer", "Toolbox", "Output"]);
+const quiz2Options = JSON.stringify(["Anchored", "CanCollide", "Transparency", "Name"]);
+const quiz3Options = JSON.stringify(["Workspace", "ServerStorage", "Lighting", "Players"]);
+---
+
+<LessonLayout title="스튜디오 적응" lessonNumber={1} totalSlides={9}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">1주차 A</span>
+                <h1 class="title-display mb-4">
+                    로블록스 스튜디오<br>
+                    <span class="text-neon-mint">적응하기</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    게임 개발의 첫 걸음!<br>
+                    Explorer, Properties 패널과 Anchored를 배워요
+                </p>
+                <div class="flex flex-wrap gap-3 justify-center mb-8">
+                    <span class="px-4 py-2 bg-neon-sky/20 rounded-full text-sm font-medium">🔍 Explorer</span>
+                    <span class="px-4 py-2 bg-neon-mint/20 rounded-full text-sm font-medium">⚙️ Properties</span>
+                    <span class="px-4 py-2 bg-neon-gold/20 rounded-full text-sm font-medium">⚓ Anchored</span>
+                </div>
+                <div class="info-box max-w-md mx-auto">
+                    <span class="text-2xl">🎯</span>
+                    <h3 class="font-bold text-lg mt-2 mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm space-y-1">
+                        <li>✓ Explorer 패널 구조 이해하기</li>
+                        <li>✓ Properties 패널로 속성 변경하기</li>
+                        <li>✓ Anchored 체크의 의미 알기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Explorer 패널 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Explorer 패널이란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-sky">folder_open</span>
+                            게임의 모든 것이 담긴 폴더
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            Explorer는 게임에 있는 <strong>모든 오브젝트</strong>를 보여주는 패널입니다.
+                            컴퓨터의 파일 탐색기처럼 폴더 구조로 정리되어 있어요.
+                        </p>
+                        <HintBox type="tip" title="패널 열기">
+                            View 탭 → Explorer 클릭 (또는 단축키 사용)
+                        </HintBox>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🗂️ 주요 폴더 구조</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex items-start gap-3 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-10 h-10 bg-neon-sky/20 rounded-lg flex items-center justify-center flex-shrink-0 text-xl">🌍</span>
+                                <div>
+                                    <strong>Workspace</strong>
+                                    <p class="text-sm text-ink-light">게임에 보이는 모든 물체 (파트, 모델)</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-10 h-10 bg-neon-mint/20 rounded-lg flex items-center justify-center flex-shrink-0 text-xl">👥</span>
+                                <div>
+                                    <strong>Players</strong>
+                                    <p class="text-sm text-ink-light">접속한 플레이어 정보</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-10 h-10 bg-neon-gold/20 rounded-lg flex items-center justify-center flex-shrink-0 text-xl">📦</span>
+                                <div>
+                                    <strong>ReplicatedStorage</strong>
+                                    <p class="text-sm text-ink-light">모든 플레이어가 공유하는 저장소</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-10 h-10 bg-neon-coral/20 rounded-lg flex items-center justify-center flex-shrink-0 text-xl">🔒</span>
+                                <div>
+                                    <strong>ServerStorage</strong>
+                                    <p class="text-sm text-ink-light">서버만 접근 가능한 저장소</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: Properties 패널 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Properties 패널이란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-mint">settings</span>
+                            오브젝트의 모든 설정
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            Properties 패널은 선택한 오브젝트의 <strong>모든 속성</strong>을 보여줍니다.
+                            여기서 이름, 색상, 크기, 위치 등을 바꿀 수 있어요!
+                        </p>
+                        <HintBox type="tip" title="패널 열기">
+                            View 탭 → Properties 클릭
+                        </HintBox>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🎨 자주 사용하는 속성들</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="border-b border-ink-pale">
+                                        <th class="py-2 px-3">속성</th>
+                                        <th class="py-2 px-3">설명</th>
+                                        <th class="py-2 px-3">예시</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="text-sm">
+                                    <tr class="border-b border-ink-pale/50">
+                                        <td class="py-2 px-3 font-mono text-neon-sky">Name</td>
+                                        <td class="py-2 px-3 text-ink-light">오브젝트 이름</td>
+                                        <td class="py-2 px-3">"KillBrick", "Platform"</td>
+                                    </tr>
+                                    <tr class="border-b border-ink-pale/50">
+                                        <td class="py-2 px-3 font-mono text-neon-sky">BrickColor</td>
+                                        <td class="py-2 px-3 text-ink-light">파트 색상</td>
+                                        <td class="py-2 px-3">Bright red, Lime green</td>
+                                    </tr>
+                                    <tr class="border-b border-ink-pale/50">
+                                        <td class="py-2 px-3 font-mono text-neon-sky">Size</td>
+                                        <td class="py-2 px-3 text-ink-light">크기 (X, Y, Z)</td>
+                                        <td class="py-2 px-3">4, 1, 4</td>
+                                    </tr>
+                                    <tr class="border-b border-ink-pale/50">
+                                        <td class="py-2 px-3 font-mono text-neon-sky">Position</td>
+                                        <td class="py-2 px-3 text-ink-light">위치 좌표</td>
+                                        <td class="py-2 px-3">0, 10, 0</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-2 px-3 font-mono text-neon-sky">Transparency</td>
+                                        <td class="py-2 px-3 text-ink-light">투명도 (0~1)</td>
+                                        <td class="py-2 px-3">0 = 불투명, 1 = 투명</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: Anchored 속성 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">중요 개념</span>
+                <h2 class="title-section mb-6">⚓ Anchored란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-gold/30">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="text-2xl">⚓</span>
+                            파트를 고정하는 닻
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            <code class="text-neon-sky">Anchored</code>는 파트가 <strong>물리 법칙의 영향을 받을지</strong> 결정합니다.
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="p-4 bg-neon-coral/10 rounded-xl border border-neon-coral/30">
+                                <h4 class="font-bold mb-2 text-neon-coral">❌ Anchored = false</h4>
+                                <ul class="text-sm space-y-1 text-ink-light">
+                                    <li>• 중력에 의해 떨어짐</li>
+                                    <li>• 다른 물체와 충돌</li>
+                                    <li>• 밀거나 튕길 수 있음</li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-neon-mint/10 rounded-xl border border-neon-mint/30">
+                                <h4 class="font-bold mb-2 text-neon-mint">✅ Anchored = true</h4>
+                                <ul class="text-sm space-y-1 text-ink-light">
+                                    <li>• 공중에 고정됨</li>
+                                    <li>• 절대 움직이지 않음</li>
+                                    <li>• 바닥, 벽, 장애물에 사용</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="warning" title="⚠️ 자주 하는 실수">
+                        바닥이나 장애물에 Anchored를 체크하지 않으면 게임 시작 시 중력에 의해 떨어집니다!
+                        플레이(F5) 전에 꼭 확인하세요.
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 파트 생성 실습 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">실습</span>
+                <h2 class="title-section mb-6">🧱 파트 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-sky">add_box</span>
+                            파트 생성 방법 3가지
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-neon-sky rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">1</span>
+                                <div>
+                                    <strong>Home 탭 → Part 버튼</strong>
+                                    <p class="text-sm text-ink-light">Block, Sphere, Cylinder, Wedge 중 선택</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-neon-sky rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">2</span>
+                                <div>
+                                    <strong>Workspace 우클릭 → Insert Object → Part</strong>
+                                    <p class="text-sm text-ink-light">Explorer에서 직접 추가</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-neon-sky rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">3</span>
+                                <div>
+                                    <strong>단축키 사용</strong>
+                                    <p class="text-sm text-ink-light">자주 쓰는 파트 타입 단축키 설정 가능</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card bg-gradient-to-br from-neon-mint/10 to-neon-sky/10">
+                        <h3 class="font-bold text-lg mb-3">🎯 지금 해보세요!</h3>
+                        <ol class="space-y-2 text-sm">
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 bg-neon-mint rounded-full flex items-center justify-center text-white text-xs font-bold">1</span>
+                                Home 탭에서 <strong>Part → Block</strong> 클릭
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 bg-neon-mint rounded-full flex items-center justify-center text-white text-xs font-bold">2</span>
+                                파트 선택 후 Properties에서 <strong>Name</strong>을 "MyPart"로 변경
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 bg-neon-mint rounded-full flex items-center justify-center text-white text-xs font-bold">3</span>
+                                <strong>Anchored</strong> 체크박스 클릭
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <span class="w-6 h-6 bg-neon-mint rounded-full flex items-center justify-center text-white text-xs font-bold">4</span>
+                                <strong>F5</strong>로 플레이해서 파트가 안 떨어지는지 확인!
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 스튜디오 가이드</span>
+                <h2 class="title-section mb-6">UI 레이아웃 정리하기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-roblox-red/30">
+                        <h3 class="font-bold text-lg mb-4">📐 추천 패널 배치</h3>
+
+                        <div class="bg-ink-pale/30 rounded-xl p-4 mb-4 font-mono text-sm">
+                            <div class="flex gap-2 mb-2">
+                                <div class="flex-1 bg-neon-sky/20 p-2 rounded text-center">Viewport (게임 화면)</div>
+                            </div>
+                            <div class="flex gap-2">
+                                <div class="w-1/4 bg-neon-mint/20 p-2 rounded text-center text-xs">Explorer</div>
+                                <div class="flex-1 bg-ink-pale p-2 rounded text-center text-xs">...</div>
+                                <div class="w-1/4 bg-neon-gold/20 p-2 rounded text-center text-xs">Properties</div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-ink-deep text-white rounded flex items-center justify-center text-xs font-bold">1</span>
+                                <p class="text-sm"><strong>View 탭</strong>에서 Explorer, Properties, Output 체크</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-ink-deep text-white rounded flex items-center justify-center text-xs font-bold">2</span>
+                                <p class="text-sm">Explorer는 <strong>왼쪽</strong>, Properties는 <strong>오른쪽</strong>에 배치</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-ink-deep text-white rounded flex items-center justify-center text-xs font-bold">3</span>
+                                <p class="text-sm">Output은 <strong>아래</strong>에 배치 (에러 메시지 확인용)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="info" title="💡 Output 창이란?">
+                        print() 결과와 에러 메시지가 출력되는 곳이에요.
+                        View → Output으로 열 수 있어요!
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 이동/회전/크기 도구 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">실습</span>
+                <h2 class="title-section mb-6">🔧 파트 조작 도구</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">기본 조작 도구 (Home 탭)</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-ink-pale/50 rounded-xl text-center">
+                                <div class="text-3xl mb-2">↔️</div>
+                                <h4 class="font-bold mb-1">Move</h4>
+                                <p class="text-sm text-ink-light">파트 이동</p>
+                                <code class="text-xs bg-ink-deep text-white px-2 py-1 rounded mt-2 inline-block">단축키: G</code>
+                            </div>
+                            <div class="p-4 bg-ink-pale/50 rounded-xl text-center">
+                                <div class="text-3xl mb-2">🔄</div>
+                                <h4 class="font-bold mb-1">Rotate</h4>
+                                <p class="text-sm text-ink-light">파트 회전</p>
+                                <code class="text-xs bg-ink-deep text-white px-2 py-1 rounded mt-2 inline-block">단축키: R</code>
+                            </div>
+                            <div class="p-4 bg-ink-pale/50 rounded-xl text-center">
+                                <div class="text-3xl mb-2">📐</div>
+                                <h4 class="font-bold mb-1">Scale</h4>
+                                <p class="text-sm text-ink-light">파트 크기</p>
+                                <code class="text-xs bg-ink-deep text-white px-2 py-1 rounded mt-2 inline-block">단축키: S</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card bg-gradient-to-br from-neon-sky/10 to-neon-mint/10">
+                        <h3 class="font-bold text-lg mb-3">🎯 도전! 계단 만들기</h3>
+                        <p class="text-ink-light mb-3">Move와 Scale 도구를 사용해서 3단 계단을 만들어보세요!</p>
+                        <ol class="space-y-1 text-sm">
+                            <li>1. Part 3개 생성</li>
+                            <li>2. 각 파트에 <strong>Anchored</strong> 체크</li>
+                            <li>3. Scale로 크기 조절 (넓고 얇게)</li>
+                            <li>4. Move로 계단처럼 배치</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용을 확인해볼까요?</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="게임의 모든 오브젝트를 폴더 구조로 보여주는 패널은?"
+                    correct="B"
+                    options={quiz1Options}
+                    correct-explanation="맞아요! Explorer 패널에서 게임의 모든 오브젝트를 트리 형태로 볼 수 있습니다."
+                    wrong-explanation="Explorer 패널이 정답이에요. Properties는 속성, Toolbox는 에셋, Output은 출력창입니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="파트가 중력에 떨어지지 않게 고정하는 속성은?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="정답! Anchored를 체크하면 파트가 공중에 고정됩니다."
+                    wrong-explanation="Anchored가 정답이에요. 이 속성을 체크하면 파트가 물리 법칙의 영향을 받지 않습니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in">
+                <quiz-question
+                    question="게임에 보이는 모든 물체(파트, 모델)가 들어있는 폴더는?"
+                    correct="A"
+                    options={quiz3Options}
+                    correct-explanation="맞아요! Workspace에는 게임 화면에 보이는 모든 오브젝트가 들어있습니다."
+                    wrong-explanation="Workspace가 정답이에요. ServerStorage는 서버 전용, Lighting은 조명 설정입니다."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 마무리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="text-6xl mb-6 block">🎉</span>
+                <h2 class="title-display mb-4">1차시 A 완료!</h2>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    스튜디오의 기본 패널과 파트 조작을 배웠어요
+                </p>
+
+                <div class="lesson-card max-w-md mx-auto mb-8">
+                    <h3 class="font-bold text-lg mb-3">📝 오늘 배운 것</h3>
+                    <ul class="text-left space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Explorer - 게임의 모든 오브젝트 폴더
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Properties - 오브젝트의 설정 패널
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Anchored - 파트 고정 속성
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Move, Rotate, Scale 도구
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="info-box max-w-md mx-auto">
+                    <strong>다음 시간 예고</strong>
+                    <p class="text-sm mt-1">1B: 첫 스크립트 - print 함수와 Output 창</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

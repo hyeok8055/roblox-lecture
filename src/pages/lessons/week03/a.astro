@@ -1,0 +1,423 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["함수이름()", "run 함수이름", "call 함수이름", "do 함수이름"]);
+const quiz2Options = JSON.stringify(["동사 (sayHello, givePoints)", "숫자로 시작 (1stFunction)", "특수문자 포함 (my-func)", "한글만 (안녕함수)"]);
+
+// 에디터 코드
+const editorCode1 = `-- 빈칸을 채워 함수를 완성하세요!
+local function sayHello()
+    print("___")  -- 인사말을 넣어보세요
+end
+
+sayHello()`;
+
+const editorCode2 = `-- 함수에 이름(매개변수)을 받아 인사하기
+local function greet(name)
+    print("안녕, " .. name .. "!")
+end
+
+-- 여러 번 호출해보세요
+greet("철수")
+greet("영희")`;
+
+const editorCode3 = `-- 미션: 두 수를 더하는 함수 만들기
+
+-- 힌트: function add(a, b) 형태로 만들어요
+local function ___(a, b)
+    return a ___ b
+end
+
+-- 테스트
+print(add(3, 5))   -- 8이 나와야 해요
+print(add(10, 20)) -- 30이 나와야 해요`;
+
+const editorCode4 = `-- 자유 실습: 나만의 함수 만들기
+-- 예시: 자기소개 함수, 구구단 함수 등
+
+local function introduce(name, age)
+    print("제 이름은 " .. name .. "입니다")
+    print("나이는 " .. age .. "살이에요")
+end
+
+introduce("코딩왕", 12)
+
+-- 아래에 나만의 함수를 만들어보세요!
+`;
+
+// 힌트 데이터
+const hints1 = JSON.stringify(["___ 부분에 원하는 인사말을 넣어보세요", "예: 안녕하세요!, Hello!, 반가워!"]);
+const hints2 = JSON.stringify(["name 변수에 전달된 이름이 들어와요", "greet('민수') 처럼 다른 이름으로도 호출해보세요"]);
+const hints3 = JSON.stringify(["첫 번째 빈칸에는 함수 이름 add를 넣어요", "두 번째 빈칸에는 + 연산자를 넣어요", "return a + b 형태가 되어야 해요"]);
+const hints4 = JSON.stringify(["매개변수를 활용해보세요", "여러 개의 print를 사용해도 돼요", "다른 함수를 호출하는 함수도 만들 수 있어요"]);
+---
+
+<LessonLayout title="함수 기초" lessonNumber={3} totalSlides={9}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">3주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-mint">함수</span> 기초
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    코드를 묶어서 재사용하는 방법을 배워요
+                </p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔧 function</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📦 매개변수</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">↩️ return</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ 함수를 만들고 호출하기</li>
+                        <li>✓ 매개변수로 값 전달하기</li>
+                        <li>✓ return으로 결과 돌려받기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 함수란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">함수(Function)란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🔧</span>
+                            반복되는 코드 묶음
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            함수는 <strong>여러 줄의 코드를 하나로 묶어</strong> 이름을 붙인 거예요.
+                            필요할 때마다 그 이름을 부르면 코드가 실행됩니다!
+                        </p>
+                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4">
+                            <div class="text-sm text-ink-light mb-2">비유하자면...</div>
+                            <div class="font-bold">📱 "전화걸기" 버튼</div>
+                            <div class="text-sm text-ink-light mt-1">
+                                버튼 하나로 복잡한 통화 연결 과정이 자동 실행!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">함수 만들기</h3>
+                        <lua-code-block title="함수 기본 형태">
+-- 함수 정의 (만들기)
+local function 함수이름()
+    -- 실행할 코드
+end
+
+-- 함수 호출 (실행하기)
+함수이름()
+                        </lua-code-block>
+                        <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                            <div class="p-3 bg-neon-mint/10 rounded-lg">
+                                <div class="font-bold text-neon-mint">정의</div>
+                                <div class="text-ink-light">함수를 만드는 것</div>
+                            </div>
+                            <div class="p-3 bg-neon-sky/10 rounded-lg">
+                                <div class="font-bold text-neon-sky">호출</div>
+                                <div class="text-ink-light">함수를 실행하는 것</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="함수 이름 짓기">
+                함수 이름은 <strong>동사</strong>로 시작하면 좋아요!
+                예: <code>sayHello</code>, <code>killPlayer</code>, <code>givePoints</code>
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 빈칸 채우기 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 함수를 완성하세요! (___에 인사말 넣기)"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 4: 매개변수 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">심화 개념</span>
+                <h2 class="title-section mb-6">매개변수 (Parameter)</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light mb-6">
+                    함수에 <strong>값을 전달</strong>해서 더 유연하게 사용할 수 있어요!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">매개변수 없는 함수 vs 있는 함수</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-ink-light mb-2">❌ 한 명에게만</div>
+                            <lua-code-block>
+local function greet()
+    print("안녕, 철수!")
+end
+                            </lua-code-block>
+                        </div>
+                        <div>
+                            <div class="text-sm text-ink-light mb-2">✅ 누구에게나</div>
+                            <lua-code-block>
+local function greet(name)
+    print("안녕, " .. name .. "!")
+end
+
+greet("철수")
+greet("영희")
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">여러 개의 매개변수</h4>
+                    <lua-code-block>
+local function introduce(name, age)
+    print(name .. "는 " .. age .. "살이에요")
+end
+
+introduce("철수", 12)  -- 철수는 12살이에요
+introduce("영희", 13)  -- 영희는 13살이에요
+                    </lua-code-block>
+                </div>
+            </div>
+
+            <HintBox type="info" title="매개변수 이름">
+                매개변수 이름은 자유롭게 지어도 되지만, 의미를 알 수 있게 지어요!
+                <code>name</code>, <code>player</code>, <code>speed</code> 등
+            </HintBox>
+
+            <!-- 복사-붙여넣기 예제들 -->
+            <div class="lesson-card border-2 border-neon-mint/30 mt-6 animate-in">
+                <h4 class="font-bold mb-3 flex items-center gap-2">
+                    <span class="text-xl">📋</span>
+                    복사해서 바로 테스트!
+                </h4>
+                <p class="text-sm text-ink-light mb-3">
+                    Part에 Script를 넣고, 아래 코드를 복사해서 F5!
+                </p>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm text-neon-sky font-bold mb-2">예제 1: 간단한 함수</div>
+                        <lua-code-block title="함수기초.lua">
+local part = script.Parent
+
+local function makeBig()
+    part.Size = Vector3.new(10, 10, 10)
+    print("파트가 커졌습니다!")
+end
+
+makeBig()
+                        </lua-code-block>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-neon-mint font-bold mb-2">예제 2: 매개변수 함수</div>
+                        <lua-code-block title="매개변수.lua">
+local part = script.Parent
+
+local function setColor(colorName)
+    part.BrickColor = BrickColor.new(colorName)
+    print("색상:", colorName)
+end
+
+setColor("Bright red")
+task.wait(2)
+setColor("Bright blue")
+                        </lua-code-block>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-neon-gold font-bold mb-2">예제 3: 여러 매개변수</div>
+                        <lua-code-block title="커스터마이즈.lua">
+local part = script.Parent
+
+local function customize(colorName, size, transparency)
+    part.BrickColor = BrickColor.new(colorName)
+    part.Size = Vector3.new(size, size, size)
+    part.Transparency = transparency
+end
+
+customize("Bright yellow", 5, 0.2)
+                        </lua-code-block>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-neon-coral font-bold mb-2">예제 4: return 사용</div>
+                        <lua-code-block title="리턴함수.lua">
+local part = script.Parent
+
+local function getDoubleSize(original)
+    return original * 2
+end
+
+local newSize = getDoubleSize(3)
+part.Size = Vector3.new(newSize, newSize, newSize)
+print("새 크기:", newSize)
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 매개변수 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="매개변수를 사용해 여러 사람에게 인사해보세요!"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 6: return -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">심화 개념</span>
+                <h2 class="title-section mb-6">return (결과 돌려주기)</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light">
+                    함수가 계산한 결과를 <strong>돌려받고 싶을 때</strong> return을 사용해요!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">return 사용 예시</h4>
+                    <lua-code-block title="덧셈 함수">
+local function add(a, b)
+    return a + b
+end
+
+local result = add(3, 5)
+print(result)  -- 8
+                    </lua-code-block>
+                    <div class="mt-4 p-4 bg-gradient-to-r from-neon-mint/10 to-neon-sky/10 rounded-xl">
+                        <div class="text-sm">
+                            <strong>return</strong>은 함수를 끝내고 값을 돌려줘요!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">로블록스에서 자주 쓰는 패턴</h4>
+                    <lua-code-block>
+-- 플레이어인지 확인하는 함수
+local function isPlayer(part)
+    local humanoid = part.Parent:FindFirstChild("Humanoid")
+    return humanoid ~= nil
+end
+
+-- 사용 예시
+if isPlayer(hitPart) then
+    print("플레이어가 닿았어요!")
+end
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 단계적 확장 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 덧셈 함수를 완성하세요! (함수이름: add, 연산자: +)"
+            initial-code={editorCode3}
+            hints={hints3}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 8: 자유 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="나만의 함수를 만들어보세요! (자기소개, 구구단 등 자유롭게)"
+            initial-code={editorCode4}
+            hints={hints4}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="함수를 호출(실행)하는 방법은?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! 함수이름() 형태로 호출해요. 예: sayHello()"
+                        wrong-explanation="함수이름()으로 호출합니다. 괄호()가 중요해요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="함수 이름을 지을 때 권장되는 방식은?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! 동사로 시작하면 함수가 무슨 일을 하는지 알기 쉬워요."
+                        wrong-explanation="함수 이름은 동사로 시작하는 게 좋아요. 숫자로 시작하거나 특수문자는 사용하지 않아요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-mint/20 to-neon-sky/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">3주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 이벤트(Touched)를 배워요!<br>
+                        함수와 이벤트가 만나면 상호작용이 시작됩니다 ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

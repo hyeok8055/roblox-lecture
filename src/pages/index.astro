@@ -1,21 +1,43 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 
-// 12주 커리큘럼 데이터
+// 24차시 커리큘럼 데이터 (주 2회, 12주)
 const curriculum = [
-    { week: 1, title: '스튜디오 적응', desc: 'Explorer/Properties, Anchored, 파트 조작', active: true },
-    { week: 2, title: '변수와 속성', desc: 'local 변수, BrickColor, Transparency', active: true },
-    { week: 3, title: '함수와 이벤트', desc: 'Touched 이벤트, Kill Part', active: true },
-    { week: 4, title: '조건문', desc: 'if-then-end, 조건부 문', active: true },
-    { week: 5, title: '반복문', desc: 'while true do, for, 회전 장애물', active: true },
-    { week: 6, title: 'Humanoid', desc: 'WalkSpeed, JumpPower, 스피드 패드', active: false },
-    { week: 7, title: 'GUI', desc: 'ScreenGui, TextLabel, 시작 화면', active: false },
-    { week: 8, title: 'Leaderstats', desc: '점수 시스템, 자동 수입', active: false },
-    { week: 9, title: 'Client vs Server', desc: 'LocalScript vs Script', active: false },
-    { week: 10, title: '맵 제작', desc: 'Toolbox + 직접 제작', active: false },
-    { week: 11, title: '게임 로직', desc: '승리 조건, 아이템 상점', active: false },
-    { week: 12, title: '출시', desc: '버그 수정, 테스트, Public', active: false },
+    // 1개월차: 기초 문법
+    { week: 1, part: 'A', title: '스튜디오 적응', desc: 'Explorer, Properties, Anchored', active: true, path: '/lessons/week01/a' },
+    { week: 1, part: 'B', title: '첫 스크립트', desc: 'print, Output 창', active: true, path: '/lessons/week01/b' },
+    { week: 2, part: 'A', title: '변수 기초', desc: 'local 변수, 자료형', active: true, path: '/lessons/week02/a' },
+    { week: 2, part: 'B', title: '파트 속성 변경', desc: 'BrickColor, Transparency', active: true, path: '/lessons/week02/b' },
+    { week: 3, part: 'A', title: '함수 기초', desc: 'function, 매개변수, return', active: true, path: '/lessons/week03/a' },
+    { week: 3, part: 'B', title: '이벤트 (Touched)', desc: 'Connect, Humanoid 감지', active: true, path: '/lessons/week03/b' },
+    { week: 4, part: 'A', title: '조건문 기초', desc: 'if-then-end, 비교연산자', active: true, path: '/lessons/week04/a' },
+    { week: 4, part: 'B', title: '조건문 활용', desc: 'Kill Part, 체력 감소', active: true, path: '/lessons/week04/b' },
+
+    // 2개월차: 게임 로직
+    { week: 5, part: 'A', title: '반복문 (for)', desc: 'for i = 1, 10 do', active: true, path: '/lessons/week05/a' },
+    { week: 5, part: 'B', title: '반복문 (while)', desc: 'while true do, 회전 장애물', active: true, path: '/lessons/week05/b' },
+    { week: 6, part: 'A', title: 'Humanoid', desc: 'WalkSpeed, JumpPower', active: false, path: '/lessons/week06/a' },
+    { week: 6, part: 'B', title: '스피드/점프 패드', desc: '능력치 변경 파트', active: false, path: '/lessons/week06/b' },
+    { week: 7, part: 'A', title: 'GUI 기초', desc: 'ScreenGui, TextLabel', active: false, path: '/lessons/week07/a' },
+    { week: 7, part: 'B', title: '시작 화면', desc: 'TextButton, 클릭 이벤트', active: false, path: '/lessons/week07/b' },
+    { week: 8, part: 'A', title: 'Leaderstats', desc: '점수 시스템 기초', active: false, path: '/lessons/week08/a' },
+    { week: 8, part: 'B', title: '점수 시스템', desc: '코인 수집, 자동 수입', active: false, path: '/lessons/week08/b' },
+
+    // 3개월차: 프로젝트
+    { week: 9, part: 'A', title: 'Client vs Server', desc: 'LocalScript vs Script', active: false, path: '/lessons/week09/a' },
+    { week: 9, part: 'B', title: 'RemoteEvent', desc: '서버-클라이언트 통신', active: false, path: '/lessons/week09/b' },
+    { week: 10, part: 'A', title: '맵 제작', desc: 'Toolbox, 직접 제작', active: false, path: '/lessons/week10/a' },
+    { week: 10, part: 'B', title: '장애물 맵', desc: '점프맵 스테이지', active: false, path: '/lessons/week10/b' },
+    { week: 11, part: 'A', title: '게임 로직', desc: '승리 조건, 리스폰', active: false, path: '/lessons/week11/a' },
+    { week: 11, part: 'B', title: '아이템 상점', desc: '구매 시스템', active: false, path: '/lessons/week11/b' },
+    { week: 12, part: 'A', title: '테스트', desc: '버그 수정, 밸런싱', active: false, path: '/lessons/week12/a' },
+    { week: 12, part: 'B', title: '출시', desc: 'Public 설정, 홍보', active: false, path: '/lessons/week12/b' },
 ];
+
+// 월별로 그룹화
+const month1 = curriculum.slice(0, 8);   // 1~4주
+const month2 = curriculum.slice(8, 16);  // 5~8주
+const month3 = curriculum.slice(16, 24); // 9~12주
 ---
 
 <BaseLayout title="로블록스 과외">
@@ -28,57 +50,33 @@ const curriculum = [
             <h1 class="title-display text-ink-deep mb-4">
                 로블록스 <span class="text-neon-mint">게임 개발</span> 과외
             </h1>
-            <p class="text-lg text-ink-light max-w-xl mx-auto">
-                12주 커리큘럼으로 나만의 로블록스 게임을 만들어보세요
+            <p class="text-lg text-ink-light max-w-xl mx-auto mb-4">
+                12주 24차시 커리큘럼으로 나만의 로블록스 게임을 만들어보세요
+            </p>
+            <p class="text-sm text-ink-light">
+                주 2회 × 1.5시간 | 기초 문법 → 게임 로직 → 프로젝트
             </p>
         </header>
 
         <!-- 커리큘럼 그리드 -->
         <main class="max-w-6xl mx-auto px-6 pb-20">
-            <!-- 월별 섹션 -->
+            <!-- 1개월차 -->
             <section class="mb-12">
                 <div class="flex items-center gap-3 mb-6">
                     <span class="badge badge-lesson">1개월차</span>
-                    <h2 class="title-section">3D 적응 & 기초 문법</h2>
+                    <h2 class="title-section">기초 문법</h2>
+                    <span class="text-sm text-ink-light">(1~4주)</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {curriculum.slice(0, 4).map(lesson => (
-                        <a
-                            href={lesson.active ? `/lessons/${lesson.week.toString().padStart(2, '0')}` : '#'}
-                            class={`lesson-card group ${!lesson.active ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            <div class="flex items-start justify-between mb-3">
-                                <div class={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold ${lesson.active ? 'bg-gradient-to-br from-ink-deep to-ink-medium' : 'bg-gray-300'}`}>
-                                    {lesson.week}
-                                </div>
-                                {lesson.active && (
-                                    <span class="badge badge-success text-xs">수강 가능</span>
-                                )}
-                            </div>
-                            <h3 class="font-bold text-ink-deep mb-1 group-hover:text-neon-sky transition-colors">
-                                {lesson.title}
-                            </h3>
-                            <p class="text-sm text-ink-light">{lesson.desc}</p>
-                        </a>
-                    ))}
-                </div>
-            </section>
-
-            <section class="mb-12">
-                <div class="flex items-center gap-3 mb-6">
-                    <span class="badge badge-lesson">2개월차</span>
-                    <h2 class="title-section">게임 로직 심화</h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {curriculum.slice(4, 8).map(lesson => (
+                    {month1.map(lesson => (
                         lesson.active ? (
                             <a
-                                href={`/lessons/${lesson.week.toString().padStart(2, '0')}`}
+                                href={lesson.path}
                                 class="lesson-card group"
                             >
                                 <div class="flex items-start justify-between mb-3">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br from-ink-deep to-ink-medium">
-                                        {lesson.week}
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br from-ink-deep to-ink-medium text-sm">
+                                        {lesson.week}{lesson.part}
                                     </div>
                                     <span class="badge badge-success text-xs">수강 가능</span>
                                 </div>
@@ -90,8 +88,8 @@ const curriculum = [
                         ) : (
                             <div class="lesson-card opacity-50">
                                 <div class="flex items-start justify-between mb-3">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-300 text-white font-bold">
-                                        {lesson.week}
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center bg-gray-300 text-white font-bold text-sm">
+                                        {lesson.week}{lesson.part}
                                     </div>
                                     <span class="material-symbols-outlined text-gray-300">lock</span>
                                 </div>
@@ -103,23 +101,84 @@ const curriculum = [
                 </div>
             </section>
 
+            <!-- 2개월차 -->
+            <section class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="badge badge-lesson">2개월차</span>
+                    <h2 class="title-section">게임 로직 심화</h2>
+                    <span class="text-sm text-ink-light">(5~8주)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {month2.map(lesson => (
+                        lesson.active ? (
+                            <a
+                                href={lesson.path}
+                                class="lesson-card group"
+                            >
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br from-ink-deep to-ink-medium text-sm">
+                                        {lesson.week}{lesson.part}
+                                    </div>
+                                    <span class="badge badge-success text-xs">수강 가능</span>
+                                </div>
+                                <h3 class="font-bold text-ink-deep mb-1 group-hover:text-neon-sky transition-colors">
+                                    {lesson.title}
+                                </h3>
+                                <p class="text-sm text-ink-light">{lesson.desc}</p>
+                            </a>
+                        ) : (
+                            <div class="lesson-card opacity-50">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center bg-gray-300 text-white font-bold text-sm">
+                                        {lesson.week}{lesson.part}
+                                    </div>
+                                    <span class="material-symbols-outlined text-gray-300">lock</span>
+                                </div>
+                                <h3 class="font-bold text-ink-deep mb-1">{lesson.title}</h3>
+                                <p class="text-sm text-ink-light">{lesson.desc}</p>
+                            </div>
+                        )
+                    ))}
+                </div>
+            </section>
+
+            <!-- 3개월차 -->
             <section>
                 <div class="flex items-center gap-3 mb-6">
                     <span class="badge badge-lesson">3개월차</span>
                     <h2 class="title-section">프로젝트 완성</h2>
+                    <span class="text-sm text-ink-light">(9~12주)</span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {curriculum.slice(8, 12).map(lesson => (
-                        <div class={`lesson-card ${!lesson.active ? 'opacity-50' : ''}`}>
-                            <div class="flex items-start justify-between mb-3">
-                                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-gray-300 text-white font-bold">
-                                    {lesson.week}
+                    {month3.map(lesson => (
+                        lesson.active ? (
+                            <a
+                                href={lesson.path}
+                                class="lesson-card group"
+                            >
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br from-ink-deep to-ink-medium text-sm">
+                                        {lesson.week}{lesson.part}
+                                    </div>
+                                    <span class="badge badge-success text-xs">수강 가능</span>
                                 </div>
-                                <span class="material-symbols-outlined text-gray-300">lock</span>
+                                <h3 class="font-bold text-ink-deep mb-1 group-hover:text-neon-sky transition-colors">
+                                    {lesson.title}
+                                </h3>
+                                <p class="text-sm text-ink-light">{lesson.desc}</p>
+                            </a>
+                        ) : (
+                            <div class="lesson-card opacity-50">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center bg-gray-300 text-white font-bold text-sm">
+                                        {lesson.week}{lesson.part}
+                                    </div>
+                                    <span class="material-symbols-outlined text-gray-300">lock</span>
+                                </div>
+                                <h3 class="font-bold text-ink-deep mb-1">{lesson.title}</h3>
+                                <p class="text-sm text-ink-light">{lesson.desc}</p>
                             </div>
-                            <h3 class="font-bold text-ink-deep mb-1">{lesson.title}</h3>
-                            <p class="text-sm text-ink-light">{lesson.desc}</p>
-                        </div>
+                        )
                     ))}
                 </div>
             </section>

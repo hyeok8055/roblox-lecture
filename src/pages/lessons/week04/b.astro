@@ -1,0 +1,742 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 빈칸 채우기 실습 코드 - 개념 설명 포함
+const editorCode1 = `-- ========================================
+-- 🔥 Kill Part: 닿으면 죽는 파트
+-- ========================================
+-- 💡 Humanoid란?
+--    플레이어 캐릭터의 생명력을 관리하는 오브젝트예요
+--    Health(체력), WalkSpeed(속도) 등을 가지고 있어요
+-- ========================================
+
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    -- 💡 FindFirstChild("이름")
+    --    = "이름"이라는 오브젝트를 찾아요
+    --    = 없으면 nil(없음)을 반환해요
+    local humanoid = hit.Parent:FindFirstChild("___")
+
+    -- humanoid가 있으면 = 플레이어가 닿은 거예요!
+    if humanoid then
+        -- Health = 0 → 캐릭터 사망
+        humanoid.Health = 0
+    end
+end)`;
+
+const hints1 = JSON.stringify([
+    "💡 Humanoid = 캐릭터의 생명력 관리자",
+    "💡 FindFirstChild로 Humanoid를 찾으면 플레이어인지 확인할 수 있어요",
+    "정답: Humanoid"
+]);
+
+const editorCode2 = `-- ========================================
+-- ⚡ 데미지 파트: 닿으면 체력 10 감소
+-- ========================================
+-- 💡 Health = 현재 체력 (기본값: 100)
+-- 💡 체력 감소: Health - 숫자
+-- 💡 체력 회복: Health + 숫자
+-- ========================================
+
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        -- 💡 현재 체력에서 10을 빼려면?
+        -- humanoid.Health (현재) ___ 10 (감소량)
+        humanoid.Health = humanoid.Health ___ 10
+    end
+end)`;
+
+const hints2 = JSON.stringify([
+    "💡 체력을 '감소'시키려면 빼기(-) 연산자!",
+    "💡 Health - 10 = 체력에서 10을 빼요",
+    "정답: - (빼기)"
+]);
+
+const editorCode3 = `-- ========================================
+-- 🛡️ 조건부 데미지: 체력이 50 이상일 때만!
+-- ========================================
+-- 💡 비교 연산자 정리:
+--    >= : 크거나 같다 (이상)
+--    <= : 작거나 같다 (이하)
+--    >  : 크다 (초과)
+--    <  : 작다 (미만)
+-- ========================================
+
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+
+    -- 💡 and = 그리고 (둘 다 참이어야 실행)
+    -- 체력이 50 '이상'일 때만 데미지
+    if humanoid and humanoid.Health ___ 50 then
+        humanoid.Health = humanoid.Health - 20
+        print("데미지!")
+    end
+end)`;
+
+const hints3 = JSON.stringify([
+    "💡 '이상'은 크거나 같다 = >=",
+    "💡 >= 50 = 50보다 크거나 같다",
+    "정답: >="
+]);
+
+const quiz1Options = JSON.stringify(["humanoid.Health = 0", "humanoid:Kill()", "player:Destroy()", "character.Health = 0"]);
+const quiz2Options = JSON.stringify(["and", "or", "&&", "+"]);
+const quiz3Options = JSON.stringify(["Humanoid", "Character", "Player", "Health"]);
+---
+
+<LessonLayout title="조건문 활용" lessonNumber={4} totalSlides={10}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-lua mb-6">4주차 B</span>
+                <h1 class="title-display mb-4">
+                    조건문<br>
+                    <span class="text-neon-coral">활용하기</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    조건문과 이벤트를 조합해서<br>
+                    Kill Part와 데미지 시스템을 만들어요
+                </p>
+                <div class="flex flex-wrap gap-3 justify-center mb-8">
+                    <span class="px-4 py-2 bg-neon-coral/20 rounded-full text-sm font-medium">💀 Kill Part</span>
+                    <span class="px-4 py-2 bg-neon-gold/20 rounded-full text-sm font-medium">💔 체력 감소</span>
+                    <span class="px-4 py-2 bg-neon-mint/20 rounded-full text-sm font-medium">💚 체력 회복</span>
+                </div>
+                <div class="info-box max-w-md mx-auto">
+                    <span class="text-2xl">🎯</span>
+                    <h3 class="font-bold text-lg mt-2 mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm space-y-1">
+                        <li>✓ Kill Part (즉사 파트) 만들기</li>
+                        <li>✓ 데미지 파트 (체력 감소) 만들기</li>
+                        <li>✓ 힐링 파트 (체력 회복) 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Humanoid와 Health -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">💖 Humanoid와 Health</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-coral/30">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-coral">favorite</span>
+                            캐릭터의 생명력 시스템
+                        </h3>
+
+                        <div class="bg-ink-pale/30 rounded-xl p-4 font-mono text-sm mb-4">
+                            <div class="text-ink-light mb-2">-- 캐릭터 구조 --</div>
+                            <div class="ml-0">👤 Character</div>
+                            <div class="ml-4">├ 🦴 Head, Torso, LeftArm...</div>
+                            <div class="ml-4">└ ❤️ <span class="text-neon-coral font-bold">Humanoid</span></div>
+                            <div class="ml-8">├ Health = 100 (현재 체력)</div>
+                            <div class="ml-8">└ MaxHealth = 100 (최대 체력)</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 bg-neon-coral/10 rounded-lg">
+                                <h4 class="font-bold text-sm mb-1">Health = 0</h4>
+                                <p class="text-xs text-ink-light">캐릭터 사망</p>
+                            </div>
+                            <div class="p-3 bg-neon-mint/10 rounded-lg">
+                                <h4 class="font-bold text-sm mb-1">Health = MaxHealth</h4>
+                                <p class="text-xs text-ink-light">체력 완전 회복</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="info" title="Health 속성">
+                        Health는 0 미만으로 내려가지 않고, MaxHealth를 초과하지 않습니다.
+                        기본값은 둘 다 100이에요!
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: Kill Part 기본 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">실전 코드</span>
+                <h2 class="title-section mb-6">💀 Kill Part 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">즉사 파트 코드</h3>
+                        <p class="text-ink-light mb-4">
+                            닿으면 <strong>즉시 사망</strong>하는 파트입니다. 오비 게임의 필수 요소!
+                        </p>
+
+                        <lua-code-block title="KillPart.lua" show-line-numbers>
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    -- 1. Humanoid 찾기
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+
+    -- 2. Humanoid가 있으면 (= 플레이어면)
+    if humanoid then
+        -- 3. 체력을 0으로 = 사망
+        humanoid.Health = 0
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card bg-gradient-to-br from-neon-coral/10 to-neon-gold/10">
+                        <h3 class="font-bold text-lg mb-3">📝 코드 흐름</h3>
+                        <ol class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="w-6 h-6 bg-neon-coral rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">1</span>
+                                <span>무언가가 파트에 닿음 (Touched)</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-6 h-6 bg-neon-coral rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">2</span>
+                                <span>닿은 것의 부모에서 Humanoid 찾기</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="w-6 h-6 bg-neon-coral rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">3</span>
+                                <span>Humanoid가 있으면 (조건문!) 체력 0으로</span>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 빈칸 채우기 실습 1 -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워서 Kill Part를 완성하세요 (플레이어의 생명력 오브젝트 이름)"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: 데미지 파트 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">실전 코드</span>
+                <h2 class="title-section mb-6">💔 데미지 파트 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">체력 감소 파트</h3>
+                        <p class="text-ink-light mb-4">
+                            닿으면 체력이 <strong>일정량 감소</strong>하는 파트입니다.
+                        </p>
+
+                        <lua-code-block title="DamagePart.lua" show-line-numbers>
+local part = script.Parent
+local damage = 25  -- 데미지량
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        -- 현재 체력에서 데미지만큼 빼기
+        humanoid.Health = humanoid.Health - damage
+        print("데미지! 남은 체력:", humanoid.Health)
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="warning" title="⚠️ 무한 데미지 문제">
+                        위 코드는 파트에 닿아있는 동안 <strong>계속 데미지</strong>가 들어갑니다!
+                        다음 슬라이드에서 쿨다운(재사용 대기)을 추가해볼게요.
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 빈칸 채우기 실습 2 -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸에 알맞은 연산자를 넣어 체력을 10 감소시키세요"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 7: 쿨다운 추가 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">고급</span>
+                <h2 class="title-section mb-6">⏱️ 쿨다운(재사용 대기) 추가</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">debounce 패턴</h3>
+                        <p class="text-ink-light mb-4">
+                            변수로 상태를 기억해서 <strong>연속 발동을 방지</strong>합니다.
+                        </p>
+
+                        <lua-code-block title="DamagePart_Cooldown.lua" show-line-numbers>
+local part = script.Parent
+local damage = 25
+local cooldown = 1  -- 1초 쿨다운
+local canDamage = true  -- 데미지 가능 상태
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+
+    -- 조건: Humanoid가 있고 AND 데미지 가능 상태
+    if humanoid and canDamage then
+        canDamage = false  -- 잠금
+
+        humanoid.Health = humanoid.Health - damage
+
+        task.wait(cooldown)  -- 1초 대기
+        canDamage = true  -- 잠금 해제
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="tip" title="and 연산자">
+                        <code>if A and B then</code> = A와 B가 <strong>둘 다 참</strong>일 때만 실행
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 힐링 파트 + 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 스튜디오 가이드</span>
+                <h2 class="title-section mb-6">💚 힐링 파트 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-mint/30">
+                        <h3 class="font-bold text-lg mb-4">체력 회복 파트 만들기</h3>
+
+                        <div class="space-y-3 mb-4">
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-neon-mint text-white rounded flex items-center justify-center text-xs font-bold">1</span>
+                                <p class="text-sm">Part 생성 후 <strong>초록색</strong>으로 변경 (Lime green)</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-neon-mint text-white rounded flex items-center justify-center text-xs font-bold">2</span>
+                                <p class="text-sm">Part에 Script 추가</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="w-6 h-6 bg-neon-mint text-white rounded flex items-center justify-center text-xs font-bold">3</span>
+                                <p class="text-sm">아래 코드 입력</p>
+                            </div>
+                        </div>
+
+                        <lua-code-block title="HealPart.lua">
+local part = script.Parent
+local healAmount = 30
+local canHeal = true
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+
+    if humanoid and canHeal then
+        canHeal = false
+
+        -- 체력 회복 (더하기!)
+        humanoid.Health = humanoid.Health + healAmount
+
+        task.wait(2)
+        canHeal = true
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="info" title="체력 상한">
+                        Health가 MaxHealth(기본 100)를 넘으면 자동으로 100으로 조정됩니다.
+                    </HintBox>
+                </div>
+
+                <!-- 복사-붙여넣기 예제들 -->
+                <div class="animate-in lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트! (추가 예제)
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드 중 하나를 복사해서 F5!
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">⏱️ 데미지 파트 (쿨다운)</div>
+                            <lua-code-block title="DamageCooldown.lua">
+-- ========================================
+-- ⚡ 데미지 파트 (쿨다운 있음)
+-- ========================================
+-- 📦 Part (Anchored ✓, 주황색) + Script
+-- 💡 쿨다운 = 재사용 대기시간
+--    연속으로 맞지 않게 해줘요!
+-- ========================================
+local part = script.Parent
+local damage = 20       -- 데미지량
+local cooldown = 1      -- 1초 쿨다운
+local canDamage = true  -- 데미지 가능 상태
+
+local function onTouched(otherPart)
+    -- 💡 return = 함수 즉시 종료
+    if canDamage == false then return end
+
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = humanoid.Health - damage
+        canDamage = false     -- 잠금!
+        task.wait(cooldown)   -- 1초 대기
+        canDamage = true      -- 잠금 해제
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">💚 힐링 파트</div>
+                            <lua-code-block title="HealPart.lua">
+-- ========================================
+-- 💚 힐링 파트 (체력 회복)
+-- ========================================
+-- 📦 Part (Anchored ✓, 초록색) + Script
+-- 💡 Health = 현재 체력
+-- 💡 MaxHealth = 최대 체력 (기본 100)
+-- ========================================
+local part = script.Parent
+local healAmount = 30  -- 회복량
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        -- 현재 체력이 최대보다 작으면 = 다쳤으면
+        if humanoid.Health &lt; humanoid.MaxHealth then
+            humanoid.Health = humanoid.Health + healAmount
+            print("체력 회복!")
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-neon-gold font-bold mb-2">🔘 토글 스위치</div>
+                        <lua-code-block title="ToggleSwitch.lua">
+-- ========================================
+-- 🔘 토글 스위치 (ON/OFF 전환)
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 not = 반대로 (true ↔ false)
+-- 💡 토글 = 누를 때마다 상태가 바뀜
+-- ========================================
+local part = script.Parent
+local isOn = false  -- 시작은 OFF
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        -- 💡 not isOn = isOn의 반대
+        -- false → true, true → false
+        isOn = not isOn
+
+        if isOn then
+            part.BrickColor = BrickColor.new("Lime green")
+            print("ON!")
+        else
+            part.BrickColor = BrickColor.new("Bright red")
+            print("OFF!")
+        end
+        task.wait(0.5)  -- 연속 터치 방지
+    end
+end
+
+part.Touched:Connect(onTouched)
+                        </lua-code-block>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">📍 체크포인트</div>
+                            <lua-code-block title="Checkpoint.lua">
+-- ========================================
+-- 📍 체크포인트 (저장 지점)
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 {} = 빈 테이블 (목록)
+-- 💡 touched[이름] = 누가 닿았는지 기억
+-- ========================================
+local part = script.Parent
+local touched = {}  -- 닿은 플레이어 목록
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    -- 💡 캐릭터에서 플레이어 정보 가져오기
+    local player = game.Players:GetPlayerFromCharacter(otherPart.Parent)
+
+    if humanoid and player then
+        -- 💡 not touched[player.Name]
+        --    = 아직 저장 안 했으면
+        if not touched[player.Name] then
+            touched[player.Name] = true  -- 저장!
+            part.BrickColor = BrickColor.new("Lime green")
+            print(player.Name .. " 체크포인트 저장!")
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">🔥 연속 데미지 (DoT)</div>
+                            <lua-code-block title="DotDamage.lua">
+local part = script.Parent
+local damagePerTick = 5
+local tickRate = 0.5
+local playersInside = {}
+
+part.Touched:Connect(function(hit)
+    local hum = hit.Parent:FindFirstChild("Humanoid")
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if hum and player and not playersInside[player] then
+        playersInside[player] = true
+        while playersInside[player] and hum.Health > 0 do
+            hum.Health = hum.Health - damagePerTick
+            task.wait(tickRate)
+        end
+    end
+end)
+
+part.TouchEnded:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        playersInside[player] = nil
+    end
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">💨 점프 패드</div>
+                            <lua-code-block title="JumpPad.lua">
+-- ========================================
+-- 💨 점프 패드 (위로 날려보내기)
+-- ========================================
+-- 📦 Part (Anchored ✓, 초록색) + Script
+-- 💡 Vector3 = X, Y, Z 세 방향의 숫자
+-- 💡 Vector3.new(0, 100, 0) = 위로 100
+-- ========================================
+local part = script.Parent
+local jumpForce = 100  -- 점프 힘
+local canJump = true
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid and canJump then
+        canJump = false
+
+        -- 💡 HumanoidRootPart = 캐릭터의 중심
+        local rootPart = otherPart.Parent:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            -- 💡 속도를 Y(위)방향으로 설정 = 위로 발사!
+            rootPart.AssemblyLinearVelocity = Vector3.new(0, jumpForce, 0)
+        end
+
+        part.BrickColor = BrickColor.new("Really red")
+        task.wait(0.5)
+        part.BrickColor = BrickColor.new("Lime green")
+        canJump = true
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">👻 사라지는 발판</div>
+                            <lua-code-block title="FadingPlatform.lua">
+-- ========================================
+-- 👻 사라지는 발판
+-- ========================================
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 Transparency = 투명도 (0~1)
+--    0 = 안보임, 1 = 완전 투명
+-- 💡 CanCollide = 충돌 여부
+--    false = 통과 가능
+-- ========================================
+local part = script.Parent
+local fadeTime = 1      -- 사라지는 시간
+local respawnTime = 3   -- 다시 나타나는 대기시간
+local canFade = true
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid and canFade then
+        canFade = false
+
+        -- 💡 for i = 1, 10 = 1부터 10까지 반복
+        -- 점점 투명해짐
+        for i = 1, 10 do
+            part.Transparency = i / 10  -- 0.1, 0.2, ... 1.0
+            task.wait(fadeTime / 10)
+        end
+        part.CanCollide = false  -- 통과 가능
+
+        task.wait(respawnTime)   -- 3초 대기
+
+        -- 다시 나타남
+        part.CanCollide = true
+        for i = 10, 1, -1 do     -- 거꾸로!
+            part.Transparency = i / 10
+            task.wait(fadeTime / 10)
+        end
+        part.Transparency = 0
+        canFade = true
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용을 확인해볼까요?</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="플레이어를 즉시 사망시키는 코드는?"
+                    correct="A"
+                    options={quiz1Options}
+                    correct-explanation="맞아요! humanoid.Health = 0 으로 체력을 0으로 만들면 사망합니다."
+                    wrong-explanation="humanoid.Health = 0이 정답이에요. Health를 0으로 설정하면 캐릭터가 사망합니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="두 조건이 '모두 참'일 때만 실행하려면 어떤 연산자를 사용할까요?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="정답! and 연산자는 양쪽 조건이 모두 참일 때 true를 반환합니다."
+                    wrong-explanation="and가 정답이에요. Lua에서는 and를 사용합니다. (&&는 JavaScript)"
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in">
+                <quiz-question
+                    question="플레이어의 체력을 관리하는 오브젝트 이름은?"
+                    correct="A"
+                    options={quiz3Options}
+                    correct-explanation="맞아요! Humanoid 오브젝트가 Health, WalkSpeed 등을 관리합니다."
+                    wrong-explanation="Humanoid가 정답이에요. Character는 모델 전체, Player는 계정 정보입니다."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 마무리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="text-6xl mb-6 block">⚔️</span>
+                <h2 class="title-display mb-4">4차시 완료!</h2>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    조건문으로 게임 로직을 만들 수 있게 되었어요!
+                </p>
+
+                <div class="lesson-card max-w-md mx-auto mb-8">
+                    <h3 class="font-bold text-lg mb-3">📝 오늘 배운 것</h3>
+                    <ul class="text-left space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-coral">💀</span>
+                            Kill Part - Health = 0
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-gold">💔</span>
+                            데미지 파트 - Health - damage
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">💚</span>
+                            힐링 파트 - Health + healAmount
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-sky">⏱️</span>
+                            debounce - 쿨다운 패턴
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="info-box max-w-md mx-auto">
+                    <strong>다음 시간 예고</strong>
+                    <p class="text-sm mt-1">5A: 반복문 (for) - for i = 1, 10 do</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

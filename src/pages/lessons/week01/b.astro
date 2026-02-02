@@ -1,0 +1,484 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 빈칸 채우기 실습 코드
+const editorCode1 = `-- 빈칸을 채워서 인사말을 출력해보세요
+___("안녕하세요!")`;
+
+const hints1 = JSON.stringify(["출력 함수의 이름은 p로 시작해요", "print 함수를 사용하세요"]);
+
+const editorCode2 = `-- 자신의 이름을 출력해보세요
+print("___")`;
+
+const hints2 = JSON.stringify(["큰따옴표 안에 이름을 넣으세요", "예: 홍길동, 민수, 영희"]);
+
+const editorCode3 = `-- 여러 줄 출력하기
+print("1번 메시지")
+print("___")
+print("3번 메시지")`;
+
+const hints3 = JSON.stringify(["2번 메시지를 넣어보세요", "아무 문자열이나 넣어도 됩니다"]);
+
+const quiz1Options = JSON.stringify(["print()", "echo()", "console.log()", "write()"]);
+const quiz2Options = JSON.stringify(["Output", "Console", "Terminal", "Explorer"]);
+const quiz3Options = JSON.stringify(["--", "//", "#", "/*"]);
+---
+
+<LessonLayout title="첫 스크립트" lessonNumber={1} totalSlides={10}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-lua mb-6">1주차 B</span>
+                <h1 class="title-display mb-4">
+                    첫 번째<br>
+                    <span class="text-neon-mint">스크립트</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    print 함수로 메시지를 출력하고<br>
+                    Output 창에서 결과를 확인해요
+                </p>
+                <div class="flex flex-wrap gap-3 justify-center mb-8">
+                    <span class="px-4 py-2 bg-neon-sky/20 rounded-full text-sm font-medium">📝 Script</span>
+                    <span class="px-4 py-2 bg-neon-mint/20 rounded-full text-sm font-medium">🖨️ print()</span>
+                    <span class="px-4 py-2 bg-neon-gold/20 rounded-full text-sm font-medium">📺 Output</span>
+                </div>
+                <div class="info-box max-w-md mx-auto">
+                    <span class="text-2xl">🎯</span>
+                    <h3 class="font-bold text-lg mt-2 mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm space-y-1">
+                        <li>✓ Script 오브젝트 생성하기</li>
+                        <li>✓ print() 함수로 출력하기</li>
+                        <li>✓ Output 창에서 결과 확인하기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Script란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Script란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-sky">code</span>
+                            코드를 담는 오브젝트
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            <strong>Script</strong>는 Lua 코드가 들어있는 오브젝트입니다.
+                            게임이 시작되면 Script 안의 코드가 <strong>자동으로 실행</strong>됩니다!
+                        </p>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="p-3 bg-ink-pale/50 rounded-lg">
+                                <h4 class="font-bold text-sm mb-1 text-neon-sky">📜 Script</h4>
+                                <p class="text-xs text-ink-light">서버에서 실행되는 코드</p>
+                            </div>
+                            <div class="p-3 bg-ink-pale/50 rounded-lg">
+                                <h4 class="font-bold text-sm mb-1 text-neon-mint">💻 LocalScript</h4>
+                                <p class="text-xs text-ink-light">플레이어 컴퓨터에서 실행 (나중에 배워요)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="info" title="Script vs LocalScript">
+                        지금은 모두 <strong>Script</strong>만 사용합니다.
+                        LocalScript는 GUI나 카메라 효과에 사용하는데, 3개월차에 배울 거예요!
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: print 함수 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">Lua 기초</span>
+                <h2 class="title-section mb-6">🖨️ print() 함수</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">가장 기본적인 출력 함수</h3>
+                        <p class="text-ink-light mb-4">
+                            <code class="text-neon-sky">print()</code>는 괄호 안의 내용을 Output 창에 출력합니다.
+                            디버깅(오류 찾기)할 때 가장 많이 사용해요!
+                        </p>
+
+                        <lua-code-block title="print 기본 사용법" show-line-numbers>
+-- 문자열 출력
+print("Hello, Roblox!")
+
+-- 숫자 출력
+print(123)
+
+-- 여러 값 출력 (쉼표로 구분)
+print("점수:", 100)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-gold/30">
+                        <h3 class="font-bold text-lg mb-3">📌 문자열 규칙</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span>문자열은 <strong>큰따옴표("")</strong> 또는 <strong>작은따옴표('')</strong>로 감싸요</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span><code>"Hello"</code>와 <code>'Hello'</code>는 같은 의미</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-neon-coral">✗</span>
+                                <span><code>print(Hello)</code> - 따옴표 없으면 에러!</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 빈칸 채우기 실습 1 -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="___를 지우고 올바른 출력 함수를 입력하세요"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: Output 창 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">📺 Output 창</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-mint">terminal</span>
+                            print 결과가 나타나는 곳
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            Output 창은 <code>print()</code>의 결과와 <strong>에러 메시지</strong>가 표시되는 곳입니다.
+                            코드가 잘 작동하는지 확인할 때 필수!
+                        </p>
+
+                        <div class="bg-ink-deep rounded-xl p-4 font-mono text-sm">
+                            <div class="text-ink-light mb-1">-- Output 창 예시 --</div>
+                            <div class="text-white">Hello, Roblox!</div>
+                            <div class="text-white">점수: 100</div>
+                            <div class="text-neon-coral">14:32:15.123 - Script 'Workspace.Script', Line 5 - attempt to call nil</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-roblox-red/30">
+                        <h3 class="font-bold text-lg mb-3">🔓 Output 창 열기</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1">
+                                <ol class="space-y-2 text-sm">
+                                    <li><strong>1.</strong> 상단 메뉴에서 <strong>View</strong> 탭 클릭</li>
+                                    <li><strong>2.</strong> <strong>Output</strong> 버튼 클릭</li>
+                                    <li><strong>3.</strong> 화면 하단에 Output 창이 나타남</li>
+                                </ol>
+                            </div>
+                            <div class="text-center">
+                                <span class="text-4xl">👁️</span>
+                                <p class="text-xs text-ink-light mt-1">View → Output</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="warning" title="에러 메시지">
+                        빨간색 메시지가 보이면 코드에 문제가 있다는 뜻이에요.
+                        "Line X" 부분을 보면 몇 번째 줄에서 에러가 났는지 알 수 있어요!
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 빈칸 채우기 실습 2 -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="따옴표 안에 자신의 이름을 넣어서 출력해보세요"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 7: 주석 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">Lua 기초</span>
+                <h2 class="title-section mb-6">📝 주석 (Comment)</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">코드에 메모 남기기</h3>
+                        <p class="text-ink-light mb-4">
+                            <strong>주석</strong>은 코드에 설명을 적어두는 것입니다.
+                            컴퓨터는 주석을 무시하고, 사람만 읽어요!
+                        </p>
+
+                        <lua-code-block title="주석 사용법" show-line-numbers>
+-- 한 줄 주석: 대시 2개
+print("Hello")  -- 줄 끝에도 가능
+
+--[[
+여러 줄 주석
+이렇게 여러 줄을
+작성할 수 있어요
+]]
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card bg-gradient-to-br from-neon-mint/10 to-neon-sky/10">
+                        <h3 class="font-bold text-lg mb-3">💡 주석을 쓰면 좋은 이유</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-neon-mint">1.</span>
+                                <span>나중에 코드를 다시 볼 때 이해하기 쉬움</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-neon-mint">2.</span>
+                                <span>다른 사람이 코드를 볼 때 도움이 됨</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-neon-mint">3.</span>
+                                <span>테스트할 때 코드를 임시로 비활성화 가능</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 스튜디오 가이드</span>
+                <h2 class="title-section mb-6">Script 추가하고 실행하기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-roblox-red/30">
+                        <h3 class="font-bold text-lg mb-4">📜 Workspace에 Script 추가</h3>
+
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">1</span>
+                                <div>
+                                    <strong>Explorer에서 Workspace 찾기</strong>
+                                    <p class="text-sm text-ink-light">왼쪽 패널 상단에 있어요</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">2</span>
+                                <div>
+                                    <strong>Workspace 우클릭 → Insert Object</strong>
+                                    <p class="text-sm text-ink-light">또는 + 버튼 클릭</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">3</span>
+                                <div>
+                                    <strong>"Script" 검색 후 선택</strong>
+                                    <p class="text-sm text-ink-light">Script 오브젝트가 추가됨</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">4</span>
+                                <div>
+                                    <strong>Script 더블클릭 → 코드 작성</strong>
+                                    <p class="text-sm text-ink-light">스크립트 에디터가 열림</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-neon-mint/20 rounded-lg">
+                                <span class="w-8 h-8 bg-neon-mint rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">5</span>
+                                <div>
+                                    <strong>F5로 플레이 → Output 확인!</strong>
+                                    <p class="text-sm text-ink-light">print 결과가 Output에 나타남</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="tip" title="바로 테스트하기">
+                        코드를 작성하고 <strong>F5</strong>를 누르면 바로 게임이 실행됩니다.
+                        <strong>F6</strong>을 누르면 처음부터 다시 시작해요!
+                    </HintBox>
+                </div>
+
+                <!-- 복사-붙여넣기 예제 -->
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-mint/30">
+                        <h4 class="font-bold mb-3 flex items-center gap-2">
+                            <span class="text-xl">📋</span>
+                            복사해서 바로 테스트!
+                        </h4>
+                        <p class="text-sm text-ink-light mb-3">
+                            Part에 Script를 넣고, 아래 코드를 복사해서 붙여넣은 후 F5!
+                        </p>
+                        <lua-code-block title="첫 스크립트.lua" show-line-numbers>
+-- Part에 Script 넣고 F5!
+local part = script.Parent
+
+print("스크립트가 실행되었습니다!")
+print("파트 이름:", part.Name)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-sky/30">
+                        <h4 class="font-bold mb-3 flex items-center gap-2">
+                            <span class="text-xl">🎨</span>
+                            색상 변경 예제
+                        </h4>
+                        <lua-code-block title="색상변경.lua" show-line-numbers>
+local part = script.Parent
+
+part.BrickColor = BrickColor.new("Bright red")
+print("색상이 빨간색으로 바뀌었습니다!")
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-gold/30">
+                        <h4 class="font-bold mb-3 flex items-center gap-2">
+                            <span class="text-xl">⏱️</span>
+                            시간 딜레이 예제
+                        </h4>
+                        <lua-code-block title="딜레이변경.lua" show-line-numbers>
+local part = script.Parent
+
+print("3초 후에 색상이 바뀝니다...")
+task.wait(3)
+part.BrickColor = BrickColor.new("Bright blue")
+print("파란색으로 바뀌었습니다!")
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용을 확인해볼까요?</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="Lua에서 텍스트를 출력하는 함수는?"
+                    correct="A"
+                    options={quiz1Options}
+                    correct-explanation="맞아요! print() 함수로 Output 창에 텍스트를 출력합니다."
+                    wrong-explanation="print()가 정답이에요. echo는 PHP, console.log는 JavaScript에서 사용합니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="print() 결과가 표시되는 창의 이름은?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="정답! Output 창에서 print 결과와 에러 메시지를 확인할 수 있어요."
+                    wrong-explanation="Output이 정답이에요. View 탭에서 열 수 있습니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in">
+                <quiz-question
+                    question="Lua에서 한 줄 주석을 시작하는 기호는?"
+                    correct="A"
+                    options={quiz3Options}
+                    correct-explanation="맞아요! Lua에서는 -- (대시 2개)로 주석을 작성합니다."
+                    wrong-explanation="-- (대시 2개)가 정답이에요. //는 JavaScript, #은 Python에서 사용합니다."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 마무리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="text-6xl mb-6 block">🚀</span>
+                <h2 class="title-display mb-4">1차시 완료!</h2>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    첫 번째 스크립트를 작성하고 실행했어요!
+                </p>
+
+                <div class="lesson-card max-w-md mx-auto mb-8">
+                    <h3 class="font-bold text-lg mb-3">📝 오늘 배운 것</h3>
+                    <ul class="text-left space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Script - 코드를 담는 오브젝트
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            print() - 텍스트 출력 함수
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Output - print 결과가 나타나는 창
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            -- 주석으로 메모 남기기
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="info-box max-w-md mx-auto">
+                    <strong>다음 시간 예고</strong>
+                    <p class="text-sm mt-1">2A: 변수 기초 - local 변수와 자료형</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

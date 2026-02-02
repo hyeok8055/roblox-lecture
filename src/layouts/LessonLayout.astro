@@ -93,19 +93,40 @@ const { title, lessonNumber, totalSlides = 1 } = Astro.props;
         prevBtn?.addEventListener('click', () => changeSlide(-1));
         nextBtn?.addEventListener('click', () => changeSlide(1));
 
-        // 전체화면
-        fullscreenBtn?.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen();
-                document.body.classList.add('is-fullscreen');
-            } else {
-                document.exitFullscreen();
-                document.body.classList.remove('is-fullscreen');
+        // 전체화면 (Safari 호환성 포함)
+        fullscreenBtn?.addEventListener('click', async () => {
+            try {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    // 전체화면 진입
+                    const elem = document.documentElement;
+                    if (elem.requestFullscreen) {
+                        await elem.requestFullscreen();
+                    } else if (elem.webkitRequestFullscreen) {
+                        // Safari
+                        await elem.webkitRequestFullscreen();
+                    }
+                    document.body.classList.add('is-fullscreen');
+                } else {
+                    // 전체화면 해제
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) {
+                        // Safari
+                        await document.webkitExitFullscreen();
+                    }
+                    document.body.classList.remove('is-fullscreen');
+                }
+            } catch (err) {
+                console.warn('전체화면 전환 실패:', err);
             }
         });
 
+        // 전체화면 상태 변경 감지 (Safari 포함)
         document.addEventListener('fullscreenchange', () => {
             document.body.classList.toggle('is-fullscreen', !!document.fullscreenElement);
+        });
+        document.addEventListener('webkitfullscreenchange', () => {
+            document.body.classList.toggle('is-fullscreen', !!document.webkitFullscreenElement);
         });
 
         // 초기화

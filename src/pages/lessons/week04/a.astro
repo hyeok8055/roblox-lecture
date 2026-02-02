@@ -1,0 +1,690 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["if-then-end", "if-do-end", "when-then-end", "if-else"]);
+const quiz2Options = JSON.stringify(["==", "=", "===", ":="]);
+
+// 힌트 데이터 - 초등학생 눈높이의 개념 설명 포함
+const hints1 = JSON.stringify([
+    "💡 >= 는 '크거나 같다'라는 뜻이에요",
+    "___ 부분에 >= 80을 넣어보세요",
+    "if score >= 80 then = '점수가 80점 이상이면'"
+]);
+const hints2 = JSON.stringify([
+    "💡 elseif는 '그게 아니고 만약 ~라면' 이라는 뜻이에요",
+    "score 변수의 숫자를 65, 75, 85, 95 등으로 바꿔보세요",
+    "90↑ = A, 80↑ = B, 70↑ = C, 그 외 = F"
+]);
+const hints3 = JSON.stringify([
+    "💡 Humanoid란? 플레이어 캐릭터의 생명력을 관리하는 오브젝트예요",
+    "💡 Health = 0 이면 캐릭터가 사망해요",
+    "💡 FindFirstChild('Humanoid')로 플레이어인지 확인해요"
+]);
+const hints4 = JSON.stringify([
+    "💡 humanoid.Health는 현재 체력 (기본값: 100)",
+    "Health / 2 = 절반으로, Health - 20 = 20씩 감소",
+    "💡 humanoid.MaxHealth는 최대 체력 (기본값: 100)"
+]);
+
+// 빈칸 채우기 1
+const editorCode1 = `-- 빈칸을 채워 조건문을 완성하세요!
+
+local score = 85
+
+if score ___ then
+    print("합격!")
+else
+    print("불합격...")
+end`;
+
+// 등급 판정
+const editorCode2 = `-- 점수에 따른 등급 판정
+local score = 85
+
+if score >= 90 then
+    print("A등급!")
+elseif score >= 80 then
+    print("B등급!")
+elseif score >= 70 then
+    print("C등급!")
+else
+    print("F등급...")
+end`;
+
+// Kill Part - 상세 설명 포함
+const editorCode3 = `-- ========================================
+-- 🔥 Kill Part (용암 파트)
+-- ========================================
+-- 📦 준비물: Part 1개
+--    - Anchored ✓ (고정)
+--    - BrickColor: Bright red (빨간색 추천)
+-- 📜 사용법: Part 안에 Script 넣기
+-- ========================================
+
+-- script.Parent = 이 스크립트가 들어있는 파트
+local part = script.Parent
+
+-- 🔥 누군가 파트에 닿으면 실행되는 함수
+local function onTouched(otherPart)
+    -- otherPart = 닿은 물체 (플레이어의 팔, 다리 등)
+    -- otherPart.Parent = 닿은 물체의 부모 (캐릭터 전체)
+
+    -- Humanoid 찾기 (플레이어인지 확인)
+    -- Humanoid = 캐릭터의 생명력 관리자
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    -- humanoid가 있으면 = 플레이어가 닿은 거예요!
+    if humanoid then
+        print("플레이어가 용암에 빠졌어요!")
+        -- Health를 0으로 = 즉시 사망!
+        humanoid.Health = 0
+    end
+end
+
+-- Touched 이벤트에 함수 연결
+-- 누군가 닿을 때마다 onTouched 함수가 실행돼요
+part.Touched:Connect(onTouched)
+print("Kill Part 준비 완료!")`;
+
+// 데미지 파트 - 상세 설명 포함
+const editorCode4 = `-- ========================================
+-- ⚡ 데미지 파트 (체력 감소)
+-- ========================================
+-- 📦 준비물: Part 1개
+--    - Anchored ✓ (고정)
+--    - BrickColor: Neon orange (주황색 추천)
+-- 📜 사용법: Part 안에 Script 넣기
+-- ========================================
+
+local part = script.Parent
+
+local function onTouched(otherPart)
+    -- Humanoid = 캐릭터의 생명력 관리자
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        -- 💡 체력 감소 방법들:
+        -- humanoid.Health / 2 = 절반으로 감소
+        -- humanoid.Health - 20 = 20씩 감소
+        -- humanoid.Health - 50 = 절반 감소 (100 기준)
+
+        humanoid.Health = humanoid.Health / 2
+        print("데미지! 남은 체력:", humanoid.Health)
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 체력 회복 파트 - 상세 설명 포함
+const editorCode5 = `-- ========================================
+-- 💚 체력 회복 파트 (힐링)
+-- ========================================
+-- 📦 준비물: Part 1개
+--    - Anchored ✓ (고정)
+--    - BrickColor: Lime green (초록색 추천)
+-- 📜 사용법: Part 안에 Script 넣기
+-- ========================================
+
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        -- 💡 humanoid.Health = 현재 체력
+        -- 💡 humanoid.MaxHealth = 최대 체력 (기본값 100)
+
+        -- 현재 체력이 최대 체력보다 작으면 = 다쳤으면
+        if humanoid.Health < humanoid.MaxHealth then
+            -- 체력을 최대치로 회복!
+            humanoid.Health = humanoid.MaxHealth
+            print("체력이 완전히 회복되었습니다!")
+        else
+            print("이미 체력이 가득 찼어요!")
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+---
+
+<LessonLayout title="조건문 기초" lessonNumber={4} totalSlides={10}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">4주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-gold">조건문</span> 기초
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    "만약 ~라면" 상황에 따라<br>
+                    다른 코드를 실행하는 방법을 배워요
+                </p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔀 if-then-end</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⚖️ 비교 연산자</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">💀 Kill Part</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ if-then-end 문법 이해하기</li>
+                        <li>✓ 비교 연산자 사용하기</li>
+                        <li>✓ Kill Part 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 조건문이란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">조건문이란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🔀</span>
+                            갈림길에서 선택하기
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            조건문은 <strong>"만약 ~라면"</strong> 상황에 따라
+                            다른 코드를 실행하게 해요.
+                        </p>
+                        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4">
+                            <div class="text-sm font-bold mb-2">🎮 게임에서 조건문 예시:</div>
+                            <ul class="text-sm space-y-1">
+                                <li>🎮 점수가 100점이면 → "만점!" 출력</li>
+                                <li>❤️ 체력이 0이면 → 게임 오버</li>
+                                <li>👤 플레이어가 닿으면 → 데미지 주기</li>
+                                <li>🔑 열쇠가 있으면 → 문 열기</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">기본 형태</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-sm text-ink-light mb-2">단순 조건</div>
+                                <lua-code-block>
+if 조건 then
+    -- 조건이 참이면 실행
+end
+                                </lua-code-block>
+                            </div>
+                            <div>
+                                <div class="text-sm text-ink-light mb-2">참/거짓 분기</div>
+                                <lua-code-block>
+if 조건 then
+    -- 참일 때
+else
+    -- 거짓일 때
+end
+                                </lua-code-block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 비교 연산자 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">비교 연산자</span>
+                <h2 class="title-section mb-6">조건 만들기</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light">
+                    조건을 만들려면 <strong>비교 연산자</strong>를 사용해요!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 animate-in mb-6">
+                <div class="lesson-card text-center">
+                    <code class="text-2xl font-bold text-neon-sky">==</code>
+                    <p class="text-sm text-ink-light mt-2">같다</p>
+                    <code class="text-xs mt-1 block">score == 100</code>
+                </div>
+                <div class="lesson-card text-center">
+                    <code class="text-2xl font-bold text-neon-sky">~=</code>
+                    <p class="text-sm text-ink-light mt-2">같지 않다</p>
+                    <code class="text-xs mt-1 block">name ~= "Guest"</code>
+                </div>
+                <div class="lesson-card text-center">
+                    <code class="text-2xl font-bold text-neon-sky">&gt;</code>
+                    <p class="text-sm text-ink-light mt-2">크다</p>
+                    <code class="text-xs mt-1 block">score &gt; 50</code>
+                </div>
+                <div class="lesson-card text-center">
+                    <code class="text-2xl font-bold text-neon-sky">&lt;</code>
+                    <p class="text-sm text-ink-light mt-2">작다</p>
+                    <code class="text-xs mt-1 block">health &lt; 20</code>
+                </div>
+                <div class="lesson-card text-center">
+                    <code class="text-2xl font-bold text-neon-sky">&gt;=</code>
+                    <p class="text-sm text-ink-light mt-2">크거나 같다</p>
+                    <code class="text-xs mt-1 block">level &gt;= 10</code>
+                </div>
+                <div class="lesson-card text-center">
+                    <code class="text-2xl font-bold text-neon-sky">&lt;=</code>
+                    <p class="text-sm text-ink-light mt-2">작거나 같다</p>
+                    <code class="text-xs mt-1 block">coins &lt;= 0</code>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="주의! = vs ==">
+                <code>=</code>는 값을 넣는 것 (대입), <code>==</code>는 비교하는 것!<br>
+                <code>score = 100</code> (점수를 100으로 설정) vs <code>score == 100</code> (점수가 100인가?)
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 빈칸 채우기 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 80점 이상이면 합격하는 조건문을 완성하세요! (>= 80)"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: 등급 판정 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="score 값을 바꿔서 다른 등급이 나오게 해보세요! (90↑=A, 80↑=B, 70↑=C)"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 6: 스튜디오 가이드 - Kill Part -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 실습</span>
+                <h2 class="title-section mb-6">스튜디오에서 Kill Part 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">💀</span>
+                        따라하기: Kill Part (용암)
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div><strong>Part 생성</strong>: Home → Part → Block</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div><strong>색상 변경</strong>: Properties → BrickColor → Bright red 또는 Bright orange</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div><strong>Anchored 체크</strong>: Properties에서 Anchored ✓</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div><strong>Script 추가</strong>: Part 우클릭 → Insert Object → Script</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <div><strong>F5</strong>로 테스트 → 파트에 닿으면 사망!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">📋 복사할 코드 (상세 주석 포함)</h4>
+                    <lua-code-block title="Kill Part" show-line-numbers>
+-- ========================================
+-- 🔥 Kill Part (용암 파트)
+-- ========================================
+-- 📦 준비물: Part 1개
+--    - Anchored ✓ (고정해야 안 떨어져요)
+--    - BrickColor: Bright red (빨간색)
+-- 📜 사용법: Part 우클릭 → Insert Object → Script
+-- ========================================
+
+-- script.Parent = 이 스크립트가 들어있는 파트
+local part = script.Parent
+
+-- 💡 함수: 누군가 파트에 닿으면 실행돼요
+-- otherPart = 닿은 물체 (플레이어의 팔, 다리 등)
+local function onTouched(otherPart)
+    -- 💡 FindFirstChild("Humanoid")
+    --    = "Humanoid"라는 이름의 오브젝트를 찾아요
+    --    = Humanoid가 있으면 플레이어예요!
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    -- 💡 if humanoid then = Humanoid가 있으면
+    if humanoid then
+        -- 💡 Health = 0 → 캐릭터 사망!
+        humanoid.Health = 0
+    end
+end
+
+-- 💡 Touched:Connect(함수)
+--    = 누군가 닿을 때마다 함수를 실행해요
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="info" title="💡 핵심 개념 정리">
+                    <strong>Humanoid</strong> = 플레이어 캐릭터의 생명력 관리자<br>
+                    <strong>Health</strong> = 현재 체력 (0이 되면 사망)<br>
+                    <strong>FindFirstChild()</strong> = 이름으로 오브젝트를 찾아요<br>
+                    Touched 이벤트는 모든 물체에 반응하니까, Humanoid가 있는지 확인해야 해요!
+                </HintBox>
+
+                <!-- 복사-붙여넣기 예제들 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트! (추가 예제)
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드 중 하나를 복사해서 F5!
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">📊 등급 판정</div>
+                            <lua-code-block title="등급판정.lua">
+-- 📦 Part 1개 + Script
+-- 💡 BrickColor.new("색상이름") = 파트 색상 변경
+local part = script.Parent
+local score = 85  -- 👈 이 숫자를 바꿔보세요!
+
+if score >= 90 then
+    -- 90점 이상 = A등급 (초록)
+    part.BrickColor = BrickColor.new("Lime green")
+    print("A등급!")
+elseif score >= 70 then
+    -- 70점 이상 = B등급 (노랑)
+    part.BrickColor = BrickColor.new("Bright yellow")
+    print("B등급!")
+else
+    -- 70점 미만 = C등급 (빨강)
+    part.BrickColor = BrickColor.new("Bright red")
+    print("C등급!")
+end
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">📐 크기 조건</div>
+                            <lua-code-block title="크기조건.lua">
+-- 📦 Part 1개 + Script
+-- 💡 part.Size = 파트의 크기 (X, Y, Z)
+-- 💡 part.Size.X = X축(가로) 크기
+local part = script.Parent
+local currentSize = part.Size.X
+
+if currentSize > 5 then
+    print("큰 파트입니다!")
+    part.BrickColor = BrickColor.new("Bright blue")
+else
+    print("작은 파트입니다!")
+    part.BrickColor = BrickColor.new("Bright orange")
+end
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-neon-coral font-bold mb-2">🎲 랜덤 색상</div>
+                        <lua-code-block title="랜덤색상.lua">
+-- 📦 Part 1개 + Script
+-- 💡 math.random(1, 3) = 1~3 중 랜덤 숫자
+local part = script.Parent
+local randomNumber = math.random(1, 3)
+
+-- == 는 "같다"를 비교하는 연산자
+if randomNumber == 1 then
+    part.BrickColor = BrickColor.new("Bright red")
+elseif randomNumber == 2 then
+    part.BrickColor = BrickColor.new("Bright green")
+else
+    part.BrickColor = BrickColor.new("Bright blue")
+end
+print("랜덤 숫자:", randomNumber)
+                        </lua-code-block>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🚀 점프 부스터</div>
+                            <lua-code-block title="JumpBoost.lua">
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 JumpPower = 점프력 (기본값: 50)
+local part = script.Parent
+local boostPower = 100  -- 점프력 2배!
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        -- 현재 점프력이 부스트보다 낮으면
+        if humanoid.JumpPower &lt; boostPower then
+            humanoid.JumpPower = boostPower
+            print("점프력 증가!")
+            -- 💡 task.wait(5) = 5초 기다리기
+            task.wait(5)
+            humanoid.JumpPower = 50
+            print("점프력 원래대로")
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">🏃 스피드 부스터</div>
+                            <lua-code-block title="SpeedBoost.lua">
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 WalkSpeed = 걷는 속도 (기본값: 16)
+local part = script.Parent
+local boostSpeed = 32  -- 속도 2배!
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        -- == 16 = 기본 속도일 때만 적용
+        if humanoid.WalkSpeed == 16 then
+            humanoid.WalkSpeed = boostSpeed
+            print("속도 2배!")
+            task.wait(5)
+            humanoid.WalkSpeed = 16
+            print("속도 원래대로")
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="text-sm text-neon-gold font-bold mb-2">🚪 레벨 체크 문</div>
+                        <lua-code-block title="LevelGate.lua">
+-- 📦 Part (Anchored ✓) + Script
+-- 💡 Transparency = 투명도 (0=불투명, 1=완전투명)
+-- 💡 CanCollide = 충돌 여부 (false=통과 가능)
+local part = script.Parent
+local requiredLevel = 5
+local playerLevel = 3  -- 👈 이 숫자를 바꿔보세요!
+
+if playerLevel >= requiredLevel then
+    print("환영합니다! 문이 열립니다.")
+    part.Transparency = 0.8  -- 반투명
+    part.CanCollide = false  -- 통과 가능
+else
+    -- .. 은 문자열을 연결하는 연산자
+    print("레벨 " .. requiredLevel .. " 이상만 입장 가능!")
+    part.BrickColor = BrickColor.new("Bright red")
+end
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: Kill Part 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="Kill Part! 플레이어가 닿으면 체력을 0으로 만들어요."
+            initial-code={editorCode3}
+            hints={hints3}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 8: 로블록스 예제들 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">예제 모음</span>
+                <h2 class="title-section mb-6">조건문으로 만들 수 있는 것들</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">⚡</span> 데미지 파트
+                    </h4>
+                    <lua-code-block>
+if humanoid then
+    -- 절반 데미지
+    humanoid.Health = humanoid.Health / 2
+end
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">💚</span> 체력 회복 파트
+                    </h4>
+                    <lua-code-block>
+if humanoid then
+    if humanoid.Health &lt; humanoid.MaxHealth then
+        humanoid.Health = humanoid.MaxHealth
+    end
+end
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🏃</span> 속도 증가 파트
+                    </h4>
+                    <lua-code-block>
+if humanoid then
+    if humanoid.WalkSpeed &lt; 50 then
+        humanoid.WalkSpeed = humanoid.WalkSpeed + 10
+    end
+end
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🚪</span> 레벨 체크 문
+                    </h4>
+                    <lua-code-block>
+if playerLevel >= 10 then
+    print("문이 열립니다!")
+    door.Transparency = 1
+    door.CanCollide = false
+else
+    print("레벨 10 이상만!")
+end
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 데미지 파트 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="데미지 파트! Health를 절반으로 줄이거나 20씩 감소시켜보세요."
+            initial-code={editorCode4}
+            hints={hints4}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 10: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="Lua에서 조건문의 기본 형태는?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! if 조건 then ... end 형태로 사용해요."
+                        wrong-explanation="if-then-end가 정답이에요. else와 elseif를 추가할 수도 있어요."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="두 값이 같은지 비교할 때 사용하는 연산자는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! ==는 비교, =는 대입이에요. 헷갈리지 마세요!"
+                        wrong-explanation="== (등호 2개)가 정답이에요. =는 값을 넣는 대입 연산자예요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-gold/20 to-neon-mint/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">4주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 조건문을 더 활용해요!<br>
+                        논리 연산자 (and, or, not) ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

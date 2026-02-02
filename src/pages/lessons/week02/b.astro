@@ -1,0 +1,509 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 빈칸 채우기 실습 코드
+const editorCode1 = `-- 빈칸을 채워서 파트를 빨간색으로 바꾸세요
+local part = script.Parent
+part.___ = BrickColor.new("Bright red")`;
+
+const hints1 = JSON.stringify(["색상을 바꾸는 속성 이름은 Brick으로 시작해요", "BrickColor 속성을 사용하세요"]);
+
+const editorCode2 = `-- 파트를 반투명하게 만들어보세요 (0.5)
+local part = script.Parent
+part.Transparency = ___`;
+
+const hints2 = JSON.stringify(["0은 불투명, 1은 완전 투명", "0.5는 반투명이에요"]);
+
+const editorCode3 = `-- 파트를 초록색 + 반투명으로 만들기
+local part = script.Parent
+part.BrickColor = BrickColor.new("___")
+part.Transparency = ___`;
+
+const hints3 = JSON.stringify(["초록색: Lime green 또는 Bright green", "반투명: 0.3 ~ 0.7 사이 값"]);
+
+const quiz1Options = JSON.stringify(["BrickColor", "Color", "PartColor", "FillColor"]);
+const quiz2Options = JSON.stringify(["0 ~ 1", "0 ~ 100", "0 ~ 255", "1 ~ 10"]);
+const quiz3Options = JSON.stringify(["script.Parent", "this.Parent", "part.Parent", "game.Parent"]);
+---
+
+<LessonLayout title="파트 속성 변경" lessonNumber={2} totalSlides={10}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-lua mb-6">2주차 B</span>
+                <h1 class="title-display mb-4">
+                    파트 속성<br>
+                    <span class="text-neon-mint">변경하기</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    코드로 파트의 색상과 투명도를 바꿔봐요
+                </p>
+                <div class="flex flex-wrap gap-3 justify-center mb-8">
+                    <span class="px-4 py-2 bg-neon-coral/20 rounded-full text-sm font-medium">🎨 BrickColor</span>
+                    <span class="px-4 py-2 bg-neon-sky/20 rounded-full text-sm font-medium">👻 Transparency</span>
+                    <span class="px-4 py-2 bg-neon-mint/20 rounded-full text-sm font-medium">📍 script.Parent</span>
+                </div>
+                <div class="info-box max-w-md mx-auto">
+                    <span class="text-2xl">🎯</span>
+                    <h3 class="font-bold text-lg mt-2 mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm space-y-1">
+                        <li>✓ BrickColor로 색상 변경하기</li>
+                        <li>✓ Transparency로 투명도 조절하기</li>
+                        <li>✓ script.Parent 이해하기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: script.Parent -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">📍 script.Parent란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-sky/30">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-neon-sky">account_tree</span>
+                            스크립트의 부모 오브젝트
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            <code class="text-neon-sky">script.Parent</code>는 <strong>스크립트가 들어있는 오브젝트</strong>를 가리킵니다.
+                        </p>
+
+                        <div class="bg-ink-pale/30 rounded-xl p-4 font-mono text-sm mb-4">
+                            <div class="text-ink-light mb-2">-- Explorer 구조 --</div>
+                            <div class="ml-0">📁 Workspace</div>
+                            <div class="ml-4">└ 🧱 <span class="text-neon-mint font-bold">Part</span> ← script.Parent</div>
+                            <div class="ml-8">└ 📜 Script ← 현재 스크립트</div>
+                        </div>
+
+                        <lua-code-block title="script.Parent 사용법">
+-- Script가 Part 안에 있을 때
+local part = script.Parent  -- Part를 가리킴
+
+-- part의 색상 변경
+part.BrickColor = BrickColor.new("Bright red")
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="tip" title="왜 script.Parent를 사용할까요?">
+                        이름으로 찾지 않고 <strong>상대 경로</strong>로 오브젝트를 참조해요.
+                        스크립트를 다른 파트에 복사해도 코드 수정 없이 동작합니다!
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: BrickColor -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">Lua 코드</span>
+                <h2 class="title-section mb-6">🎨 BrickColor로 색상 변경</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">기본 문법</h3>
+                        <lua-code-block title="BrickColor 사용법" show-line-numbers>
+local part = script.Parent
+
+-- 색상 이름으로 변경
+part.BrickColor = BrickColor.new("Bright red")
+
+-- 다른 색상들
+part.BrickColor = BrickColor.new("Lime green")
+part.BrickColor = BrickColor.new("Bright blue")
+part.BrickColor = BrickColor.new("New Yeller")  -- 노랑
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🌈 자주 쓰는 BrickColor 이름</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #C4281C"></div>
+                                <code class="text-xs">Bright red</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #0D69AC"></div>
+                                <code class="text-xs">Bright blue</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #4B974B"></div>
+                                <code class="text-xs">Lime green</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #FFFF00"></div>
+                                <code class="text-xs">New Yeller</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #FFFFFF"></div>
+                                <code class="text-xs">White</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded bg-black"></div>
+                                <code class="text-xs">Black</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #D678BE"></div>
+                                <code class="text-xs">Pink</code>
+                            </div>
+                            <div class="flex items-center gap-2 p-2 bg-ink-pale/50 rounded-lg">
+                                <div class="w-6 h-6 rounded" style="background: #FF8000"></div>
+                                <code class="text-xs">Neon orange</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 빈칸 채우기 실습 1 -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워서 파트를 빨간색으로 바꾸세요"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: Transparency -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">Lua 코드</span>
+                <h2 class="title-section mb-6">👻 Transparency로 투명도 조절</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">투명도 값의 범위</h3>
+                        <p class="text-ink-light mb-4">
+                            <code class="text-neon-sky">Transparency</code>는 <strong>0 ~ 1</strong> 사이의 숫자입니다.
+                        </p>
+
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-neon-sky rounded-lg mb-2"></div>
+                                <code class="text-xs">0</code>
+                                <p class="text-xs text-ink-light">불투명</p>
+                            </div>
+                            <div class="text-2xl text-ink-light">→</div>
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-neon-sky/50 rounded-lg mb-2"></div>
+                                <code class="text-xs">0.5</code>
+                                <p class="text-xs text-ink-light">반투명</p>
+                            </div>
+                            <div class="text-2xl text-ink-light">→</div>
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-neon-sky/10 rounded-lg border-2 border-dashed border-ink-pale mb-2"></div>
+                                <code class="text-xs">1</code>
+                                <p class="text-xs text-ink-light">완전 투명</p>
+                            </div>
+                        </div>
+
+                        <lua-code-block title="Transparency 사용법">
+local part = script.Parent
+
+part.Transparency = 0    -- 불투명 (기본값)
+part.Transparency = 0.5  -- 반투명
+part.Transparency = 1    -- 완전 투명 (안 보임)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <HintBox type="info" title="활용 예시">
+                        • 유령 효과: 0.7~0.9 • 유리창: 0.5 • 숨겨진 통로: 1 (보이지 않지만 통과 가능)
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 빈칸 채우기 실습 2 -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="파트를 반투명(0.5)으로 만들어보세요"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 7: 여러 속성 동시 변경 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">응용</span>
+                <h2 class="title-section mb-6">🔧 여러 속성 동시에 변경하기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">색상 + 투명도 + 크기</h3>
+                        <lua-code-block title="여러 속성 변경" show-line-numbers>
+local part = script.Parent
+
+-- 색상 변경
+part.BrickColor = BrickColor.new("Bright blue")
+
+-- 투명도 변경
+part.Transparency = 0.3
+
+-- 크기 변경
+part.Size = Vector3.new(4, 1, 4)
+
+-- 재질 변경
+part.Material = Enum.Material.Neon
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card bg-gradient-to-br from-neon-mint/10 to-neon-sky/10">
+                        <h3 class="font-bold text-lg mb-3">🎮 자주 쓰는 Material (재질)</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                            <div class="p-2 bg-white/50 rounded text-center">
+                                <code>Plastic</code>
+                                <p class="text-xs text-ink-light">기본</p>
+                            </div>
+                            <div class="p-2 bg-white/50 rounded text-center">
+                                <code>Neon</code>
+                                <p class="text-xs text-ink-light">발광</p>
+                            </div>
+                            <div class="p-2 bg-white/50 rounded text-center">
+                                <code>Glass</code>
+                                <p class="text-xs text-ink-light">유리</p>
+                            </div>
+                            <div class="p-2 bg-white/50 rounded text-center">
+                                <code>Metal</code>
+                                <p class="text-xs text-ink-light">금속</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 스튜디오 가이드</span>
+                <h2 class="title-section mb-6">파트에 스크립트 추가하기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-roblox-red/30">
+                        <h3 class="font-bold text-lg mb-4">📜 색상 바꾸는 파트 만들기</h3>
+
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">1</span>
+                                <div>
+                                    <strong>Part 생성</strong>
+                                    <p class="text-sm text-ink-light">Home → Part → Block</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">2</span>
+                                <div>
+                                    <strong>Anchored 체크</strong>
+                                    <p class="text-sm text-ink-light">Properties 패널에서 Anchored ✓</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">3</span>
+                                <div>
+                                    <strong>Script 추가</strong>
+                                    <p class="text-sm text-ink-light">Part 우클릭 → Insert Object → Script</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-ink-pale/50 rounded-lg">
+                                <span class="w-8 h-8 bg-roblox-red rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">4</span>
+                                <div>
+                                    <strong>코드 작성</strong>
+                                    <lua-code-block>
+local part = script.Parent
+part.BrickColor = BrickColor.new("Bright red")
+part.Transparency = 0.3
+                                    </lua-code-block>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-3 bg-neon-mint/20 rounded-lg">
+                                <span class="w-8 h-8 bg-neon-mint rounded-lg flex items-center justify-center text-white font-bold flex-shrink-0">5</span>
+                                <div>
+                                    <strong>F5로 테스트</strong>
+                                    <p class="text-sm text-ink-light">게임 시작하면 파트 색상이 바뀜!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 복사-붙여넣기 예제들 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트!
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드 중 하나를 복사해서 F5!
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">색상 + 투명도</div>
+                            <lua-code-block title="반투명파트.lua">
+local part = script.Parent
+
+part.BrickColor = BrickColor.new("Bright blue")
+part.Transparency = 0.5
+print("반투명 파란색 파트!")
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">크기 변경</div>
+                            <lua-code-block title="플랫폼.lua">
+local part = script.Parent
+
+part.Size = Vector3.new(10, 2, 10)
+print("납작한 플랫폼이 되었습니다!")
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">네온 재질</div>
+                            <lua-code-block title="네온파트.lua">
+local part = script.Parent
+
+part.Material = Enum.Material.Neon
+part.BrickColor = BrickColor.new("Lime green")
+print("네온 빛나는 파트!")
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">종합 속성 변경</div>
+                            <lua-code-block title="슈퍼파트.lua">
+local part = script.Parent
+
+part.Name = "SuperPart"
+part.BrickColor = BrickColor.new("Bright violet")
+part.Size = Vector3.new(4, 4, 4)
+part.Transparency = 0.3
+part.Material = Enum.Material.Glass
+print("슈퍼파트 완성!")
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용을 확인해볼까요?</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="파트의 색상을 바꾸는 속성 이름은?"
+                    correct="A"
+                    options={quiz1Options}
+                    correct-explanation="맞아요! BrickColor 속성으로 파트의 색상을 변경합니다."
+                    wrong-explanation="BrickColor가 정답이에요. BrickColor.new('색상이름')으로 사용합니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in mb-6">
+                <quiz-question
+                    question="Transparency 값의 범위는?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="정답! Transparency는 0(불투명)부터 1(투명)까지의 값을 가집니다."
+                    wrong-explanation="0 ~ 1이 정답이에요. 0은 불투명, 1은 완전 투명입니다."
+                ></quiz-question>
+            </div>
+
+            <div class="animate-in">
+                <quiz-question
+                    question="스크립트가 들어있는 오브젝트를 참조하는 코드는?"
+                    correct="A"
+                    options={quiz3Options}
+                    correct-explanation="맞아요! script.Parent는 스크립트의 부모 오브젝트를 가리킵니다."
+                    wrong-explanation="script.Parent가 정답이에요. script는 현재 스크립트, Parent는 부모를 의미합니다."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 마무리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="text-6xl mb-6 block">🎨</span>
+                <h2 class="title-display mb-4">2차시 완료!</h2>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    코드로 파트의 모습을 바꿀 수 있게 되었어요!
+                </p>
+
+                <div class="lesson-card max-w-md mx-auto mb-8">
+                    <h3 class="font-bold text-lg mb-3">📝 오늘 배운 것</h3>
+                    <ul class="text-left space-y-2 text-sm">
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            script.Parent - 스크립트의 부모 참조
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            BrickColor - 파트 색상 변경
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Transparency - 투명도 (0~1)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span>
+                            Material - 재질 변경
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="info-box max-w-md mx-auto">
+                    <strong>다음 시간 예고</strong>
+                    <p class="text-sm mt-1">3A: 함수 기초 - function, 매개변수, return</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

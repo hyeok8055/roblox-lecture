@@ -1,0 +1,425 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["local", "var", "let", "const"]);
+const quiz2Options = JSON.stringify(["BrickColor", "Color", "Paint", "Texture"]);
+
+// 힌트 데이터
+const hints1 = JSON.stringify(["___ 부분에 자신의 이름을 넣어보세요", "따옴표 안에 텍스트를 넣어요"]);
+const hints2 = JSON.stringify(["number에는 숫자를, text에는 문자열을 넣어요", "문자열은 따옴표로 감싸야 해요"]);
+const hints3 = JSON.stringify(["BrickColor 속성을 변경해요", "Bright blue, Bright green 등 시도해보세요"]);
+const hints4 = JSON.stringify(["Transparency는 0~1 사이 숫자", "0.5는 반투명, 1은 완전 투명"]);
+
+// 빈칸 채우기 1
+const editorCode1 = `-- 빈칸을 채워 변수를 완성하세요!
+
+local myName = "___"
+
+print("안녕하세요!")
+print("제 이름은 " .. myName .. "입니다")`;
+
+// 확장 실습
+const editorCode2 = `-- 다양한 타입의 변수 만들기
+
+local playerName = "___"  -- 문자열 (텍스트)
+local score = ___         -- 숫자
+local isAlive = true      -- 참/거짓
+
+print("이름:", playerName)
+print("점수:", score)
+print("생존:", isAlive)`;
+
+// 색상 변경
+const editorCode3 = `-- 파트 색상 바꾸기
+local part = script.Parent
+
+-- 색상 이름을 바꿔보세요!
+-- Bright red, Bright blue, Bright green
+-- Bright yellow, Bright violet, Bright orange
+part.BrickColor = BrickColor.new("Bright red")
+
+print("색상이 바뀌었습니다!")`;
+
+// 투명도 변경
+const editorCode4 = `-- 파트 투명도 바꾸기
+local part = script.Parent
+
+-- 0 = 불투명, 0.5 = 반투명, 1 = 완전 투명
+part.Transparency = 0.5
+
+print("투명도:", part.Transparency)`;
+
+// 종합 실습
+const editorCode5 = `-- 파트 속성 종합 변경
+local part = script.Parent
+
+-- 색상 변경
+part.BrickColor = BrickColor.new("Bright blue")
+
+-- 반투명하게
+part.Transparency = 0.3
+
+-- 이름 변경
+part.Name = "MyCoolPart"
+
+print("파트 이름:", part.Name)
+print("완료!")`;
+---
+
+<LessonLayout title="변수 기초" lessonNumber={2} totalSlides={9}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">2주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-mint">변수</span> 기초
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    데이터를 담는 상자, 변수를 배워요
+                </p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📦 local 변수</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📝 문자열</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔢 숫자</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ 변수가 무엇인지 이해하기</li>
+                        <li>✓ local 키워드로 변수 만들기</li>
+                        <li>✓ 문자열, 숫자, 참/거짓 타입 알기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 변수란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">변수(Variable)란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">📦</span>
+                            이름표가 붙은 상자
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            변수는 <strong>데이터를 담는 상자</strong>예요.
+                            상자에 이름표를 붙여서 나중에 쉽게 찾을 수 있죠.
+                        </p>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-ink-pale rounded-xl p-4 text-center">
+                                <div class="text-3xl mb-2">📦</div>
+                                <div class="text-xs text-ink-light">이름: <strong>playerName</strong></div>
+                                <div class="text-lg font-bold text-neon-mint">"Steve"</div>
+                            </div>
+                            <div class="bg-ink-pale rounded-xl p-4 text-center">
+                                <div class="text-3xl mb-2">📦</div>
+                                <div class="text-xs text-ink-light">이름: <strong>score</strong></div>
+                                <div class="text-lg font-bold text-neon-sky">100</div>
+                            </div>
+                            <div class="bg-ink-pale rounded-xl p-4 text-center">
+                                <div class="text-3xl mb-2">📦</div>
+                                <div class="text-xs text-ink-light">이름: <strong>isAlive</strong></div>
+                                <div class="text-lg font-bold text-neon-gold">true</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">Lua에서 변수 만들기</h3>
+                        <lua-code-block title="변수 선언" show-line-numbers>
+-- local 키워드로 변수 생성
+local playerName = "Steve"
+local score = 100
+local isAlive = true
+
+-- 변수 사용
+print(playerName)  -- Steve
+print(score)       -- 100
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="info" title="local이 뭐예요?">
+                <code>local</code>은 "이 변수는 여기서만 쓸 거야"라고 선언하는 키워드예요.
+                항상 변수 앞에 <code>local</code>을 붙이는 습관을 들이세요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 빈칸 채우기 1 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="___를 지우고 자신의 이름을 입력하세요!"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 4: 변수 타입 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">심화 개념</span>
+                <h2 class="title-section mb-6">변수의 타입 (자료형)</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light">
+                    변수에는 여러 <strong>종류(타입)</strong>의 데이터를 담을 수 있어요!
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 animate-in">
+                <div class="lesson-card text-center">
+                    <div class="text-3xl mb-3">📝</div>
+                    <h4 class="font-bold mb-2">문자열 (String)</h4>
+                    <p class="text-sm text-ink-light mb-3">텍스트, 글자</p>
+                    <lua-code-block>
+local name = "Steve"
+local msg = "Hello!"
+                    </lua-code-block>
+                    <div class="mt-2 text-xs text-ink-light">
+                        따옴표("")로 감싸요
+                    </div>
+                </div>
+
+                <div class="lesson-card text-center">
+                    <div class="text-3xl mb-3">🔢</div>
+                    <h4 class="font-bold mb-2">숫자 (Number)</h4>
+                    <p class="text-sm text-ink-light mb-3">정수, 소수</p>
+                    <lua-code-block>
+local score = 100
+local speed = 16.5
+                    </lua-code-block>
+                    <div class="mt-2 text-xs text-ink-light">
+                        따옴표 없이 숫자만
+                    </div>
+                </div>
+
+                <div class="lesson-card text-center">
+                    <div class="text-3xl mb-3">✓✗</div>
+                    <h4 class="font-bold mb-2">불리언 (Boolean)</h4>
+                    <p class="text-sm text-ink-light mb-3">참/거짓</p>
+                    <lua-code-block>
+local isAlive = true
+local isDead = false
+                    </lua-code-block>
+                    <div class="mt-2 text-xs text-ink-light">
+                        true 또는 false만
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="문자열 연결하기">
+                <code>..</code> 연산자로 문자열을 연결할 수 있어요!<br>
+                <code>print("점수: " .. score)</code> → "점수: 100"
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 확장 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="다양한 타입의 변수를 만들어보세요! (이름과 점수 넣기)"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 6: 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 실습</span>
+                <h2 class="title-section mb-6">스튜디오에서 변수 사용하기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📋</span>
+                        따라하기: 파트 색상 바꾸기
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div><strong>Part 생성</strong>: Home → Part → Block</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div><strong>Anchored 체크</strong>: Properties에서 Anchored ✓</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div><strong>Script 추가</strong>: Part 우클릭 → Insert Object → Script</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div><strong>코드 붙여넣기</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <div><strong>F5</strong>로 테스트 → 파트 색상 확인!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">복사할 코드</h4>
+                    <lua-code-block title="파트 색상 변경" show-line-numbers>
+local part = script.Parent
+
+-- 변수로 색상 지정
+local myColor = "Bright blue"
+
+part.BrickColor = BrickColor.new(myColor)
+print("색상이 " .. myColor .. "로 바뀌었습니다!")
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="tip" title="사용 가능한 색상 이름">
+                    Bright red, Bright blue, Bright green, Bright yellow,
+                    Bright violet, Bright orange, White, Black 등
+                </HintBox>
+
+                <!-- 복사-붙여넣기 예제들 -->
+                <div class="lesson-card border-2 border-neon-mint/30 mt-6">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트!
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드를 복사해서 붙여넣은 후 F5!
+                    </p>
+
+                    <div class="mb-4">
+                        <div class="text-sm text-neon-sky font-bold mb-2">예제 1: 변수로 색상 관리</div>
+                        <lua-code-block title="변수색상.lua" show-line-numbers>
+local part = script.Parent
+
+local myColor = "Bright green"
+part.BrickColor = BrickColor.new(myColor)
+print("색상:", myColor)
+                        </lua-code-block>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-sm text-neon-mint font-bold mb-2">예제 2: 여러 변수 사용</div>
+                        <lua-code-block title="여러변수.lua" show-line-numbers>
+local part = script.Parent
+
+local partName = "멋진 파트"
+local partSize = 5
+
+part.Name = partName
+part.Size = Vector3.new(partSize, partSize, partSize)
+print(partName .. "의 크기:", partSize)
+                        </lua-code-block>
+                    </div>
+
+                    <div>
+                        <div class="text-sm text-neon-gold font-bold mb-2">예제 3: 변수 계산</div>
+                        <lua-code-block title="변수계산.lua" show-line-numbers>
+local part = script.Parent
+
+local baseSize = 2
+local multiplier = 3
+local finalSize = baseSize * multiplier
+
+part.Size = Vector3.new(finalSize, 1, finalSize)
+print("최종 크기:", finalSize)
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 색상 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="파트 색상을 다양하게 바꿔보세요! (Bright blue, Bright green 등)"
+            initial-code={editorCode3}
+            hints={hints3}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 8: 투명도 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="투명도를 바꿔보세요! (0 = 불투명, 0.5 = 반투명, 1 = 완전 투명)"
+            initial-code={editorCode4}
+            hints={hints4}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="Lua에서 변수를 만들 때 사용하는 키워드는?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! Lua에서는 local 키워드로 지역 변수를 선언합니다."
+                        wrong-explanation="Lua에서는 local 키워드를 사용해요. var, let, const는 다른 언어에서 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트의 색상을 바꾸는 속성은?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! BrickColor 속성으로 파트의 색상을 바꿀 수 있어요."
+                        wrong-explanation="BrickColor가 정답이에요. BrickColor.new('색상이름')으로 사용합니다."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-mint/20 to-neon-sky/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">2주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 파트 속성을 더 자세히 배워요!<br>
+                        Size, Position, Transparency 등 ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

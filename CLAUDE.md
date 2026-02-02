@@ -77,6 +77,13 @@ npm run build    # 프로덕션 빌드 (dist/)
 npm run preview  # 빌드 미리보기
 ```
 
+## ⚠️ 디버깅 규칙
+
+**브라우저 테스트는 반드시 Playwright 사용!**
+- `curl`, `wget` 등 CLI 도구로 브라우저 테스트 금지
+- `mcp__plugin_playwright_playwright__*` 도구 적극 활용
+- 페이지 렌더링, UI 확인, 인터랙션 테스트 모두 Playwright로
+
 ## 새 차시 만들기
 
 ### 1. 레슨 파일 생성

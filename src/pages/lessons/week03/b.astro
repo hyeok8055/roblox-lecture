@@ -1,0 +1,631 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["Touched", "Click", "Enter", "Collision"]);
+const quiz2Options = JSON.stringify([":Connect(함수)", ".Run(함수)", ":Link(함수)", ".Start(함수)"]);
+const quiz3Options = JSON.stringify(["닿은 다른 물체", "현재 파트", "플레이어만", "아무것도 아님"]);
+
+// 빈칸 채우기 1: 기본 이벤트 연결
+const editorCode1 = `-- 빈칸을 채워 이벤트를 연결하세요!
+
+local part = script.Parent
+
+local function onTouched(otherPart)
+    print("무언가 닿았어요!")
+end
+
+-- 이벤트 연결하기 (빈칸: Touched, Connect)
+part.___:___(onTouched)`;
+
+// 빈칸 채우기 2: 색상 변경
+const editorCode2 = `-- 빈칸을 채워 닿으면 색이 바뀌는 파트를 만드세요!
+
+local part = script.Parent
+
+local function onTouched(otherPart)
+    -- 빈칸: BrickColor, Bright red
+    part.___ = BrickColor.new("___")
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 확장 실습: 플레이어 감지
+const editorCode3 = `-- 플레이어가 닿았는지 확인하기
+local part = script.Parent
+
+local function onTouched(otherPart)
+    -- 닿은 물체의 부모에서 Humanoid 찾기
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        print("플레이어가 닿았어요!")
+        part.BrickColor = BrickColor.new("Bright green")
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 전체 작성 실습
+const editorCode4 = `-- 미션: 닿으면 사라지는 파트 만들기
+-- 힌트: Transparency = 1, CanCollide = false
+
+local part = script.Parent
+
+local function onTouched(otherPart)
+    -- 여기에 코드 작성
+    -- 1. 투명하게 만들기 (Transparency)
+    -- 2. 충돌 끄기 (CanCollide)
+
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 로블록스 적용 코드
+const robloxCode1 = `-- 🎮 색상 변경 파트 (스튜디오에서 테스트)
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        part.BrickColor = BrickColor.Random()
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const robloxCode2 = `-- 🎮 Kill Part (용암 파트)
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const robloxCode3 = `-- 🎮 점프 패드
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        -- 위로 튀어오르게!
+        local rootPart = otherPart.Parent:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            rootPart.AssemblyLinearVelocity = Vector3.new(0, 100, 0)
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 힌트 데이터
+const hints1 = JSON.stringify(["part.Touched 형태로 이벤트에 접근해요", ":Connect(함수)로 연결해요", "part.Touched:Connect(onTouched)가 정답!"]);
+const hints2 = JSON.stringify(["BrickColor 속성을 변경해요", "BrickColor.new('Bright red') 형태로 색상을 지정해요", "part.BrickColor = BrickColor.new('Bright red')"]);
+const hints3 = JSON.stringify(["part.Transparency = 1 로 투명하게", "part.CanCollide = false 로 통과 가능하게", "humanoid 체크는 선택사항이에요"]);
+---
+
+<LessonLayout title="이벤트 (Touched)" lessonNumber={3} totalSlides={10}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">3주차 B</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-coral">이벤트</span> (Touched)
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    파트에 닿으면 반응하는 게임의 핵심!<br>
+                    상호작용을 만드는 방법을 배워요
+                </p>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">👆 Touched</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔗 Connect</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">👤 Humanoid</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ Touched 이벤트 이해하기</li>
+                        <li>✓ 플레이어 감지하기</li>
+                        <li>✓ 스튜디오에서 직접 구현하기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 이벤트란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">이벤트(Event)란?</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light mb-6">
+                    이벤트는 <strong>"어떤 일이 일어났을 때"</strong> 코드를 실행하는 방법이에요.
+                    게임에서 상호작용을 만드는 핵심 기능입니다!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 text-neon-sky">자주 쓰는 이벤트</h4>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl">
+                            <span class="text-2xl">👆</span>
+                            <div class="font-bold mt-2">Touched</div>
+                            <div class="text-xs text-ink-light">무언가 닿았을 때</div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
+                            <span class="text-2xl">🖱️</span>
+                            <div class="font-bold mt-2">MouseClick</div>
+                            <div class="text-xs text-ink-light">클릭했을 때</div>
+                        </div>
+                        <div class="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
+                            <span class="text-2xl">👤</span>
+                            <div class="font-bold mt-2">PlayerAdded</div>
+                            <div class="text-xs text-ink-light">플레이어 입장 시</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">이벤트 연결 방법</h4>
+                    <lua-code-block title="기본 문법">
+-- 이벤트:Connect(함수)
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                    <div class="mt-4 p-4 bg-gradient-to-r from-neon-mint/10 to-neon-sky/10 rounded-xl text-sm">
+                        <strong>:Connect()</strong>로 이벤트와 함수를 연결해요!<br>
+                        이벤트가 발생하면 연결된 함수가 자동 실행됩니다.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: Touched 이벤트 상세 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">Touched 이벤트 완벽 이해</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">Touched 이벤트 구조</h4>
+                    <lua-code-block title="Touched 기본 형태" show-line-numbers>
+local part = script.Parent
+
+local function onTouched(otherPart)
+    -- otherPart = 닿은 다른 물체
+    print("닿은 물체:", otherPart.Name)
+end
+
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-2 flex items-center gap-2">
+                            <span class="text-neon-mint">✓</span> part
+                        </h4>
+                        <p class="text-sm text-ink-light">
+                            <code>script.Parent</code> = 스크립트가 들어있는 파트
+                        </p>
+                    </div>
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-2 flex items-center gap-2">
+                            <span class="text-neon-sky">✓</span> otherPart
+                        </h4>
+                        <p class="text-sm text-ink-light">
+                            닿은 다른 물체 (플레이어 다리, 다른 파트 등)
+                        </p>
+                    </div>
+                </div>
+
+                <HintBox type="warning" title="주의! otherPart ≠ 플레이어">
+                    otherPart는 플레이어의 <strong>신체 부위</strong> (다리, 팔 등)입니다!<br>
+                    플레이어인지 확인하려면 <code>otherPart.Parent</code>에서 Humanoid를 찾아야 해요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 빈칸 채우기 1 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 Touched 이벤트를 연결하세요! (Touched, Connect)"
+            initial-code={editorCode1}
+            hints={hints1}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 5: 플레이어 감지 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">실전 기술</span>
+                <h2 class="title-section mb-6">플레이어 감지하기</h2>
+            </div>
+
+            <div class="animate-in mb-6">
+                <p class="text-lg text-ink-light">
+                    Touched 이벤트는 <strong>모든 물체</strong>에 반응해요.<br>
+                    플레이어만 감지하려면 Humanoid를 확인해야 합니다!
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">로블록스 캐릭터 구조</h4>
+                    <div class="flex gap-4 items-center">
+                        <div class="p-4 bg-ink-pale rounded-xl text-center">
+                            <div class="text-2xl mb-1">👤</div>
+                            <div class="text-xs font-bold">Player</div>
+                        </div>
+                        <span class="text-2xl">→</span>
+                        <div class="p-4 bg-gradient-to-br from-violet-50 to-purple-100 rounded-xl text-center">
+                            <div class="text-2xl mb-1">🧍</div>
+                            <div class="text-xs font-bold">Character</div>
+                            <div class="text-[10px] text-ink-light">(otherPart.Parent)</div>
+                        </div>
+                        <span class="text-2xl">→</span>
+                        <div class="p-4 bg-gradient-to-br from-red-50 to-red-100 rounded-xl text-center">
+                            <div class="text-2xl mb-1">❤️</div>
+                            <div class="text-xs font-bold">Humanoid</div>
+                            <div class="text-[10px] text-ink-light">HP, 속도 등</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">플레이어 감지 코드</h4>
+                    <lua-code-block title="Humanoid 확인하기">
+local function onTouched(otherPart)
+    -- 닿은 물체의 부모(캐릭터)에서 Humanoid 찾기
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        print("플레이어가 닿았어요!")
+    end
+end
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 빈칸 채우기 2 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="빈칸을 채워 닿으면 빨간색으로 바뀌는 파트를 만드세요!"
+            initial-code={editorCode2}
+            hints={hints2}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 7: 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 실습</span>
+                <h2 class="title-section mb-6">스튜디오에서 구현하기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📋</span>
+                        따라하기: 색상 변경 파트
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div><strong>Part 생성</strong>: Home → Part → Block</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div><strong>Anchored 체크</strong>: Properties 패널에서 Anchored ✓</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div><strong>Script 추가</strong>: Part 우클릭 → Insert Object → Script</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div><strong>코드 붙여넣기</strong>: 아래 코드 복사 → Script에 붙여넣기</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <div><strong>테스트</strong>: F5 (플레이) → 파트에 닿아보기!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">복사할 코드</h4>
+                    <lua-code-block title="색상 변경 파트">
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        part.BrickColor = BrickColor.Random()
+    end
+end
+
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="tip" title="Output 창 열기">
+                    에러 확인: <strong>View → Output</strong><br>
+                    코드가 안 되면 Output 창에서 빨간 에러 메시지를 확인하세요!
+                </HintBox>
+
+                <!-- 복사-붙여넣기 예제들 추가 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트! (추가 예제)
+                    </h4>
+                    <p class="text-sm text-ink-light mb-3">
+                        Part에 Script를 넣고, 아래 코드 중 하나를 복사해서 F5!
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">💀 Kill Part</div>
+                            <lua-code-block title="KillPart.lua">
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">🚀 점프 패드</div>
+                            <lua-code-block title="JumpPad.lua">
+local part = script.Parent
+local jumpPower = 100
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.JumpPower = jumpPower
+        humanoid.Jump = true
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">👻 사라지는 파트</div>
+                            <lua-code-block title="FadingPart.lua">
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        part.Transparency = 1
+        part.CanCollide = false
+        task.wait(3)
+        part.Transparency = 0
+        part.CanCollide = true
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🪙 코인 수집</div>
+                            <lua-code-block title="Coin.lua">
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        print("코인 획득!")
+        part:Destroy()
+    end
+end
+
+part.Touched:Connect(onTouched)
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 로블록스 예제들 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">예제 모음</span>
+                <h2 class="title-section mb-6">Touched로 만들 수 있는 것들</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🔥</span> Kill Part (용암)
+                    </h4>
+                    <lua-code-block>
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🚀</span> 점프 패드
+                    </h4>
+                    <lua-code-block>
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        local root = otherPart.Parent:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.AssemblyLinearVelocity = Vector3.new(0, 100, 0)
+        end
+    end
+end
+
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">👻</span> 사라지는 파트
+                    </h4>
+                    <lua-code-block>
+local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        part.Transparency = 1
+        part.CanCollide = false
+        task.wait(3)
+        part.Transparency = 0
+        part.CanCollide = true
+    end
+end
+
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">🔊</span> 소리 재생
+                    </h4>
+                    <lua-code-block>
+local part = script.Parent
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://9120385988"  -- 코인 효과음 (Roblox 제공)
+sound.Parent = part
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        sound:Play()
+    end
+end
+
+part.Touched:Connect(onTouched)
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 전체 작성 실습 (전체화면) -->
+    <section class="slide slide-fullscreen">
+        <lua-editor
+            mission="닿으면 투명해지고 통과 가능한 파트를 만드세요! (Transparency = 1, CanCollide = false)"
+            initial-code={editorCode4}
+            hints={hints3}
+        ></lua-editor>
+    </section>
+
+    <!-- 슬라이드 10: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트에 무언가 닿았을 때 발생하는 이벤트는?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! Touched 이벤트는 파트에 무언가 닿으면 발생해요."
+                        wrong-explanation="Touched가 정답이에요. part.Touched:Connect(함수)로 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="이벤트와 함수를 연결하는 메서드는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! :Connect(함수)로 이벤트와 함수를 연결해요."
+                        wrong-explanation=":Connect(함수)가 정답이에요. 콜론(:)을 사용합니다!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="Touched 이벤트 함수의 otherPart는 무엇인가요?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! otherPart는 닿은 다른 물체예요. 플레이어의 다리일 수도 있고, 다른 파트일 수도 있어요."
+                        wrong-explanation="otherPart는 '닿은 다른 물체'예요. 플레이어 감지는 Humanoid 체크가 필요해요!"
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-coral/20 to-neon-gold/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">3주차 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        함수 + 이벤트 = 상호작용!<br>
+                        다음 시간에는 조건문(if)을 배워요 ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
