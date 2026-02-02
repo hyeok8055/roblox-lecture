@@ -27,17 +27,8 @@ Thumbs.db
 *.swp
 *.swo
 
-# Claude Code local settings
-.claude/
-
-# Serena MCP settings
-.serena/
-
 # Netlify local
 .netlify/
 
 # Test screenshots
 .playwright-mcp/
-
-# Temp folders
-roblox-tutor/
