@@ -1,59 +1,63 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to Claude Code when working with this repository.
 
 ## 프로젝트 개요
 
-**로블록스 과외 커리큘럼** - 로블록스 스튜디오와 Lua 스크립팅을 가르치는 교육 프로젝트. Astro + Lit + Wasmoon 기반의 인터랙티브 슬라이드 형식.
+**로블록스 과외 커리큘럼** - 로블록스 스튜디오와 Lua 스크립팅을 가르치는 교육 프로젝트.
+Astro + Lit + Wasmoon 기반의 인터랙티브 슬라이드 형식.
+
+- **GitHub**: https://github.com/hyeok8055/roblox-lecture
+- **배포**: https://hyeok-lecture.netlify.app/
 
 ## 프로젝트 구조
 
 ```
-/_26_로블록스_과외/
-├── .gitignore
-├── _design_sample.html         # 디자인 시스템 레퍼런스
-├── CLAUDE.md
+/
+├── src/
+│   ├── pages/
+│   │   ├── index.astro          # 메인 페이지 (커리큘럼 목록)
+│   │   └── lessons/
+│   │       ├── 01.astro         # 1차시: 스튜디오 적응
+│   │       ├── 02.astro         # 2차시: 변수와 속성
+│   │       ├── 03.astro         # 3차시: 함수와 이벤트
+│   │       ├── 04.astro         # 4차시: 조건문
+│   │       └── 05.astro         # 5차시: 반복문
+│   │
+│   ├── layouts/
+│   │   ├── BaseLayout.astro     # 기본 HTML 레이아웃 (CSS import)
+│   │   └── LessonLayout.astro   # 레슨 공통 레이아웃 (네비게이션)
+│   │
+│   ├── components/
+│   │   ├── astro/               # Astro 컴포넌트
+│   │   │   ├── HintBox.astro
+│   │   │   ├── Badge.astro
+│   │   │   └── StepCard.astro
+│   │   │
+│   │   └── lit/                 # Lit Web Components
+│   │       ├── index.ts         # 컴포넌트 등록
+│   │       ├── LuaCodeBlock.ts  # 코드 블록 (구문 강조)
+│   │       ├── LuaEditor.ts     # 코드 에디터 (실행 가능)
+│   │       └── QuizQuestion.ts  # 퀴즈 컴포넌트
+│   │
+│   ├── styles/
+│   │   └── global.css           # 전역 스타일 (CSS 변수, 컴포넌트)
+│   │
+│   └── lib/
+│       └── lua-runtime.ts       # Wasmoon Lua 인터프리터
 │
-└── roblox-tutor/               # Astro 프로젝트
-    ├── src/
-    │   ├── pages/
-    │   │   ├── index.astro     # 메인 페이지 (커리큘럼 목록)
-    │   │   └── lessons/
-    │   │       ├── 01.astro    # 1차시: 스튜디오 적응
-    │   │       ├── 02.astro    # 2차시: 변수와 속성
-    │   │       ├── 03.astro    # 3차시: 함수와 이벤트
-    │   │       ├── 04.astro    # 4차시: 조건문
-    │   │       └── 05.astro    # 5차시: 반복문
-    │   │
-    │   ├── layouts/
-    │   │   ├── BaseLayout.astro    # 기본 HTML 레이아웃
-    │   │   └── LessonLayout.astro  # 레슨 공통 레이아웃 (네비게이션)
-    │   │
-    │   ├── components/
-    │   │   ├── astro/              # Astro 컴포넌트
-    │   │   │   ├── HintBox.astro
-    │   │   │   ├── Badge.astro
-    │   │   │   └── StepCard.astro
-    │   │   │
-    │   │   └── lit/                # Lit Web Components
-    │   │       ├── index.ts        # 컴포넌트 등록
-    │   │       ├── LuaCodeBlock.ts # 코드 블록 (구문 강조)
-    │   │       ├── LuaEditor.ts    # 코드 에디터 (실행 가능)
-    │   │       └── QuizQuestion.ts # 퀴즈 컴포넌트
-    │   │
-    │   ├── styles/
-    │   │   └── global.css          # 전역 스타일
-    │   │
-    │   └── lib/
-    │       └── lua-runtime.ts      # Wasmoon Lua 인터프리터
-    │
-    ├── public/
-    │   └── favicon.svg
-    │
-    ├── package.json
-    ├── astro.config.mjs
-    ├── tailwind.config.mjs
-    └── tsconfig.json
+├── public/
+│   ├── favicon.ico
+│   └── favicon.svg
+│
+├── package.json
+├── astro.config.mjs
+├── tailwind.config.mjs
+├── tsconfig.json
+├── netlify.toml                 # Netlify 배포 설정
+├── CLAUDE.md
+├── _design_sample.html          # 디자인 시스템 레퍼런스
+└── .gitignore
 ```
 
 ## 기술 스택
@@ -63,15 +67,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **TailwindCSS**: 유틸리티 CSS
 - **Wasmoon**: 브라우저 Lua 인터프리터
 - **TypeScript**: 타입 안전성
-- **Pretendard + Space Grotesk + JetBrains Mono**: 폰트
 
 ## 개발 명령어
 
 ```bash
-cd roblox-tutor
 npm install      # 의존성 설치
 npm run dev      # 개발 서버 (localhost:4321)
-npm run build    # 프로덕션 빌드
+npm run build    # 프로덕션 빌드 (dist/)
 npm run preview  # 빌드 미리보기
 ```
 
@@ -79,7 +81,7 @@ npm run preview  # 빌드 미리보기
 
 ### 1. 레슨 파일 생성
 
-`src/pages/lessons/06.astro` 생성:
+`src/pages/lessons/06.astro`:
 
 ```astro
 ---
@@ -93,12 +95,16 @@ const quizOptions = JSON.stringify(["A", "B", "C", "D"]);
 <LessonLayout title="제목" lessonNumber={6} totalSlides={5}>
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
-        <!-- 내용 -->
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <!-- 인트로 내용 -->
+        </div>
     </section>
 
     <!-- 슬라이드 2: 개념 -->
     <section class="slide">
-        <!-- 내용 -->
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <!-- 개념 설명 -->
+        </div>
     </section>
 
     <!-- 슬라이드 3: 실습 (전체화면) -->
@@ -110,7 +116,17 @@ const quizOptions = JSON.stringify(["A", "B", "C", "D"]);
         ></lua-editor>
     </section>
 
-    <!-- Lit 컴포넌트 로드 -->
+    <!-- 슬라이드 4: 퀴즈 -->
+    <section class="slide">
+        <quiz-question
+            question="질문?"
+            correct="B"
+            options={quizOptions}
+            correct-explanation="정답 설명"
+            wrong-explanation="오답 설명"
+        ></quiz-question>
+    </section>
+
     <script>
         import('../../components/lit/index').catch(console.error);
     </script>
@@ -119,11 +135,11 @@ const quizOptions = JSON.stringify(["A", "B", "C", "D"]);
 
 ### 2. 인덱스 페이지 업데이트
 
-`src/pages/index.astro`에 새 차시 카드 추가.
+`src/pages/index.astro`에서 해당 차시 `active: true`로 변경.
 
-## Lit 컴포넌트 사용법
+## 주요 컴포넌트
 
-### LuaCodeBlock - 코드 표시용
+### LuaCodeBlock - 코드 표시
 
 ```astro
 <lua-code-block title="파일명.lua" show-line-numbers>
@@ -132,7 +148,7 @@ print("Hello!")
 </lua-code-block>
 ```
 
-### LuaEditor - 코드 실습용
+### LuaEditor - 코드 실습
 
 ```astro
 <lua-editor
@@ -154,48 +170,30 @@ print("Hello!")
 ></quiz-question>
 ```
 
-## CSS 클래스
+### HintBox - 힌트 박스
 
-### 레이아웃
-- `.slide` - 슬라이드 컨테이너
-- `.slide.active` - 현재 활성 슬라이드
-- `.slide-fullscreen` - 전체화면 실습 슬라이드
-- `.animate-in` - 등장 애니메이션
-
-### 컴포넌트
-- `.lesson-card` - 콘텐츠 카드
-- `.hint-box` - 힌트 박스 (금색)
-- `.info-box` - 정보 박스 (보라색)
-- `.badge-*` - 뱃지 (lesson, quiz, lua, roblox)
-
-### 주의사항
-- 코드 블록은 **세로 배치** (`flex flex-col`) 사용 - 가로 스크롤 방지
-- `<` 문자는 `&lt;`로 이스케이프 (Astro 템플릿 내)
-
-## 디자인 시스템: "Arcade Classroom"
-
-### 색상 변수
-
-```css
-/* 베이스 */
---ink-deep: #1a1625;
---ink-cream: #fdfcfb;
-
-/* 네온 포인트 */
---neon-mint: #3DFFA2;   /* 실행/성공 */
---neon-coral: #FF6B6B;  /* 정지/오류 */
---neon-gold: #FFD93D;   /* 강조/경고 */
---neon-sky: #6BCFFF;    /* 정보/링크 */
-
-/* Lua 구문 강조 */
---lua-keyword: #C792EA;
---lua-builtin: #82AAFF;
---lua-string: #C3E88D;
---lua-number: #F78C6C;
---lua-comment: #676E95;
+```astro
+<HintBox type="info" title="제목">
+    내용
+</HintBox>
+<!-- type: info, tip, warning -->
 ```
 
-## 12주 커리큘럼
+## CSS 주의사항
+
+1. **CSS는 Astro import 방식 사용** (BaseLayout.astro 참고)
+   ```astro
+   ---
+   import '../styles/global.css';
+   ---
+   ```
+   `<link>` 태그로 `/styles/global.css` 참조하면 404 에러 발생
+
+2. **코드 블록은 세로 배치** (`flex flex-col`) - 가로 스크롤 방지
+
+3. **`<` 문자는 이스케이프** - Astro 템플릿 내에서 `&lt;` 사용
+
+## 12주 커리큘럼 진행 상황
 
 ### 1개월차: 기초 문법
 | 차시 | 주제 | 상태 |
@@ -223,8 +221,31 @@ print("Hello!")
 
 ## 배포
 
+GitHub에 push하면 Netlify가 자동 배포.
+
 ```bash
-cd roblox-tutor
-npm run build
-# dist/ 폴더를 Netlify/Vercel에 배포
+git add -A
+git commit -m "메시지"
+git push
 ```
+
+## 디자인 시스템 요약
+
+### 색상 변수 (global.css)
+```css
+--ink-deep: #1a1625;      /* 텍스트 */
+--ink-cream: #fdfcfb;     /* 배경 */
+--neon-mint: #3DFFA2;     /* 성공/실행 */
+--neon-coral: #FF6B6B;    /* 오류/정지 */
+--neon-gold: #FFD93D;     /* 경고/힌트 */
+--neon-sky: #6BCFFF;      /* 정보/링크 */
+--roblox-red: #E31B23;    /* 로블록스 브랜드 */
+```
+
+### 주요 CSS 클래스
+- `.slide` / `.slide.active` - 슬라이드
+- `.slide-fullscreen` - 전체화면 실습
+- `.lesson-card` - 콘텐츠 카드
+- `.badge-*` - 뱃지 (lesson, quiz, lua, roblox)
+- `.hint-box` / `.info-box` - 박스
+- `.animate-in` - 등장 애니메이션
