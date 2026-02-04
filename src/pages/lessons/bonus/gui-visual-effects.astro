@@ -1,0 +1,800 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// SurfaceGui 퀴즈 데이터
+const surfaceGuiQuizBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "workspace", "game"] },
+    { id: "b2", correct: "SurfaceGui", options: ["ScreenGui", "SurfaceGui", "BillboardGui", "TextLabel"] },
+    { id: "b3", correct: "TextLabel", options: ["TextBox", "TextLabel", "TextButton", "Frame"] }
+]);
+
+const surfaceGuiQuizTemplate = `local part = [b1]
+local gui = part:FindFirstChild("[b2]")
+local text = gui:FindFirstChild("[b3]")
+
+text.Text = "위험!"
+text.TextColor3 = Color3.fromRGB(255, 0, 0)`;
+
+const surfaceGuiQuizFullCode = `local part = script.Parent
+local gui = part:FindFirstChild("SurfaceGui")
+local text = gui:FindFirstChild("TextLabel")
+
+text.Text = "위험!"
+text.TextColor3 = Color3.fromRGB(255, 0, 0)`;
+
+// 용암 효과 퀴즈 데이터
+const lavaQuizBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "workspace.Part", "game.Part"] },
+    { id: "b2", correct: "task.spawn", options: ["task.wait", "task.spawn", "spawn", "coroutine"] },
+    { id: "b3", correct: "true", options: ["true", "false", "1", "part"] },
+    { id: "b4", correct: "Color3.fromRGB", options: ["BrickColor.new", "Color3.fromRGB", "Color3.new", "Color.new"] }
+]);
+
+const lavaQuizTemplate = `local part = [b1]
+
+[b2](function()
+    while [b3] do
+        part.Color = [b4](255, 60, 0)
+        task.wait(0.3)
+        part.Color = Color3.fromRGB(255, 120, 0)
+        task.wait(0.3)
+    end
+end)
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const lavaQuizFullCode = `local part = script.Parent
+
+task.spawn(function()
+    while true do
+        part.Color = Color3.fromRGB(255, 60, 0)
+        task.wait(0.3)
+        part.Color = Color3.fromRGB(255, 120, 0)
+        task.wait(0.3)
+    end
+end)
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 힐링 효과 퀴즈 데이터
+const healQuizBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "workspace", "game"] },
+    { id: "b2", correct: "Color3.fromRGB", options: ["BrickColor.new", "Color3.fromRGB", "Color.RGB", "RGB"] },
+    { id: "b3", correct: "humanoid.MaxHealth", options: ["100", "humanoid.MaxHealth", "humanoid.Health", "MaxHealth"] },
+    { id: "b4", correct: "debounce", options: ["wait", "debounce", "cooldown", "false"] }
+]);
+
+const healQuizTemplate = `local part = [b1]
+local debounce = false
+
+task.spawn(function()
+    while true do
+        part.Color = [b2](0, 255, 100)
+        task.wait(0.5)
+        part.Color = Color3.fromRGB(100, 255, 150)
+        task.wait(0.5)
+    end
+end)
+
+local function onTouched(otherPart)
+    if [b4] then return end
+
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid and humanoid.Health < [b3] then
+        debounce = true
+        humanoid.Health = humanoid.MaxHealth
+        task.wait(2)
+        debounce = false
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const healQuizFullCode = `local part = script.Parent
+local debounce = false
+
+task.spawn(function()
+    while true do
+        part.Color = Color3.fromRGB(0, 255, 100)
+        task.wait(0.5)
+        part.Color = Color3.fromRGB(100, 255, 150)
+        task.wait(0.5)
+    end
+end)
+
+local function onTouched(otherPart)
+    if debounce then return end
+
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid and humanoid.Health < humanoid.MaxHealth then
+        debounce = true
+        humanoid.Health = humanoid.MaxHealth
+        task.wait(2)
+        debounce = false
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["SurfaceGui", "ScreenGui", "BillboardGui", "ImageLabel"]);
+const quiz2Options = JSON.stringify(["Color3.fromRGB(255, 0, 0)", "Color3.new(255, 0, 0)", "BrickColor.new(255, 0, 0)", "RGB(255, 0, 0)"]);
+---
+
+<LessonLayout title="GUI와 시각 효과" lessonNumber={0} totalSlides={12}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">보너스 차시</span>
+                <h1 class="title-display mb-4">
+                    GUI와<br>
+                    <span class="text-neon-mint">시각 효과</span>
+                </h1>
+                <p class="text-xl text-ink-light mb-8 max-w-lg mx-auto">
+                    파트에 텍스트를 표시하고, 용암/힐링 효과를 만들어보세요!
+                </p>
+
+                <div class="lesson-card inline-block text-left">
+                    <h3 class="font-bold text-ink-deep mb-3">오늘 배울 내용</h3>
+                    <ul class="space-y-2 text-ink-light">
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">1.</span>
+                            SurfaceGui로 파트에 텍스트 표시
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">2.</span>
+                            Color3.fromRGB로 색상 애니메이션
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">3.</span>
+                            용암 파트 효과 (Kill + 깜빡임)
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">4.</span>
+                            힐링 파트 효과 (회복 + 깜빡임)
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-8 flex items-center justify-center gap-4 text-sm text-ink-light">
+                    <span class="px-3 py-1 bg-neon-sky/20 text-neon-sky rounded-full">선행: 5B (while)</span>
+                    <span class="px-3 py-1 bg-neon-gold/20 text-neon-gold rounded-full">선행: 4A (Kill Part)</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: SurfaceGui 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">개념</span>
+            <h2 class="title-section mb-6">SurfaceGui란?</h2>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg text-ink-deep mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📺</span> SurfaceGui
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        파트 <strong>표면</strong>에 UI를 표시하는 컴포넌트!<br>
+                        "위험!", "출구", "점수판" 같은 텍스트를 파트에 붙일 수 있어요.
+                    </p>
+                    <div class="bg-ink-pale/50 rounded-lg p-3 text-sm">
+                        <strong>구조:</strong> Part → SurfaceGui → TextLabel
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg text-ink-deep mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🖥️</span> ScreenGui
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        <strong>화면</strong>에 UI를 표시하는 컴포넌트!<br>
+                        체력바, 점수, 메뉴 버튼 등 HUD에 사용해요.
+                    </p>
+                    <div class="bg-ink-pale/50 rounded-lg p-3 text-sm">
+                        <strong>구조:</strong> StarterGui → ScreenGui → Frame
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="비교">
+                <strong>SurfaceGui</strong> = 파트에 붙이는 표지판 (3D 공간)<br>
+                <strong>ScreenGui</strong> = 화면에 떠 있는 HUD (2D 화면)
+            </HintBox>
+
+            <div class="mt-8">
+                <h3 class="font-bold text-ink-deep mb-4">주요 속성</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white border-2 border-ink-pale rounded-xl p-4 text-center">
+                        <span class="block text-2xl mb-2">📝</span>
+                        <span class="font-mono text-sm">Text</span>
+                        <p class="text-xs text-ink-light mt-1">표시할 글자</p>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl p-4 text-center">
+                        <span class="block text-2xl mb-2">🎨</span>
+                        <span class="font-mono text-sm">TextColor3</span>
+                        <p class="text-xs text-ink-light mt-1">글자 색상</p>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl p-4 text-center">
+                        <span class="block text-2xl mb-2">📐</span>
+                        <span class="font-mono text-sm">TextScaled</span>
+                        <p class="text-xs text-ink-light mt-1">자동 크기 조절</p>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl p-4 text-center">
+                        <span class="block text-2xl mb-2">🧭</span>
+                        <span class="font-mono text-sm">Face</span>
+                        <p class="text-xs text-ink-light mt-1">표시할 면</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 스튜디오 가이드 - SurfaceGui -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">스튜디오 가이드</span>
+            <h2 class="title-section mb-6">SurfaceGui 만들기</h2>
+
+            <div class="space-y-4">
+                <div class="lesson-card border-l-4 border-l-neon-mint">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-mint/20 flex items-center justify-center text-neon-mint font-bold shrink-0">1</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-2">Part 생성</h3>
+                            <p class="text-ink-light">Model 탭 → Part → 원하는 위치에 배치</p>
+                            <p class="text-sm text-ink-light mt-1">Anchored 체크!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-sky">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-sky/20 flex items-center justify-center text-neon-sky font-bold shrink-0">2</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-2">SurfaceGui 추가</h3>
+                            <p class="text-ink-light">Part 우클릭 → Insert Object → <strong>SurfaceGui</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-gold">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-gold/20 flex items-center justify-center text-neon-gold font-bold shrink-0">3</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-2">TextLabel 추가</h3>
+                            <p class="text-ink-light">SurfaceGui 우클릭 → Insert Object → <strong>TextLabel</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-coral">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-coral/20 flex items-center justify-center text-neon-coral font-bold shrink-0">4</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-2">TextLabel 설정</h3>
+                            <div class="grid grid-cols-2 gap-2 mt-2 text-sm">
+                                <div class="bg-ink-pale/50 rounded px-2 py-1">
+                                    <strong>Size:</strong> &#123;1, 0&#125;, &#123;1, 0&#125;
+                                </div>
+                                <div class="bg-ink-pale/50 rounded px-2 py-1">
+                                    <strong>TextScaled:</strong> true
+                                </div>
+                                <div class="bg-ink-pale/50 rounded px-2 py-1">
+                                    <strong>Text:</strong> "위험!"
+                                </div>
+                                <div class="bg-ink-pale/50 rounded px-2 py-1">
+                                    <strong>BackgroundTransparency:</strong> 1
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-roblox-red">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-roblox-red/20 flex items-center justify-center text-roblox-red font-bold shrink-0">5</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-2">Script 추가</h3>
+                            <p class="text-ink-light">Part 우클릭 → Insert Object → <strong>Script</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="info" title="구조 확인">
+                Explorer에서: Part &gt; SurfaceGui &gt; TextLabel<br>
+                Part 안에 Script도 함께!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: SurfaceGui 빈칸 퀴즈 -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="SurfaceGui 텍스트 변경"
+            setup="Part + SurfaceGui + TextLabel (위 가이드 참고)"
+            concepts='["script.Parent", "SurfaceGui", "TextLabel", "Color3.fromRGB"]'
+            blanks={surfaceGuiQuizBlanks}
+            template={surfaceGuiQuizTemplate}
+            full-code={surfaceGuiQuizFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- 슬라이드 5: 색상 애니메이션 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">개념</span>
+            <h2 class="title-section mb-6">Color3.fromRGB 색상 만들기</h2>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-lg text-ink-deep mb-4 flex items-center gap-2">
+                    <span class="text-2xl">🎨</span> RGB란?
+                </h3>
+                <p class="text-ink-light mb-4">
+                    <strong>R</strong>ed(빨강), <strong>G</strong>reen(초록), <strong>B</strong>lue(파랑)<br>
+                    세 가지 색을 섞어서 모든 색을 만들어요! (0~255 범위)
+                </p>
+
+                <div class="grid grid-cols-3 gap-4 mt-4">
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto rounded-xl mb-2" style="background: rgb(255, 0, 0);"></div>
+                        <code class="text-sm">(255, 0, 0)</code>
+                        <p class="text-xs text-ink-light">빨강</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto rounded-xl mb-2" style="background: rgb(0, 255, 0);"></div>
+                        <code class="text-sm">(0, 255, 0)</code>
+                        <p class="text-xs text-ink-light">초록</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-16 h-16 mx-auto rounded-xl mb-2" style="background: rgb(0, 0, 255);"></div>
+                        <code class="text-sm">(0, 0, 255)</code>
+                        <p class="text-xs text-ink-light">파랑</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-ink-deep mb-3">색상 애니메이션 원리</h3>
+                <lua-code-block title="색상 깜빡임 기본">
+while true do
+    part.Color = Color3.fromRGB(255, 60, 0)  -- 진한 주황
+    task.wait(0.3)
+    part.Color = Color3.fromRGB(255, 120, 0) -- 밝은 주황
+    task.wait(0.3)
+end
+                </lua-code-block>
+            </div>
+
+            <HintBox type="tip" title="task.spawn이 필요한 이유">
+                <strong>while true do</strong>는 무한 반복이라 그 아래 코드가 실행 안 돼요!<br>
+                <strong>task.spawn</strong>으로 "별도 스레드"에서 실행하면 다른 코드도 실행 가능!
+            </HintBox>
+
+            <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="text-center bg-white border-2 border-ink-pale rounded-xl p-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg mb-2" style="background: rgb(255, 60, 0);"></div>
+                    <code class="text-xs">용암1</code>
+                </div>
+                <div class="text-center bg-white border-2 border-ink-pale rounded-xl p-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg mb-2" style="background: rgb(255, 120, 0);"></div>
+                    <code class="text-xs">용암2</code>
+                </div>
+                <div class="text-center bg-white border-2 border-ink-pale rounded-xl p-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg mb-2" style="background: rgb(0, 255, 100);"></div>
+                    <code class="text-xs">힐링1</code>
+                </div>
+                <div class="text-center bg-white border-2 border-ink-pale rounded-xl p-3">
+                    <div class="w-12 h-12 mx-auto rounded-lg mb-2" style="background: rgb(100, 255, 150);"></div>
+                    <code class="text-xs">힐링2</code>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 용암 파트 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">용암 파트</span>
+            <h2 class="title-section mb-6">용암 파트 완성 코드</h2>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                    <span class="text-2xl">🔥</span> 기능
+                </h3>
+                <ul class="space-y-2 text-ink-light">
+                    <li>✅ 주황색으로 깜빡거림 (용암 느낌)</li>
+                    <li>✅ 닿으면 즉시 사망 (Health = 0)</li>
+                </ul>
+            </div>
+
+            <lua-code-block title="LavaPart.lua" show-line-numbers>
+local part = script.Parent
+
+-- 색상 애니메이션 (별도 스레드)
+task.spawn(function()
+    while true do
+        part.Color = Color3.fromRGB(255, 60, 0)
+        task.wait(0.3)
+        part.Color = Color3.fromRGB(255, 120, 0)
+        task.wait(0.3)
+    end
+end)
+
+-- 터치 이벤트
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onTouched)
+            </lua-code-block>
+
+            <HintBox type="warning" title="스튜디오 설정">
+                Part → Properties에서:<br>
+                - <strong>Anchored</strong>: 체크<br>
+                - <strong>Material</strong>: Neon (추천)<br>
+                - <strong>Color</strong>: 주황색 계열
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 용암 파티클 효과 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">용암 파티클</span>
+            <h2 class="title-section mb-6">용암 튀는 효과 (ParticleEmitter)</h2>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                    <span class="text-2xl">🌋</span> 스튜디오에서 파티클 추가
+                </h3>
+                <ol class="space-y-3 text-ink-light">
+                    <li><strong>1.</strong> 용암 Part 선택 → 우클릭 → Insert Object → <strong>ParticleEmitter</strong></li>
+                    <li><strong>2.</strong> Properties에서 다음 설정:</li>
+                </ol>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3 text-sm">
+                    <div class="bg-neon-coral/10 border border-neon-coral/30 rounded px-2 py-1">
+                        <strong>Color:</strong> 주황~빨강
+                    </div>
+                    <div class="bg-neon-coral/10 border border-neon-coral/30 rounded px-2 py-1">
+                        <strong>Rate:</strong> 20~50
+                    </div>
+                    <div class="bg-neon-coral/10 border border-neon-coral/30 rounded px-2 py-1">
+                        <strong>Lifetime:</strong> 0.5~1
+                    </div>
+                    <div class="bg-neon-coral/10 border border-neon-coral/30 rounded px-2 py-1">
+                        <strong>Speed:</strong> 5~10
+                    </div>
+                    <div class="bg-neon-coral/10 border border-neon-coral/30 rounded px-2 py-1">
+                        <strong>SpreadAngle:</strong> 180, 180
+                    </div>
+                    <div class="bg-neon-coral/10 border border-neon-coral/30 rounded px-2 py-1">
+                        <strong>LightEmission:</strong> 1
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="완성 구조">
+                Explorer에서 이렇게 보여야 해요:<br>
+                <code>Part (용암)</code><br>
+                &nbsp;&nbsp;├─ <code>Script</code> (색상 애니메이션 + Kill 코드)<br>
+                &nbsp;&nbsp;└─ <code>ParticleEmitter</code> (용암 튀는 효과)
+            </HintBox>
+
+            <div class="mt-6 grid md:grid-cols-2 gap-4">
+                <div class="bg-white border-2 border-ink-pale rounded-xl p-4">
+                    <h4 class="font-bold text-ink-deep mb-2">스크립트 역할</h4>
+                    <ul class="text-sm text-ink-light space-y-1">
+                        <li>✅ 색상 깜빡임 (주황↔밝은주황)</li>
+                        <li>✅ 터치 시 즉사 처리</li>
+                    </ul>
+                </div>
+                <div class="bg-white border-2 border-ink-pale rounded-xl p-4">
+                    <h4 class="font-bold text-ink-deep mb-2">파티클 역할</h4>
+                    <ul class="text-sm text-ink-light space-y-1">
+                        <li>✅ 용암 튀는 시각 효과</li>
+                        <li>✅ 스크립트 없이 Properties만으로!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 용암 효과 빈칸 퀴즈 -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="용암 파트 (Kill + 색상 애니메이션)"
+            setup="Part 1개 + ParticleEmitter (위 가이드 참고)"
+            concepts='["script.Parent", "task.spawn", "while", "Color3.fromRGB", "Touched"]'
+            blanks={lavaQuizBlanks}
+            template={lavaQuizTemplate}
+            full-code={lavaQuizFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- 슬라이드 9: 힐링 파트 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">힐링 파트</span>
+            <h2 class="title-section mb-6">힐링 파트 완성 코드</h2>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                        <span class="text-2xl">💚</span> 기능
+                    </h3>
+                    <ul class="space-y-2 text-ink-light text-sm">
+                        <li>✅ 초록색으로 깜빡거림 (힐링 느낌)</li>
+                        <li>✅ 닿으면 체력 완전 회복</li>
+                        <li>✅ 2초 쿨타임 (debounce)</li>
+                    </ul>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-mint">
+                    <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                        <span class="text-2xl">✨</span> 파티클 설정
+                    </h3>
+                    <p class="text-ink-light text-sm mb-2">Part → 우클릭 → Insert Object → <strong>ParticleEmitter</strong></p>
+                    <div class="grid grid-cols-2 gap-1 text-xs">
+                        <div class="bg-neon-mint/10 border border-neon-mint/30 rounded px-2 py-1">
+                            <strong>Color:</strong> 초록~연두
+                        </div>
+                        <div class="bg-neon-mint/10 border border-neon-mint/30 rounded px-2 py-1">
+                            <strong>Rate:</strong> 10~20
+                        </div>
+                        <div class="bg-neon-mint/10 border border-neon-mint/30 rounded px-2 py-1">
+                            <strong>Lifetime:</strong> 1~2
+                        </div>
+                        <div class="bg-neon-mint/10 border border-neon-mint/30 rounded px-2 py-1">
+                            <strong>Speed:</strong> 2~5
+                        </div>
+                        <div class="bg-neon-mint/10 border border-neon-mint/30 rounded px-2 py-1">
+                            <strong>SpreadAngle:</strong> 180, 180
+                        </div>
+                        <div class="bg-neon-mint/10 border border-neon-mint/30 rounded px-2 py-1">
+                            <strong>LightEmission:</strong> 1
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <lua-code-block title="HealPart.lua" show-line-numbers>
+local part = script.Parent
+local debounce = false
+
+-- 색상 애니메이션 (별도 스레드)
+task.spawn(function()
+    while true do
+        part.Color = Color3.fromRGB(0, 255, 100)
+        task.wait(0.5)
+        part.Color = Color3.fromRGB(100, 255, 150)
+        task.wait(0.5)
+    end
+end)
+
+-- 터치 이벤트
+local function onTouched(otherPart)
+    if debounce then return end
+
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+    if humanoid and humanoid.Health &lt; humanoid.MaxHealth then
+        debounce = true
+        humanoid.Health = humanoid.MaxHealth
+        task.wait(2)  -- 2초 쿨타임
+        debounce = false
+    end
+end
+
+part.Touched:Connect(onTouched)
+            </lua-code-block>
+
+            <HintBox type="tip" title="완성 구조">
+                <code>Part (힐링)</code> → <code>Script</code> + <code>ParticleEmitter</code>
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 힐링 효과 빈칸 퀴즈 -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="힐링 파트 (회복 + 색상 애니메이션)"
+            setup="Part 1개 + ParticleEmitter (위 가이드 참고)"
+            concepts='["script.Parent", "debounce", "Color3.fromRGB", "task.spawn", "humanoid.MaxHealth"]'
+            blanks={healQuizBlanks}
+            template={healQuizTemplate}
+            full-code={healQuizFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- 슬라이드 11: 다양한 파티클 효과 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">파티클 응용</span>
+            <h2 class="title-section mb-6">다양한 파티클 효과</h2>
+
+            <p class="text-ink-light mb-6">
+                Part에 <strong>ParticleEmitter</strong>를 추가하고 색상/속도를 바꾸면 다양한 효과를 만들 수 있어요!
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <!-- 스피드 파티클 -->
+                <div class="lesson-card border-l-4 border-l-neon-gold">
+                    <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                        <span class="text-2xl">⚡</span> 스피드 부스터 파티클
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-neon-gold/10 border border-neon-gold/30 rounded px-2 py-1">
+                            <strong>Color:</strong> 노랑~주황
+                        </div>
+                        <div class="bg-neon-gold/10 border border-neon-gold/30 rounded px-2 py-1">
+                            <strong>Rate:</strong> 30~50
+                        </div>
+                        <div class="bg-neon-gold/10 border border-neon-gold/30 rounded px-2 py-1">
+                            <strong>Lifetime:</strong> 0.3~0.5
+                        </div>
+                        <div class="bg-neon-gold/10 border border-neon-gold/30 rounded px-2 py-1">
+                            <strong>Speed:</strong> 10~15
+                        </div>
+                        <div class="bg-neon-gold/10 border border-neon-gold/30 rounded px-2 py-1">
+                            <strong>SpreadAngle:</strong> 30, 30
+                        </div>
+                        <div class="bg-neon-gold/10 border border-neon-gold/30 rounded px-2 py-1">
+                            <strong>LightEmission:</strong> 1
+                        </div>
+                    </div>
+                    <p class="text-xs text-ink-light mt-2">빠르게 뿜어져 나오는 번개 느낌!</p>
+                </div>
+
+                <!-- 점프 파티클 -->
+                <div class="lesson-card border-l-4 border-l-neon-sky">
+                    <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                        <span class="text-2xl">🦘</span> 점프 부스터 파티클
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-neon-sky/10 border border-neon-sky/30 rounded px-2 py-1">
+                            <strong>Color:</strong> 하늘~파랑
+                        </div>
+                        <div class="bg-neon-sky/10 border border-neon-sky/30 rounded px-2 py-1">
+                            <strong>Rate:</strong> 20~30
+                        </div>
+                        <div class="bg-neon-sky/10 border border-neon-sky/30 rounded px-2 py-1">
+                            <strong>Lifetime:</strong> 0.5~1
+                        </div>
+                        <div class="bg-neon-sky/10 border border-neon-sky/30 rounded px-2 py-1">
+                            <strong>Speed:</strong> 8~12
+                        </div>
+                        <div class="bg-neon-sky/10 border border-neon-sky/30 rounded px-2 py-1">
+                            <strong>SpreadAngle:</strong> 45, 45
+                        </div>
+                        <div class="bg-neon-sky/10 border border-neon-sky/30 rounded px-2 py-1">
+                            <strong>LightEmission:</strong> 1
+                        </div>
+                    </div>
+                    <p class="text-xs text-ink-light mt-2">위로 솟아오르는 바람 느낌!</p>
+                </div>
+
+                <!-- 독/데미지 파티클 -->
+                <div class="lesson-card border-l-4 border-l-purple-500">
+                    <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                        <span class="text-2xl">☠️</span> 독 파티클
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded px-2 py-1">
+                            <strong>Color:</strong> 보라~연두
+                        </div>
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded px-2 py-1">
+                            <strong>Rate:</strong> 15~25
+                        </div>
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded px-2 py-1">
+                            <strong>Lifetime:</strong> 1~2
+                        </div>
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded px-2 py-1">
+                            <strong>Speed:</strong> 2~4
+                        </div>
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded px-2 py-1">
+                            <strong>SpreadAngle:</strong> 180, 180
+                        </div>
+                        <div class="bg-purple-500/10 border border-purple-500/30 rounded px-2 py-1">
+                            <strong>LightEmission:</strong> 0.5
+                        </div>
+                    </div>
+                    <p class="text-xs text-ink-light mt-2">천천히 퍼지는 독가스 느낌!</p>
+                </div>
+
+                <!-- 반짝임 파티클 -->
+                <div class="lesson-card border-l-4 border-l-pink-400">
+                    <h3 class="font-bold text-ink-deep mb-3 flex items-center gap-2">
+                        <span class="text-2xl">✨</span> 반짝임 파티클
+                    </h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-pink-400/10 border border-pink-400/30 rounded px-2 py-1">
+                            <strong>Color:</strong> 흰색~분홍
+                        </div>
+                        <div class="bg-pink-400/10 border border-pink-400/30 rounded px-2 py-1">
+                            <strong>Rate:</strong> 5~10
+                        </div>
+                        <div class="bg-pink-400/10 border border-pink-400/30 rounded px-2 py-1">
+                            <strong>Lifetime:</strong> 0.5~1
+                        </div>
+                        <div class="bg-pink-400/10 border border-pink-400/30 rounded px-2 py-1">
+                            <strong>Speed:</strong> 1~3
+                        </div>
+                        <div class="bg-pink-400/10 border border-pink-400/30 rounded px-2 py-1">
+                            <strong>SpreadAngle:</strong> 180, 180
+                        </div>
+                        <div class="bg-pink-400/10 border border-pink-400/30 rounded px-2 py-1">
+                            <strong>LightEmission:</strong> 1
+                        </div>
+                    </div>
+                    <p class="text-xs text-ink-light mt-2">아이템/보물 상자에 사용!</p>
+                </div>
+            </div>
+
+            <HintBox type="info" title="파티클 팁">
+                <strong>Rate</strong> = 많을수록 빽빽 | <strong>Speed</strong> = 높을수록 빠르게 퍼짐<br>
+                <strong>SpreadAngle</strong> = 180이면 사방으로, 0이면 위로만!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 최종 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">최종 퀴즈</span>
+            <h2 class="title-section mb-8">오늘 배운 내용 확인</h2>
+
+            <div class="space-y-6">
+                <quiz-question
+                    question="Part 표면에 UI(텍스트, 이미지 등)를 표시하려면 어떤 컴포넌트를 사용해야 할까요?"
+                    correct="A"
+                    options={quiz1Options}
+                    correct-explanation="SurfaceGui는 Part의 '표면'에 UI를 표시합니다. ScreenGui는 화면(HUD)에, BillboardGui는 항상 카메라를 향하는 UI에 사용해요!"
+                    wrong-explanation="SurfaceGui를 사용해야 해요! Surface(표면)에 Gui를 붙이는 거예요."
+                ></quiz-question>
+
+                <quiz-question
+                    question="RGB로 빨간색을 만드는 올바른 코드는?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="Color3.fromRGB(255, 0, 0)이 맞아요! R=255(최대), G=0, B=0이면 순수한 빨간색!"
+                    wrong-explanation="Color3.fromRGB를 사용해야 해요. RGB 값은 0~255 범위의 정수입니다."
+                ></quiz-question>
+            </div>
+
+            <div class="mt-10 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-mint/20 via-neon-sky/20 to-neon-gold/20 border-2 border-neon-mint/30 rounded-2xl px-8 py-6">
+                    <h3 class="font-bold text-xl text-ink-deep mb-2">수고하셨습니다!</h3>
+                    <p class="text-ink-light">
+                        이제 용암/힐링 파트와 SurfaceGui를 활용해서<br>
+                        더 재미있는 게임을 만들어보세요!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

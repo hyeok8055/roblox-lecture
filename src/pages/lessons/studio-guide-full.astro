@@ -1,0 +1,684 @@
+---
+import LessonLayout from '../../layouts/LessonLayout.astro';
+import HintBox from '../../components/astro/HintBox.astro';
+---
+
+<LessonLayout title="로블록스 스튜디오 완벽 가이드" lessonNumber={101} totalSlides={23}>
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">Studio Deep Dive</span>
+                <h1 class="title-display mb-4">
+                    로블록스 스튜디오<br>
+                    <span class="text-neon-mint">완벽 가이드</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    개요부터 플러그인까지, 스튜디오의 모든 기능을<br>
+                    공식 문서 내용을 바탕으로 <strong>아주 쉽게</strong> 배워봐요!
+                </p>
+                <div class="flex flex-wrap gap-3 justify-center mb-8">
+                    <span class="px-4 py-2 bg-neon-sky/20 rounded-full text-sm font-medium">🛠️ 빌딩</span>
+                    <span class="px-4 py-2 bg-neon-mint/20 rounded-full text-sm font-medium">💻 스크립팅</span>
+                    <span class="px-4 py-2 bg-neon-gold/20 rounded-full text-sm font-medium">🧪 테스트</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 개요 (Overview) - 1/2 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">01. 개요</span>
+                <h2 class="title-section mb-6">스튜디오가 뭐예요?</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4 text-neon-sky">상상하는 모든 것의 시작</h3>
+                    <p class="text-ink-light leading-relaxed mb-4">
+                        로블록스 스튜디오는 여러분이 상상하는 모든 게임을 만들 수 있는 <strong>'만능 마법 도구상자'</strong>예요.
+                        무료로 사용할 수 있고, 친구들과 실시간으로 함께 만들 수도 있죠!
+                    </p>
+                    <ul class="text-sm space-y-2 text-ink-light bg-ink-pale/30 p-4 rounded-xl">
+                        <li class="flex items-center gap-2">✅ <strong>3D 빌딩:</strong> 레고처럼 블록을 쌓아 세상을 만들어요.</li>
+                        <li class="flex items-center gap-2">✅ <strong>스크립팅:</strong> Lua 코드로 게임에 생명을 불어넣어요.</li>
+                        <li class="flex items-center gap-2">✅ <strong>테스트:</strong> 모바일, PC 등 다양한 환경을 미리 체험해요.</li>
+                    </ul>
+                </div>
+                <div class="rounded-2xl overflow-hidden border border-ink-pale shadow-xl">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/landing/scripting.png" alt="Studio Overview" class="w-full h-auto" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: 개요 (Overview) - 2/2 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">01. 개요</span>
+                <h2 class="title-section mb-6">데이터 모델의 이해</h2>
+            </div>
+            <div class="lesson-card mb-6">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2">
+                        <h3 class="font-bold text-lg mb-3">계층 구조 (Tree Structure)</h3>
+                        <p class="text-sm text-ink-light leading-relaxed mb-4">
+                            로블록스 게임은 <strong>거대한 나무(Tree)</strong>와 같아요.<br>
+                            게임 전체인 <code>DataModel</code>이라는 뿌리에서 시작해, 
+                            <code>Workspace</code>, <code>Lighting</code> 같은 가지(Service)들이 뻗어나가는 구조랍니다.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 rounded-xl overflow-hidden border border-ink-pale shadow-lg">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/landing/datamodel.png" alt="DataModel Structure" class="w-full h-auto" />
+                    </div>
+                </div>
+            </div>
+            <HintBox type="info" title="알아두면 좋아요">
+                전문가들은 이 구조를 <strong>DOM (Document Object Model)</strong>이라고 부르기도 해요. 
+                웹사이트를 만드는 원리와 비슷하거든요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 설정 (Settings) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">02. 설정</span>
+                <h2 class="title-section mb-6">스튜디오 설정하기</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-3">🛠️ 설정 메뉴 열기</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        <strong>File &gt; Studio Settings</strong> 메뉴에서 스튜디오의 모든 것을 바꿀 수 있어요.
+                    </p>
+                    <div class="bg-ink-pale rounded-lg p-3 text-xs space-y-2">
+                        <div class="flex justify-between border-b border-ink-deep/10 pb-2">
+                            <span class="font-bold">Theme</span>
+                            <span>Dark(어두움) / Light(밝음) 모드 변경</span>
+                        </div>
+                        <div class="flex justify-between border-b border-ink-deep/10 pb-2">
+                            <span class="font-bold">Script Editor</span>
+                            <span>글자 크기, 폰트, 자동 완성 설정</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-bold">Auto-Save</span>
+                            <span>자동 저장 시간 간격 설정</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="lesson-card border-2 border-neon-sky/20">
+                    <h3 class="font-bold text-lg mb-3 text-neon-sky">🔄 업데이트 확인</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        로블록스는 매주 업데이트돼요! 우측 상단에 <strong>파란색 시계 아이콘</strong>이 뜨면 업데이트가 가능하다는 뜻이에요.
+                    </p>
+                    <div class="rounded-lg overflow-hidden border border-ink-pale">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Toolbar-Update-Available.png" alt="Update Available" class="w-full h-auto" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: 인터페이스 (Interface) - 전체 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <div class="animate-in text-center mb-8">
+                <span class="badge badge-lesson mb-4">03. 인터페이스</span>
+                <h2 class="title-section">화면 구성 한눈에 보기</h2>
+                <p class="text-ink-light mt-4">스튜디오는 크게 4가지 핵심 구역으로 나뉘어 있어요.</p>
+            </div>
+
+            <div class="relative bg-white rounded-2xl overflow-hidden shadow-2xl border border-ink-pale mb-8">
+                <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Toolbar-Mezzanine.png" alt="Studio Interface" class="w-full h-auto opacity-90" />
+                
+                <!-- Overlay Labels (Descriptive Layout) -->
+                <div class="absolute top-2 left-2 bg-neon-sky/90 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">1. 툴바</div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-neon-mint/90 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">2. 뷰포트 (3D 화면)</div>
+                <div class="absolute top-1/4 right-2 bg-neon-gold/90 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">3. 탐색기</div>
+                <div class="absolute bottom-1/4 right-2 bg-neon-coral/90 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">4. 속성</div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <div class="p-3 bg-neon-sky/10 rounded-lg">
+                    <h4 class="font-bold text-sm text-neon-sky">1. 툴바</h4>
+                    <p class="text-[10px] text-ink-light">도구 모음</p>
+                </div>
+                <div class="p-3 bg-neon-mint/10 rounded-lg">
+                    <h4 class="font-bold text-sm text-neon-mint">2. 뷰포트</h4>
+                    <p class="text-[10px] text-ink-light">작업 공간</p>
+                </div>
+                <div class="p-3 bg-neon-gold/10 rounded-lg">
+                    <h4 class="font-bold text-sm text-neon-gold">3. 탐색기</h4>
+                    <p class="text-[10px] text-ink-light">파일 목록</p>
+                </div>
+                <div class="p-3 bg-neon-coral/10 rounded-lg">
+                    <h4 class="font-bold text-sm text-neon-coral">4. 속성</h4>
+                    <p class="text-[10px] text-ink-light">세부 설정</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: 인터페이스 (Interface) - 도킹 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">03. 인터페이스</span>
+                <h2 class="title-section mb-6">창 정리하기 (Docking)</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4">내 맘대로 꾸미는 화면</h3>
+                    <p class="text-sm text-ink-light leading-relaxed mb-6">
+                        탐색기나 속성 창을 드래그해서 원하는 위치에 붙일 수 있어요. 
+                        이것을 <strong>'도킹(Docking)'</strong>이라고 해요.<br><br>
+                        창을 드래그하면 화면 중앙에 <strong>십자가 모양의 아이콘</strong>이 나타나는데, 
+                        원하는 방향에 마우스를 놓으면 그곳에 착! 달라붙는답니다.
+                    </p>
+                    <HintBox type="tip" title="창이 사라졌다면?">
+                        상단 메뉴의 <strong>[View]</strong> 탭을 누르면 Explorer, Properties 등 
+                        모든 창을 다시 켤 수 있어요!
+                    </HintBox>
+                </div>
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-lg">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Docking-Position-Selector-Empty.png" alt="Docking Guide" class="w-full h-auto" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 탐색기 (Explorer) - 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">04. 탐색기</span>
+                <h2 class="title-section mb-6">게임의 지도: Explorer</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-lg bg-white">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/explorer/Parent-Child-Hierarchy.png" alt="Explorer Hierarchy" class="w-full h-auto" />
+                </div>
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4 text-neon-sky">부모와 자식 관계</h3>
+                    <p class="text-sm text-ink-light leading-relaxed mb-6">
+                        탐색기에서는 모든 물체가 <strong>가족 관계</strong>처럼 연결되어 있어요.
+                    </p>
+                    <ul class="space-y-4 text-sm">
+                        <li class="bg-ink-pale/30 p-3 rounded-lg">
+                            <span class="font-bold text-neon-sky block mb-1">👑 부모 (Parent)</span>
+                            자식을 품고 있는 상위 폴더나 물체예요. 부모가 움직이면 자식도 따라가요.
+                        </li>
+                        <li class="bg-ink-pale/30 p-3 rounded-lg">
+                            <span class="font-bold text-neon-mint block mb-1">👶 자식 (Child)</span>
+                            부모 안에 들어있는 하위 물체예요.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: 탐색기 (Explorer) - 검색과 필터 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">04. 탐색기</span>
+                <h2 class="title-section mb-6">물체 빨리 찾기</h2>
+            </div>
+            
+            <div class="lesson-card mb-8">
+                <h3 class="font-bold text-lg mb-4">검색 기능 활용하기</h3>
+                <p class="text-sm text-ink-light mb-4">
+                    게임에 물체가 수천 개가 되면 하나하나 찾기 힘들죠? 
+                    탐색기 상단의 <strong>검색창(Search Bar)</strong>을 활용하세요!
+                </p>
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-sm mb-4">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/explorer/Search-Diagram.png" alt="Explorer Search" class="w-full h-auto" />
+                </div>
+                <div class="bg-ink-deep text-ink-cream p-4 rounded-xl text-xs font-mono">
+                    <p class="mb-2"><span class="text-neon-gold">Tip:</span> 고급 검색 명령어</p>
+                    <ul class="space-y-1 text-ink-cream/70">
+                        <li><code>className:Part</code> → 'Part'인 것만 보여줘요</li>
+                        <li><code>className:Script</code> → 스크립트만 모아봐요</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: 속성 (Properties) - 기본 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">05. 속성</span>
+                <h2 class="title-section mb-6">물체의 성격 바꾸기</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-3">🔢 값 입력하기</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        숫자를 직접 쓰거나, 색상 팔레트를 열어서 바꿀 수 있어요. 
+                        슬라이더를 드래그해서 투명도를 조절할 수도 있죠!
+                    </p>
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/properties/Input-Combined.png" alt="Property Inputs" class="w-full h-auto rounded-lg border border-ink-pale" />
+                </div>
+                
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-3">🏷️ 커스텀 속성 (Attributes)</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        기본 속성 외에 나만의 속성을 만들 수도 있어요. 
+                        예를 들어 'HP'나 'Team' 같은 정보를 물체에 꼬리표처럼 달아둘 수 있답니다.
+                    </p>
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/properties/Add-Attribute-Button.png" alt="Add Attribute" class="w-full h-auto rounded-lg border border-ink-pale" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: 빌드 도구 (Build Tools) - 4대 도구 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">06. 빌드</span>
+                <h2 class="title-section mb-6">4가지 핵심 도구</h2>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="lesson-card p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-neon-sky">near_me</span>
+                        <h4 class="font-bold">Select (선택)</h4>
+                    </div>
+                    <p class="text-xs text-ink-light">물체를 클릭해서 선택하거나 드래그해요.</p>
+                </div>
+                <div class="lesson-card p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-neon-mint">open_with</span>
+                        <h4 class="font-bold">Move (이동)</h4>
+                    </div>
+                    <p class="text-xs text-ink-light">화살표를 당겨서 X, Y, Z 축으로 움직여요.</p>
+                </div>
+                <div class="lesson-card p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-neon-gold">open_in_full</span>
+                        <h4 class="font-bold">Scale (크기)</h4>
+                    </div>
+                    <p class="text-xs text-ink-light">동그라미를 당겨서 크기를 키우거나 줄여요.</p>
+                </div>
+                <div class="lesson-card p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="material-symbols-outlined text-neon-coral">sync</span>
+                        <h4 class="font-bold">Rotate (회전)</h4>
+                    </div>
+                    <p class="text-xs text-ink-light">공을 돌려서 물체의 각도를 바꿔요.</p>
+                </div>
+            </div>
+            
+            <div class="lesson-card border-l-4 border-neon-sky bg-neon-sky/5">
+                <h4 class="font-bold mb-2 text-neon-sky">💡 꿀팁: 단축키</h4>
+                <p class="text-sm font-mono text-ink-light">
+                    Ctrl + 1 : 선택 / Ctrl + 2 : 이동<br>
+                    Ctrl + 3 : 크기 / Ctrl + 4 : 회전
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 빌드 도구 - 정렬 (Align) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">06. 빌드</span>
+                <h2 class="title-section mb-6">깔끔하게 정렬하기 (Align Tool)</h2>
+            </div>
+
+            <div class="lesson-card bg-white overflow-hidden p-0 border border-ink-pale">
+                <div class="grid md:grid-cols-2">
+                    <div class="p-8">
+                        <h3 class="font-bold text-2xl mb-4">자석처럼 착! 📏</h3>
+                        <p class="text-sm text-ink-light leading-relaxed mb-6">
+                            여러 개의 파트를 완벽하게 일직선으로 맞추고 싶나요? 
+                            눈대중으로 하지 마세요!<br><br>
+                            <strong>Align Tool</strong>을 사용하면 기준이 될 파트를 정하고, 
+                            나머지 파트들을 자석처럼 <strong>X, Y, Z 축</strong>에 맞춰 정렬할 수 있어요.
+                        </p>
+                        <div class="p-3 bg-neon-mint/10 rounded-lg text-xs font-bold text-neon-mint">
+                            Model 탭 &gt; Align Tool 클릭
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 flex items-center justify-center p-4">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/studio/align-tool/Mode-Min.jpg" alt="Align Tool" class="w-full h-auto rounded shadow-md" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 빌드 도구 - 피벗 (Pivot) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">06. 빌드</span>
+                <h2 class="title-section mb-6">회전의 중심 바꾸기 (Pivot)</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="rounded-2xl overflow-hidden border border-ink-pale shadow-2xl">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/pivot-tools/Edit-Pivot-Center-A.jpg" alt="Pivot Example" class="w-full h-auto" />
+                </div>
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4 text-neon-coral">문 경첩의 원리 🚪</h3>
+                    <p class="text-sm text-ink-light leading-relaxed mb-6">
+                        물체는 기본적으로 <strong>정중앙</strong>을 기준으로 회전해요. 
+                        하지만 방문처럼 <strong>끝부분</strong>을 기준으로 열려야 할 때가 있죠?<br><br>
+                        이럴 때 <strong>Edit Pivot</strong> 기능을 써서 회전 중심축을 원하는 곳으로 옮겨주면 된답니다!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: 스크립트 편집기 (Editor) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">07. 스크립팅</span>
+                <h2 class="title-section mb-6">코딩의 마법사: 편집기 기능</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-3">✨ 자동 완성 (Autocomplete)</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        명령어를 다 외울 필요 없어요! 몇 글자만 치면 스튜디오가 알아서 추천해 줍니다. 
+                        위아래 화살표로 고르고 <code>Enter</code>나 <code>Tab</code>을 누르면 끝!
+                    </p>
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/script-editor/Autocomplete-Data-Model.png" alt="Autocomplete" class="w-full h-auto rounded-lg border border-ink-pale" />
+                </div>
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-3">🔍 분석기 (Script Analysis)</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        코드를 짜는 동안 실시간으로 오류를 감시해 줘요. 
+                        빨간 줄이 그어지면 마우스를 올려보세요. 왜 틀렸는지 친절하게 알려줍니다.
+                    </p>
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/script-editor/Script-Analysis-1.png" alt="Script Analysis" class="w-full h-auto rounded-lg border border-ink-pale" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: 디버깅 (Debugging) - 중단점 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">08. 디버깅</span>
+                <h2 class="title-section mb-6">시간을 멈추는 능력: 중단점</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-lg">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/debugging/Gutter-Breakpoint.png" alt="Breakpoint Gutter" class="w-full h-auto" />
+                </div>
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4 text-red-500">Breakpoints 🛑</h3>
+                    <p class="text-sm text-ink-light leading-relaxed mb-6">
+                        게임이 너무 빨라서 버그를 찾기 힘든가요?<br>
+                        코드 줄 번호 옆을 클릭해서 <strong>'빨간 점'</strong>을 찍어보세요.<br><br>
+                        게임이 실행되다가 그 줄에 도착하면 <strong>일시정지</strong>됩니다! 
+                        그 순간 변수에 무슨 값이 들어있는지 천천히 뜯어볼 수 있어요.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: 디버깅 (Debugging) - 감시창 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">08. 디버깅</span>
+                <h2 class="title-section mb-6">변수 감시하기: Watch Window</h2>
+            </div>
+            
+            <div class="lesson-card mb-8">
+                <p class="text-sm text-ink-light mb-6">
+                    중단점으로 멈췄을 때, <strong>Watch Window</strong>를 열면 내가 궁금한 변수의 값이 어떻게 변하는지 실시간으로 추적할 수 있어요. 
+                    마치 CCTV로 범인을 감시하는 것과 같죠!
+                </p>
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-2xl">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/debugging/Watch-Variables-Window.png" alt="Watch Window" class="w-full h-auto" />
+                </div>
+            </div>
+        </section>
+
+    <!-- ==================== 슬라이드 16: 테스트 모드 (Testing) - 종류 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">09. 테스트</span>
+                <h2 class="title-section mb-6">다양한 테스트 방법</h2>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="lesson-card text-center p-6 hover:bg-neon-sky/5 transition-colors">
+                    <div class="text-4xl mb-3">▶️</div>
+                    <h4 class="font-bold mb-2">Play</h4>
+                    <p class="text-xs text-ink-light">캐릭터로 스폰 지점에서 시작</p>
+                </div>
+                <div class="lesson-card text-center p-6 hover:bg-neon-mint/5 transition-colors">
+                    <div class="text-4xl mb-3">📍</div>
+                    <h4 class="font-bold mb-2">Play Here</h4>
+                    <p class="text-xs text-ink-light">현재 카메라 위치에서 바로 시작</p>
+                </div>
+                <div class="lesson-card text-center p-6 hover:bg-neon-gold/5 transition-colors">
+                    <div class="text-4xl mb-3">🏃</div>
+                    <h4 class="font-bold mb-2">Run</h4>
+                    <p class="text-xs text-ink-light">캐릭터 없이 스크립트/물리만 실행</p>
+                </div>
+            </div>
+            
+            <div class="rounded-xl overflow-hidden border border-ink-pale bg-white p-4">
+                <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Mezzanine-Testing-Controls.png" alt="Testing Controls" class="w-full h-auto" />
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: 테스트 모드 (Testing) - 모바일 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">09. 테스트</span>
+                <h2 class="title-section mb-6">모바일 기기 체험하기</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4">스마트폰에선 어떻게 보일까? 📱</h3>
+                    <p class="text-sm text-ink-light leading-relaxed mb-6">
+                        PC에서 만들고 있지만, 스마트폰이나 태블릿으로 플레이하는 친구들도 많아요.<br><br>
+                        <strong>Device Emulator</strong> 버튼을 누르면 아이폰, 삼성 갤럭시, 아이패드 등 
+                        다양한 화면 크기에서 게임이 어떻게 보이는지 미리 확인할 수 있어요. 터치 조작도 테스트 가능해요!
+                    </p>
+                </div>
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-lg">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Editor-Window-Emulation-Options.png" alt="Device Emulation" class="w-full h-auto" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 서버 vs 클라이언트 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">10. 시점 전환</span>
+                <h2 class="title-section mb-6">신(Server)과 인간(Client)</h2>
+            </div>
+            
+            <div class="lesson-card bg-ink-deep text-ink-cream mb-8 border-2 border-neon-sky">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-xl text-neon-sky">Current: Client/Server Toggle</h3>
+                    <span class="material-symbols-outlined text-3xl">swap_horiz</span>
+                </div>
+                <p class="text-sm leading-relaxed text-ink-cream/80 mb-6">
+                    멀티플레이 게임 개발의 핵심은 <strong>"누구의 화면인가?"</strong>를 이해하는 거예요.<br>
+                    테스트 도중 이 버튼을 누르면 <strong>내 캐릭터의 시점(Client)</strong>과 <strong>게임 서버 전체의 시점(Server)</strong>을 
+                    왔다 갔다 할 수 있어요.
+                </p>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Mezzanine-Testing-Client.png" alt="Client Server Toggle" class="w-full h-auto rounded" />
+                </div>
+            </div>
+        </section>
+
+    <!-- ==================== 슬라이드 19: 출력 (Output) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">11. 출력</span>
+                <h2 class="title-section mb-6">게임의 일기장: Output</h2>
+            </div>
+
+            <div class="lesson-card mb-8">
+                <p class="text-sm text-ink-light mb-6">
+                    <code>print("안녕")</code>이라고 쓰면 여기에 글씨가 나타나요. 
+                    하지만 더 중요한 건 <strong>에러 메시지</strong>예요!
+                </p>
+                <div class="flex gap-4 mb-6">
+                    <div class="flex-1 bg-red-50 border border-red-200 rounded-lg p-3">
+                        <span class="text-red-600 font-bold block mb-1">🔴 빨간색 (Error)</span>
+                        <span class="text-xs">코드가 틀려서 실행이 멈췄어요. 반드시 고쳐야 해요!</span>
+                    </div>
+                    <div class="flex-1 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <span class="text-yellow-600 font-bold block mb-1">🟠 주황색 (Warning)</span>
+                        <span class="text-xs">실행은 되지만 뭔가 이상해요. 확인해 보는 게 좋아요.</span>
+                    </div>
+                </div>
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-xl">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Output-Window-Diagram.png" alt="Output Window Diagram" class="w-full h-auto" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 20: 개발자 콘솔 (Dev Console) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">12. 콘솔</span>
+                <h2 class="title-section mb-6">실제 게임 속의 상황판</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-xl mb-4">F9 키를 눌러보세요!</h3>
+                    <p class="text-sm text-ink-light leading-relaxed mb-6">
+                        스튜디오가 아니라 실제 로블록스 게임 안에서도 <code>F9</code> 키를 누르면 <strong>개발자 콘솔</strong>이 열려요.<br><br>
+                        "내 게임이 왜 이렇게 느리지?" 싶을 때, <strong>Memory(메모리)</strong> 탭을 보면 
+                        어떤 스크립트나 파트가 컴퓨터를 힘들게 하고 있는지 범인을 잡을 수 있답니다.
+                    </p>
+                </div>
+                <div class="rounded-xl overflow-hidden border border-ink-pale shadow-lg">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/console/Log-Sections.png" alt="Developer Console" class="w-full h-auto" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 21: 아바타 설정 (Avatar) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">13. 아바타</span>
+                <h2 class="title-section mb-6">주인공의 모습 정하기</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="lesson-card text-center">
+                    <div class="text-5xl mb-4">🚶</div>
+                    <h4 class="font-bold text-lg mb-2">Avatar Type</h4>
+                    <p class="text-sm text-ink-light mb-4">
+                        <strong>R6:</strong> 팔다리가 뻣뻣한 레고 스타일 (공포 게임에 인기!)<br>
+                        <strong>R15:</strong> 관절이 많아 부드럽게 움직이는 스타일
+                    </p>
+                </div>
+                <div class="lesson-card text-center">
+                    <div class="text-5xl mb-4">🏃</div>
+                    <h4 class="font-bold text-lg mb-2">Collision</h4>
+                    <p class="text-sm text-ink-light mb-4">
+                        플레이어끼리 부딪힐지, 아니면 유령처럼 통과할지 결정할 수 있어요.
+                    </p>
+                </div>
+            </div>
+             <div class="mt-8 rounded-xl overflow-hidden border border-ink-pale shadow-md max-w-sm mx-auto">
+                 <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Toolbar-Avatar-Settings.png" alt="Avatar Settings Button" class="w-full h-auto" />
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 22: 플러그인 (Plugins) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">14. 플러그인</span>
+                <h2 class="title-section mb-6">나만의 도구 추가하기</h2>
+            </div>
+
+            <div class="lesson-card bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-200">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/2">
+                        <h3 class="font-bold text-2xl text-purple-700 mb-4">무한한 확장</h3>
+                        <p class="text-sm text-ink-light leading-relaxed mb-6">
+                            스튜디오에 기본으로 없는 기능이 필요하다면? <strong>플러그인</strong>을 설치하세요!<br><br>
+                            - 도로나 숲을 자동으로 만들어주는 도구<br>
+                            - 복잡한 UI를 쉽게 디자인하는 도구<br>
+                            - 애니메이션을 더 편하게 만드는 도구<br><br>
+                            전 세계 개발자들이 만든 수많은 마법 도구들이 여러분을 기다려요.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 rounded-xl overflow-hidden shadow-2xl rotate-1 border border-white/50">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Toolbar-Custom-Plugin-Button.png" alt="Plugins Toolbar" class="w-full h-auto" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 23: 마무리 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <div class="text-6xl mb-6">🎓</div>
+                <h2 class="title-display mb-4">
+                    스튜디오 완전 정복<br>
+                    <span class="text-neon-mint">완료!</span>
+                </h2>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    이제 로블록스 스튜디오의 전문가가 된 것 같아요!<br>
+                    이 가이드북은 언제든 다시 돌아와서 펼쳐볼 수 있답니다.
+                </p>
+                <div class="info-box max-w-md mx-auto">
+                    <h3 class="font-bold mb-2">다음 목표</h3>
+                    <p class="text-sm text-ink-light">
+                        이제 도구 사용법을 알았으니, 
+                        <strong>"나만의 드림 하우스"</strong>를 지어보는 건 어떨까요?
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

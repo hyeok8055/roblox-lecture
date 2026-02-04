@@ -116,6 +116,46 @@ const CONCEPT_DICTIONARY: Record<string, ConceptInfo> = {
         emoji: '🌳',
         short: '부모 오브젝트',
         detail: '가족 관계 🌳 - 나무에서 가지가 달린 것처럼, 모든 오브젝트는 부모가 있어요. workspace에 넣으면 화면에 보여요!'
+    },
+    'SurfaceGui': {
+        emoji: '📺',
+        short: 'Part 표면에 UI 표시',
+        detail: '표지판 📺 - Part의 표면(Surface)에 UI를 붙여요! TextLabel, ImageLabel 등을 넣어서 "위험!", "출구" 같은 표시를 할 수 있어요.'
+    },
+    'TextLabel': {
+        emoji: '📝',
+        short: '글자를 보여주는 UI',
+        detail: '글자 표시판 📝 - 텍스트를 화면에 보여주는 UI 요소예요. Text 속성으로 글자를, TextColor3로 색상을 바꿀 수 있어요!'
+    },
+    'Color3.fromRGB': {
+        emoji: '🎨',
+        short: 'RGB로 색상 만들기',
+        detail: '물감 섞기 🎨 - Red, Green, Blue 세 가지 색을 섞어요! Color3.fromRGB(255, 0, 0)은 빨강, (0, 255, 0)은 초록, (0, 0, 255)는 파랑!'
+    },
+    'ParticleEmitter': {
+        emoji: '✨',
+        short: '파티클 효과 생성기',
+        detail: '반짝이 뿌리개 ✨ - Part에서 입자가 뿜어져 나와요! 불꽃, 연기, 반짝임 효과를 만들 수 있어요. Rate로 개수, Lifetime으로 수명 조절!'
+    },
+    'debounce': {
+        emoji: '🔒',
+        short: '연속 실행 방지 변수',
+        detail: '잠금장치 🔒 - debounce가 true면 함수가 실행 안 돼요! 한 번 실행 후 쿨타임 동안 다시 실행되는 걸 막아줘요.'
+    },
+    'task.spawn': {
+        emoji: '🚀',
+        short: '별도 스레드에서 실행',
+        detail: '분신술 🚀 - while true do가 있으면 그 아래 코드가 영원히 실행 안 돼요. task.spawn으로 "분신"을 만들어서 동시에 실행할 수 있어요!'
+    },
+    'humanoid.MaxHealth': {
+        emoji: '💖',
+        short: '최대 체력 값',
+        detail: '체력 한계 💖 - Humanoid의 최대 체력이에요. 기본값은 100! humanoid.Health를 MaxHealth로 설정하면 완전 회복!'
+    },
+    'Touched': {
+        emoji: '👆',
+        short: '파트에 닿았을 때 이벤트',
+        detail: '터치 감지 👆 - part.Touched:Connect(함수)로 연결하면, 누군가 파트에 닿을 때마다 함수가 실행돼요!'
     }
 };
 

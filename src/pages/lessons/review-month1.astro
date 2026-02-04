@@ -102,49 +102,89 @@ const colorChangeConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "
 // 점프력 강화 파트 드롭다운 퀴즈 설정
 // ============================================
 const jumpBoostBlanks = JSON.stringify([
-    {"id": "b1", "correct": "script.Parent", "options": ["script", "script.Parent", "Parent", "workspace"]},
-    {"id": "b2", "correct": "FindFirstChild", "options": ["GetChild", "FindFirstChild", "FindChild", "SearchChild"]},
-    {"id": "b3", "correct": "JumpPower", "options": ["JumpPower", "JumpHeight", "JumpForce", "Jump"]},
-    {"id": "b4", "correct": "task.wait", "options": ["wait", "task.wait", "sleep", "delay"]}
+    {"id": "b1", "correct": "FindFirstAncestorOfClass", "options": ["FindFirstChild", "FindFirstAncestorOfClass", "GetParent", "FindParent"]},
+    {"id": "b2", "correct": "FindFirstChildOfClass", "options": ["FindFirstChild", "FindFirstChildOfClass", "GetChild", "WaitForChild"]},
+    {"id": "b3", "correct": "UseJumpPower", "options": ["UseJumpPower", "JumpPowerEnabled", "CanJump", "PowerJump"]},
+    {"id": "b4", "correct": "task.delay", "options": ["task.wait", "task.delay", "wait", "delay"]}
 ]);
 
-const jumpBoostTemplate = `local part = [b1]
-local boostAmount = 100
+const jumpBoostTemplate = `local part = script.Parent
+local boostAmount = 300
+local duration = 3
+local debounce = {} -- 중복 실행 방지 목록
 
-local function onTouched(otherPart)
-    local humanoid = otherPart.Parent:[b2]("Humanoid")
+local function onTouched(hit)
+    -- hit(닿은 부위)의 조상 중 Model(캐릭터) 찾기
+    local character = hit:[b1]("Model")
+    -- 캐릭터 안에서 Humanoid 찾기 (클래스로 찾기)
+    local humanoid = character and character:[b2]("Humanoid")
 
-    if humanoid then
-        humanoid.[b3] = boostAmount
-        print("점프력 강화!")
+    -- 휴머노이드가 없거나 체력이 0이면 취소
+    if not humanoid or humanoid.Health <= 0 then return end
 
-        [b4](3)
-        humanoid.JumpPower = 50
-        print("원래대로!")
-    end
+    -- 이미 효과를 받고 있다면 취소 (디바운스 체크)
+    if debounce[character] then return end
+    debounce[character] = true -- 목록에 등록
+
+    -- JumpPower 속성을 사용하도록 설정 (중요!)
+    humanoid.[b3] = true 
+
+    local originalJumpPower = humanoid.JumpPower
+    humanoid.JumpPower = boostAmount
+    print("🚀 점프력 강화! (" .. boostAmount .. ")")
+
+    -- 3초 뒤에 실행할 예약 작업
+    [b4](duration, function()
+        -- 캐릭터가 여전히 존재하는지 확인
+        if humanoid.Parent and humanoid.Health > 0 then
+            humanoid.JumpPower = originalJumpPower
+            print("이런, 효과가 떨어졌어요.")
+        end
+        debounce[character] = nil -- 목록에서 제거
+    end)
 end
 
 part.Touched:Connect(onTouched)`;
 
 const jumpBoostFullCode = `local part = script.Parent
-local boostAmount = 100
+local boostAmount = 300
+local duration = 3
+local debounce = {} -- 중복 실행 방지 목록
 
-local function onTouched(otherPart)
-    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+local function onTouched(hit)
+    -- hit(닿은 부위)의 조상 중 Model(캐릭터) 찾기
+    local character = hit:FindFirstAncestorOfClass("Model")
+    -- 캐릭터 안에서 Humanoid 찾기 (클래스로 찾기)
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
 
-    if humanoid then
-        humanoid.JumpPower = boostAmount
-        print("점프력 강화!")
+    -- 휴머노이드가 없거나 체력이 0이면 취소
+    if not humanoid or humanoid.Health <= 0 then return end
 
-        task.wait(3)
-        humanoid.JumpPower = 50
-        print("원래대로!")
-    end
+    -- 이미 효과를 받고 있다면 취소 (디바운스 체크)
+    if debounce[character] then return end
+    debounce[character] = true -- 목록에 등록
+
+    -- JumpPower 속성을 사용하도록 설정 (중요!)
+    humanoid.UseJumpPower = true 
+
+    local originalJumpPower = humanoid.JumpPower
+    humanoid.JumpPower = boostAmount
+    print("🚀 점프력 강화! (" .. boostAmount .. ")")
+
+    -- 3초 뒤에 실행할 예약 작업
+    task.delay(duration, function()
+        -- 캐릭터가 여전히 존재하는지 확인
+        if humanoid.Parent and humanoid.Health > 0 then
+            humanoid.JumpPower = originalJumpPower
+            print("이런, 효과가 떨어졌어요.")
+        end
+        debounce[character] = nil -- 목록에서 제거
+    end)
 end
 
 part.Touched:Connect(onTouched)`;
 
-const jumpBoostConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "JumpPower", "task.wait"]);
+const jumpBoostConcepts = JSON.stringify(["FindFirstAncestorOfClass", "UseJumpPower", "task.delay", "debounce"]);
 
 // ============================================
 // 체력 회복 파트 드롭다운 퀴즈 설정
@@ -191,7 +231,7 @@ part.Touched:Connect(healPlayer)`;
 const healPartConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "Health", "MaxHealth"]);
 ---
 
-<LessonLayout title="1개월차 종합 복습" lessonNumber={0} totalSlides={32}>
+<LessonLayout title="1개월차 종합 복습" lessonNumber={0} totalSlides={30}>
     <!-- ==================== 슬라이드 1: 인트로 ==================== -->
     <section class="slide active">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
@@ -241,140 +281,52 @@ const healPartConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "Hea
         </div>
     </section>
 
-    <!-- ==================== 슬라이드 2: 스튜디오 복습 ==================== -->
+    <!-- ==================== 슬라이드 2: 스튜디오 상세 가이드 안내 (신규) ==================== -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">복습 1</span>
-                <h2 class="title-section mb-6">🎮 로블록스 스튜디오 핵심 정리</h2>
+            <div class="animate-in text-center mb-12">
+                <span class="badge badge-roblox mb-4">Studio Master</span>
+                <h2 class="title-section mb-6">로블록스 스튜디오 완벽 정복</h2>
+                <p class="text-xl text-ink-light">스튜디오의 모든 기능을 이미지와 함께 자세히 알아볼까요?</p>
             </div>
 
-            <div class="grid md:grid-cols-2 gap-6">
-                <!-- Explorer 패널 -->
-                <div class="lesson-card">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-neon-sky/20 flex items-center justify-center text-2xl">🔍</div>
-                        <div>
-                            <h3 class="font-bold text-lg">Explorer 패널</h3>
-                            <p class="text-sm text-ink-light">게임 속 모든 것의 목록</p>
-                        </div>
-                    </div>
-                    <div class="bg-ink-pale rounded-xl p-4 text-sm">
-                        <p class="mb-2"><strong>역할:</strong> 게임의 모든 오브젝트를 트리 구조로 보여줘요</p>
-                        <p class="text-ink-light">폴더처럼 계층 구조로 정리되어 있어요</p>
-                    </div>
-                </div>
+            <div class="lesson-card bg-gradient-to-br from-neon-sky/10 to-neon-mint/10 border-2 border-neon-sky/30 p-12 text-center">
+                <div class="text-6xl mb-8">🛠️</div>
+                <h3 class="font-bold text-3xl mb-6">스튜디오 상세 가이드</h3>
+                <p class="text-ink-light mb-10 leading-relaxed max-w-xl mx-auto">
+                    개요, 인터페이스, 빌드 도구, 테스트 모드 등<br>
+                    공식 문서의 모든 핵심 내용을 13살 눈높이로 풀어냈어요!
+                </p>
+                <a 
+                    href="/lessons/studio-guide-full" 
+                    class="inline-flex items-center gap-3 px-10 py-5 bg-neon-sky text-white rounded-2xl font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-neon-sky/20"
+                >
+                    <span class="material-symbols-outlined text-3xl">open_in_new</span>
+                    상세 가이드 보러가기
+                </a>
+            </div>
 
-                <!-- Properties 패널 -->
-                <div class="lesson-card">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-neon-mint/20 flex items-center justify-center text-2xl">⚙️</div>
-                        <div>
-                            <h3 class="font-bold text-lg">Properties 패널</h3>
-                            <p class="text-sm text-ink-light">오브젝트의 설정창</p>
-                        </div>
-                    </div>
-                    <div class="bg-ink-pale rounded-xl p-4 text-sm">
-                        <p class="mb-2"><strong>역할:</strong> 선택한 오브젝트의 속성을 변경해요</p>
-                        <p class="text-ink-light">Name, Position, Size, BrickColor 등</p>
-                    </div>
+            <div class="grid md:grid-cols-3 gap-6 mt-12">
+                <div class="lesson-card p-6 bg-white/50">
+                    <div class="text-2xl mb-3">📂</div>
+                    <h4 class="font-bold mb-2">탐색기 & 속성</h4>
+                    <p class="text-xs text-ink-light">부모-자식 관계와 물체 설정법</p>
                 </div>
-
-                <!-- Anchored -->
-                <div class="lesson-card md:col-span-2">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-12 h-12 rounded-xl bg-neon-gold/20 flex items-center justify-center text-2xl">⚓</div>
-                        <div>
-                            <h3 class="font-bold text-lg">Anchored (고정)</h3>
-                            <p class="text-sm text-ink-light">파트를 공중에 고정하는 속성</p>
-                        </div>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-green-50 rounded-xl p-4">
-                            <p class="font-bold text-green-700 mb-2">✅ Anchored = true</p>
-                            <p class="text-sm">파트가 공중에 고정되어 떨어지지 않아요</p>
-                            <p class="text-xs text-ink-light mt-2">발판, 벽, 장애물에 사용</p>
-                        </div>
-                        <div class="bg-red-50 rounded-xl p-4">
-                            <p class="font-bold text-red-700 mb-2">❌ Anchored = false</p>
-                            <p class="text-sm">중력의 영향을 받아 떨어져요</p>
-                            <p class="text-xs text-ink-light mt-2">던지는 물체, 굴러가는 공에 사용</p>
-                        </div>
-                    </div>
+                <div class="lesson-card p-6 bg-white/50">
+                    <div class="text-2xl mb-3">📏</div>
+                    <h4 class="font-bold mb-2">빌딩 도구</h4>
+                    <p class="text-xs text-ink-light">정렬과 피벗 활용 꿀팁</p>
+                </div>
+                <div class="lesson-card p-6 bg-white/50">
+                    <div class="text-2xl mb-3">🧪</div>
+                    <h4 class="font-bold mb-2">테스트 & 디버그</h4>
+                    <p class="text-xs text-ink-light">오류 찾기와 시뮬레이션 방법</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ==================== 슬라이드 3: Explorer 폴더 상세 (신규) ==================== -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-roblox mb-4">Explorer 상세</span>
-                <h2 class="title-section mb-6">📂 Explorer 폴더 구조</h2>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-4">
-                <!-- Workspace -->
-                <div class="lesson-card border-l-4 border-neon-mint">
-                    <h4 class="font-bold text-neon-mint mb-2">🌍 Workspace</h4>
-                    <p class="text-sm text-ink-light mb-2">게임에 <strong>보이는 모든 것</strong></p>
-                    <p class="text-xs bg-ink-pale rounded p-2">Part, Model, NPC, 지형 등</p>
-                </div>
-
-                <!-- ServerScriptService -->
-                <div class="lesson-card border-l-4 border-neon-coral">
-                    <h4 class="font-bold text-neon-coral mb-2">🔒 ServerScriptService</h4>
-                    <p class="text-sm text-ink-light mb-2"><strong>서버 전용</strong> 스크립트</p>
-                    <p class="text-xs bg-ink-pale rounded p-2">게임 로직, 데이터 저장, 보안 코드</p>
-                </div>
-
-                <!-- ServerStorage -->
-                <div class="lesson-card border-l-4 border-neon-gold">
-                    <h4 class="font-bold text-neon-gold mb-2">📦 ServerStorage</h4>
-                    <p class="text-sm text-ink-light mb-2"><strong>서버 전용</strong> 저장소</p>
-                    <p class="text-xs bg-ink-pale rounded p-2">맵 데이터, 무기 원본, 아이템</p>
-                </div>
-
-                <!-- ReplicatedStorage -->
-                <div class="lesson-card border-l-4 border-neon-sky">
-                    <h4 class="font-bold text-neon-sky mb-2">🔄 ReplicatedStorage</h4>
-                    <p class="text-sm text-ink-light mb-2">서버/클라이언트 <strong>공유</strong></p>
-                    <p class="text-xs bg-ink-pale rounded p-2">공용 모듈, 에셋, RemoteEvent</p>
-                </div>
-
-                <!-- StarterPlayer -->
-                <div class="lesson-card border-l-4 border-purple-500">
-                    <h4 class="font-bold text-purple-500 mb-2">👤 StarterPlayer</h4>
-                    <p class="text-sm text-ink-light mb-2">플레이어 <strong>기본 설정</strong></p>
-                    <p class="text-xs bg-ink-pale rounded p-2">걷기/점프 속도, 카메라 설정</p>
-                </div>
-
-                <!-- StarterGui -->
-                <div class="lesson-card border-l-4 border-pink-500">
-                    <h4 class="font-bold text-pink-500 mb-2">🖼️ StarterGui</h4>
-                    <p class="text-sm text-ink-light mb-2">시작 시 자동 복사되는 <strong>GUI</strong></p>
-                    <p class="text-xs bg-ink-pale rounded p-2">메뉴, HUD, 버튼, 텍스트</p>
-                </div>
-
-                <!-- Players -->
-                <div class="lesson-card border-l-4 border-blue-500">
-                    <h4 class="font-bold text-blue-500 mb-2">👥 Players</h4>
-                    <p class="text-sm text-ink-light mb-2">현재 <strong>접속한 플레이어</strong> 목록</p>
-                    <p class="text-xs bg-ink-pale rounded p-2">PlayerAdded, PlayerRemoving 이벤트</p>
-                </div>
-
-                <!-- Lighting -->
-                <div class="lesson-card border-l-4 border-yellow-500">
-                    <h4 class="font-bold text-yellow-500 mb-2">💡 Lighting</h4>
-                    <p class="text-sm text-ink-light mb-2"><strong>조명</strong> 및 분위기 설정</p>
-                    <p class="text-xs bg-ink-pale rounded p-2">낮/밤, 안개, 색감 효과</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==================== 슬라이드 4: 스튜디오 퀴즈 ==================== -->
+    <!-- ==================== 슬라이드 3: 스튜디오 퀴즈 ==================== -->
     <section class="slide">
         <div class="max-w-2xl mx-auto px-6 py-12">
             <quiz-question
@@ -387,7 +339,7 @@ const healPartConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "Hea
         </div>
     </section>
 
-    <!-- ==================== 슬라이드 5: 변수 복습 ==================== -->
+    <!-- ==================== 슬라이드 4: 변수 복습 ==================== -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
@@ -476,6 +428,26 @@ print("생존:", isAlive)
 local message = "안녕하세요, " .. playerName .. "님!"
 print(message)
             </lua-code-block>
+
+            <div class="mt-6 flex flex-col md:flex-row gap-6 items-center bg-ink-deep text-ink-cream p-6 rounded-2xl shadow-xl">
+                <div class="md:w-1/2">
+                    <h4 class="font-bold text-neon-mint mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined">terminal</span>
+                        출력창(Output)에서 확인하기
+                    </h4>
+                    <p class="text-xs text-ink-cream/70 mb-4">
+                        <code>print()</code> 함수를 쓰면 아래 출력 창에 결과가 나타나요. 
+                        코드가 잘 작동하는지 확인하는 가장 좋은 방법입니다!
+                    </p>
+                    <div class="flex gap-4">
+                        <div class="px-3 py-1 bg-white/10 rounded text-[10px] text-neon-sky border border-white/20">일반 메시지: 흰색</div>
+                        <div class="px-3 py-1 bg-white/10 rounded text-[10px] text-neon-coral border border-white/20">에러 메시지: 빨간색</div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 rounded-lg overflow-hidden border border-white/10 shadow-2xl">
+                    <img src="https://prod.docsiteassets.roblox.com/assets/studio/output/Output-Window-Overview.png" alt="Output Window Overview" class="w-full h-auto" />
+                </div>
+            </div>
 
             <HintBox type="info" title="복사해서 사용하세요">
                 코드 블록 우상단의 <strong>복사</strong> 버튼을 클릭하면 코드를 복사할 수 있어요!
@@ -585,6 +557,24 @@ print(message)
                     </div>
                 </div>
             </div>
+
+            <div class="mt-8 rounded-2xl overflow-hidden border-2 border-neon-mint/20 bg-white p-6">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="md:w-1/3 text-center">
+                        <div class="w-16 h-16 bg-neon-mint/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-neon-mint text-3xl">view_in_ar</span>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">물리적 결합 (Assemblies)</h4>
+                        <p class="text-xs text-ink-light">
+                            여러 파트가 모여 하나의 모델이나 '어셈블리'를 이루는 구조를 이해해 보세요. 
+                            충돌(`Touched`) 이벤트도 이 단위를 기반으로 작동합니다.
+                        </p>
+                    </div>
+                    <div class="md:w-2/3">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/parts/assemblies/Assembly-Diagram.png" alt="Assembly Diagram" class="w-full h-auto rounded-xl shadow-inner border border-ink-pale" />
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -629,6 +619,15 @@ print(message)
                             <strong>+Z</strong> = 뒤<br>
                             <strong>-Z</strong> = 앞
                         </p>
+                    </div>
+                </div>
+
+                <div class="flex justify-center mb-8">
+                    <div class="max-w-md w-full rounded-2xl overflow-hidden shadow-lg border-4 border-white">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/modeling/parts/Move-World-Orientation.png" alt="X, Y, Z 좌표계" class="w-full h-auto" />
+                        <div class="bg-white p-3 text-center">
+                            <p class="text-sm font-bold text-ink-deep">빨강(X), 초록(Y), 파랑(Z) 축</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -718,7 +717,8 @@ print("파트 설정 완료!")
         </div>
     </section>
 
-    <!-- ==================== 슬라이드 11: 함수 복습 ==================== -->
+
+    <!-- ==================== 슬라이드 14: 함수 복습 ==================== -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
