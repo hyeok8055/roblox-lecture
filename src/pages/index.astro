@@ -99,6 +99,34 @@ const month3 = curriculum.slice(16, 24); // 9~12주
                         )
                     ))}
                 </div>
+
+                <!-- 1개월차 복습 카드 -->
+                <div class="mt-6">
+                    <a
+                        href="/lessons/review-month1"
+                        class="block w-full lesson-card group bg-gradient-to-r from-neon-mint/10 via-neon-sky/10 to-neon-gold/10 border-2 border-neon-mint/30 hover:border-neon-mint/60 transition-all"
+                    >
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-mint to-neon-sky flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                                🔄
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-bold text-lg text-ink-deep group-hover:text-neon-mint transition-colors">
+                                        1개월차 종합 복습
+                                    </h3>
+                                    <span class="badge badge-success text-xs">32 슬라이드</span>
+                                </div>
+                                <p class="text-sm text-ink-light">
+                                    스튜디오 적응 • 변수 • 함수 • 이벤트 • 조건문 | 배운 모든 것을 복습하고 종합 실습까지!
+                                </p>
+                            </div>
+                            <div class="text-neon-mint text-2xl group-hover:translate-x-1 transition-transform">
+                                →
+                            </div>
+                        </div>
+                    </a>
+                </div>
             </section>
 
             <!-- 2개월차 -->
@@ -196,5 +224,13 @@ const month3 = curriculum.slice(16, 24); // 9~12주
         .text-ink-deep { color: var(--ink-deep); }
         .text-ink-light { color: var(--ink-light); }
         .border-ink-pale { border-color: var(--ink-pale); }
+    </style>
+
+    <!-- index 페이지 스크롤 활성화 -->
+    <style is:global>
+        body {
+            overflow-y: auto !important;
+            overflow-x: hidden;
+        }
     </style>
 </BaseLayout>

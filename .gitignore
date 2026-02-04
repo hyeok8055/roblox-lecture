@@ -32,3 +32,15 @@ Thumbs.db
 
 # Test screenshots
 .playwright-mcp/
+
+# Python virtual environment
+.venv/
+
+# Claude development tools
+.agents/
+.serena/
+.claude/settings.local.json
+
+
+# Manim
+manim-videos/

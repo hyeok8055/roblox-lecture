@@ -1,0 +1,1472 @@
+---
+import LessonLayout from '../../layouts/LessonLayout.astro';
+import HintBox from '../../components/astro/HintBox.astro';
+
+// ============================================
+// 퀴즈 옵션
+// ============================================
+const quiz1Options = JSON.stringify(["Explorer", "Properties", "Toolbox", "Output"]);
+const quiz2Options = JSON.stringify(["local", "var", "let", "const"]);
+const quiz3Options = JSON.stringify(["function 이름() end", "def 이름():", "func 이름() {}", "void 이름()"]);
+const quiz4Options = JSON.stringify(["==", "=", "===", ":="]);
+const quiz5Options = JSON.stringify(["Touched", "Clicked", "Hit", "Contact"]);
+const quiz6Options = JSON.stringify(["Connect", "Link", "Bind", "Attach"]);
+const quiz7Options = JSON.stringify(["if-then-end", "if-do-end", "when-then-end", "if-else"]);
+const quiz8Options = JSON.stringify(["Humanoid", "Character", "Player", "Health"]);
+const quiz9Options = JSON.stringify(["FindFirstChild", "GetChild", "SearchChild", "LookupChild"]);
+const quiz10Options = JSON.stringify(["ServerScriptService", "Workspace", "StarterGui", "ReplicatedStorage"]);
+
+// ============================================
+// Kill Part 드롭다운 퀴즈 설정
+// ============================================
+const killPartBlanks = JSON.stringify([
+    {"id": "b1", "correct": "script.Parent", "options": ["script", "script.Parent", "Parent", "workspace"]},
+    {"id": "b2", "correct": "Touched", "options": ["Touched", "Click", "Hit", "Changed"]},
+    {"id": "b3", "correct": "FindFirstChild", "options": ["GetChild", "FindFirstChild", "FindChild", "SearchChild"]},
+    {"id": "b4", "correct": "Health", "options": ["Health", "Life", "HP", "Damage"]}
+]);
+
+const killPartTemplate = `local part = [b1]
+
+local function onKill(otherPart)
+    local humanoid = otherPart.Parent:[b3]("Humanoid")
+
+    if humanoid then
+        print("용암에 빠졌어요!")
+        humanoid.[b4] = 0
+    end
+end
+
+part.[b2]:Connect(onKill)
+print("Kill Part 준비!")`;
+
+const killPartFullCode = `local part = script.Parent
+
+local function onKill(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        print("용암에 빠졌어요!")
+        humanoid.Health = 0
+    end
+end
+
+part.Touched:Connect(onKill)
+print("Kill Part 준비!")`;
+
+const killPartConcepts = JSON.stringify(["script.Parent", "Touched", "FindFirstChild", "Humanoid"]);
+
+// ============================================
+// 색상 변환 파트 드롭다운 퀴즈 설정
+// ============================================
+const colorChangeBlanks = JSON.stringify([
+    {"id": "b1", "correct": "script.Parent", "options": ["script", "script.Parent", "Parent", "workspace"]},
+    {"id": "b2", "correct": "FindFirstChild", "options": ["GetChild", "FindFirstChild", "FindChild", "SearchChild"]},
+    {"id": "b3", "correct": "math.random", "options": ["math.random", "Random", "math.rand", "random"]},
+    {"id": "b4", "correct": "BrickColor", "options": ["BrickColor", "Color", "Color3", "PartColor"]}
+]);
+
+const colorChangeTemplate = `local part = [b1]
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:[b2]("Humanoid")
+
+    if humanoid then
+        local colors = {"Bright red", "Bright blue", "Bright green"}
+        local randomIndex = [b3](1, #colors)
+        part.[b4] = BrickColor.new(colors[randomIndex])
+        print("색상 변경!")
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const colorChangeFullCode = `local part = script.Parent
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        local colors = {"Bright red", "Bright blue", "Bright green"}
+        local randomIndex = math.random(1, #colors)
+        part.BrickColor = BrickColor.new(colors[randomIndex])
+        print("색상 변경!")
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const colorChangeConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "math.random", "BrickColor"]);
+
+// ============================================
+// 점프력 강화 파트 드롭다운 퀴즈 설정
+// ============================================
+const jumpBoostBlanks = JSON.stringify([
+    {"id": "b1", "correct": "script.Parent", "options": ["script", "script.Parent", "Parent", "workspace"]},
+    {"id": "b2", "correct": "FindFirstChild", "options": ["GetChild", "FindFirstChild", "FindChild", "SearchChild"]},
+    {"id": "b3", "correct": "JumpPower", "options": ["JumpPower", "JumpHeight", "JumpForce", "Jump"]},
+    {"id": "b4", "correct": "task.wait", "options": ["wait", "task.wait", "sleep", "delay"]}
+]);
+
+const jumpBoostTemplate = `local part = [b1]
+local boostAmount = 100
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:[b2]("Humanoid")
+
+    if humanoid then
+        humanoid.[b3] = boostAmount
+        print("점프력 강화!")
+
+        [b4](3)
+        humanoid.JumpPower = 50
+        print("원래대로!")
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const jumpBoostFullCode = `local part = script.Parent
+local boostAmount = 100
+
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        humanoid.JumpPower = boostAmount
+        print("점프력 강화!")
+
+        task.wait(3)
+        humanoid.JumpPower = 50
+        print("원래대로!")
+    end
+end
+
+part.Touched:Connect(onTouched)`;
+
+const jumpBoostConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "JumpPower", "task.wait"]);
+
+// ============================================
+// 체력 회복 파트 드롭다운 퀴즈 설정
+// ============================================
+const healPartBlanks = JSON.stringify([
+    {"id": "b1", "correct": "script.Parent", "options": ["script", "script.Parent", "Parent", "workspace"]},
+    {"id": "b2", "correct": "FindFirstChild", "options": ["GetChild", "FindFirstChild", "FindChild", "SearchChild"]},
+    {"id": "b3", "correct": "Health", "options": ["Health", "HP", "Life", "Vitality"]},
+    {"id": "b4", "correct": "MaxHealth", "options": ["MaxHealth", "FullHealth", "TotalHealth", "HealthMax"]}
+]);
+
+const healPartTemplate = `local part = [b1]
+local healAmount = 30
+
+local function healPlayer(otherPart)
+    local humanoid = otherPart.Parent:[b2]("Humanoid")
+
+    if humanoid then
+        if humanoid.[b3] < humanoid.[b4] then
+            humanoid.Health = humanoid.Health + healAmount
+            print("체력 회복! +" .. healAmount)
+        end
+    end
+end
+
+part.Touched:Connect(healPlayer)`;
+
+const healPartFullCode = `local part = script.Parent
+local healAmount = 30
+
+local function healPlayer(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        if humanoid.Health < humanoid.MaxHealth then
+            humanoid.Health = humanoid.Health + healAmount
+            print("체력 회복! +" .. healAmount)
+        end
+    end
+end
+
+part.Touched:Connect(healPlayer)`;
+
+const healPartConcepts = JSON.stringify(["script.Parent", "FindFirstChild", "Health", "MaxHealth"]);
+---
+
+<LessonLayout title="1개월차 종합 복습" lessonNumber={0} totalSlides={32}>
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">1개월차 복습</span>
+                <h1 class="title-display mb-4">
+                    기초 문법<br>
+                    <span class="text-neon-mint">종합 복습</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    1~4주차에 배운 모든 내용을<br>
+                    한 번에 정리해봐요!
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-2xl mx-auto mb-8">
+                    <div class="px-4 py-3 bg-neon-sky/20 rounded-xl text-sm">
+                        <span class="text-2xl mb-1 block">🎮</span>
+                        <span class="font-bold">스튜디오</span>
+                    </div>
+                    <div class="px-4 py-3 bg-neon-mint/20 rounded-xl text-sm">
+                        <span class="text-2xl mb-1 block">📦</span>
+                        <span class="font-bold">변수</span>
+                    </div>
+                    <div class="px-4 py-3 bg-neon-gold/20 rounded-xl text-sm">
+                        <span class="text-2xl mb-1 block">🔧</span>
+                        <span class="font-bold">함수</span>
+                    </div>
+                    <div class="px-4 py-3 bg-neon-coral/20 rounded-xl text-sm">
+                        <span class="text-2xl mb-1 block">❓</span>
+                        <span class="font-bold">조건문</span>
+                    </div>
+                </div>
+
+                <div class="info-box max-w-lg mx-auto">
+                    <h3 class="font-bold text-lg mb-3">📚 복습 내용</h3>
+                    <ul class="text-left text-sm space-y-2">
+                        <li>✓ Explorer 폴더 구조 (Workspace, ServerScriptService 등)</li>
+                        <li>✓ Part 속성 (BrickColor, Anchored, CanCollide 등)</li>
+                        <li>✓ 변수 (local, 문자열, 숫자, 불리언)</li>
+                        <li>✓ 함수 (function, 매개변수, return)</li>
+                        <li>✓ 이벤트 (Touched, PlayerAdded, Died 등)</li>
+                        <li>✓ 메서드 (FindFirstChild, Clone, Destroy 등)</li>
+                        <li>✓ 조건문 (if, elseif, else)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 스튜디오 복습 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">복습 1</span>
+                <h2 class="title-section mb-6">🎮 로블록스 스튜디오 핵심 정리</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Explorer 패널 -->
+                <div class="lesson-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-sky/20 flex items-center justify-center text-2xl">🔍</div>
+                        <div>
+                            <h3 class="font-bold text-lg">Explorer 패널</h3>
+                            <p class="text-sm text-ink-light">게임 속 모든 것의 목록</p>
+                        </div>
+                    </div>
+                    <div class="bg-ink-pale rounded-xl p-4 text-sm">
+                        <p class="mb-2"><strong>역할:</strong> 게임의 모든 오브젝트를 트리 구조로 보여줘요</p>
+                        <p class="text-ink-light">폴더처럼 계층 구조로 정리되어 있어요</p>
+                    </div>
+                </div>
+
+                <!-- Properties 패널 -->
+                <div class="lesson-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-mint/20 flex items-center justify-center text-2xl">⚙️</div>
+                        <div>
+                            <h3 class="font-bold text-lg">Properties 패널</h3>
+                            <p class="text-sm text-ink-light">오브젝트의 설정창</p>
+                        </div>
+                    </div>
+                    <div class="bg-ink-pale rounded-xl p-4 text-sm">
+                        <p class="mb-2"><strong>역할:</strong> 선택한 오브젝트의 속성을 변경해요</p>
+                        <p class="text-ink-light">Name, Position, Size, BrickColor 등</p>
+                    </div>
+                </div>
+
+                <!-- Anchored -->
+                <div class="lesson-card md:col-span-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-gold/20 flex items-center justify-center text-2xl">⚓</div>
+                        <div>
+                            <h3 class="font-bold text-lg">Anchored (고정)</h3>
+                            <p class="text-sm text-ink-light">파트를 공중에 고정하는 속성</p>
+                        </div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-green-50 rounded-xl p-4">
+                            <p class="font-bold text-green-700 mb-2">✅ Anchored = true</p>
+                            <p class="text-sm">파트가 공중에 고정되어 떨어지지 않아요</p>
+                            <p class="text-xs text-ink-light mt-2">발판, 벽, 장애물에 사용</p>
+                        </div>
+                        <div class="bg-red-50 rounded-xl p-4">
+                            <p class="font-bold text-red-700 mb-2">❌ Anchored = false</p>
+                            <p class="text-sm">중력의 영향을 받아 떨어져요</p>
+                            <p class="text-xs text-ink-light mt-2">던지는 물체, 굴러가는 공에 사용</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: Explorer 폴더 상세 (신규) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">Explorer 상세</span>
+                <h2 class="title-section mb-6">📂 Explorer 폴더 구조</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- Workspace -->
+                <div class="lesson-card border-l-4 border-neon-mint">
+                    <h4 class="font-bold text-neon-mint mb-2">🌍 Workspace</h4>
+                    <p class="text-sm text-ink-light mb-2">게임에 <strong>보이는 모든 것</strong></p>
+                    <p class="text-xs bg-ink-pale rounded p-2">Part, Model, NPC, 지형 등</p>
+                </div>
+
+                <!-- ServerScriptService -->
+                <div class="lesson-card border-l-4 border-neon-coral">
+                    <h4 class="font-bold text-neon-coral mb-2">🔒 ServerScriptService</h4>
+                    <p class="text-sm text-ink-light mb-2"><strong>서버 전용</strong> 스크립트</p>
+                    <p class="text-xs bg-ink-pale rounded p-2">게임 로직, 데이터 저장, 보안 코드</p>
+                </div>
+
+                <!-- ServerStorage -->
+                <div class="lesson-card border-l-4 border-neon-gold">
+                    <h4 class="font-bold text-neon-gold mb-2">📦 ServerStorage</h4>
+                    <p class="text-sm text-ink-light mb-2"><strong>서버 전용</strong> 저장소</p>
+                    <p class="text-xs bg-ink-pale rounded p-2">맵 데이터, 무기 원본, 아이템</p>
+                </div>
+
+                <!-- ReplicatedStorage -->
+                <div class="lesson-card border-l-4 border-neon-sky">
+                    <h4 class="font-bold text-neon-sky mb-2">🔄 ReplicatedStorage</h4>
+                    <p class="text-sm text-ink-light mb-2">서버/클라이언트 <strong>공유</strong></p>
+                    <p class="text-xs bg-ink-pale rounded p-2">공용 모듈, 에셋, RemoteEvent</p>
+                </div>
+
+                <!-- StarterPlayer -->
+                <div class="lesson-card border-l-4 border-purple-500">
+                    <h4 class="font-bold text-purple-500 mb-2">👤 StarterPlayer</h4>
+                    <p class="text-sm text-ink-light mb-2">플레이어 <strong>기본 설정</strong></p>
+                    <p class="text-xs bg-ink-pale rounded p-2">걷기/점프 속도, 카메라 설정</p>
+                </div>
+
+                <!-- StarterGui -->
+                <div class="lesson-card border-l-4 border-pink-500">
+                    <h4 class="font-bold text-pink-500 mb-2">🖼️ StarterGui</h4>
+                    <p class="text-sm text-ink-light mb-2">시작 시 자동 복사되는 <strong>GUI</strong></p>
+                    <p class="text-xs bg-ink-pale rounded p-2">메뉴, HUD, 버튼, 텍스트</p>
+                </div>
+
+                <!-- Players -->
+                <div class="lesson-card border-l-4 border-blue-500">
+                    <h4 class="font-bold text-blue-500 mb-2">👥 Players</h4>
+                    <p class="text-sm text-ink-light mb-2">현재 <strong>접속한 플레이어</strong> 목록</p>
+                    <p class="text-xs bg-ink-pale rounded p-2">PlayerAdded, PlayerRemoving 이벤트</p>
+                </div>
+
+                <!-- Lighting -->
+                <div class="lesson-card border-l-4 border-yellow-500">
+                    <h4 class="font-bold text-yellow-500 mb-2">💡 Lighting</h4>
+                    <p class="text-sm text-ink-light mb-2"><strong>조명</strong> 및 분위기 설정</p>
+                    <p class="text-xs bg-ink-pale rounded p-2">낮/밤, 안개, 색감 효과</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 스튜디오 퀴즈 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <quiz-question
+                question="서버에서만 실행되는 스크립트를 넣는 폴더는?"
+                correct="A"
+                options={quiz10Options}
+                correct-explanation="ServerScriptService는 서버 전용 스크립트를 넣는 곳이에요!"
+                wrong-explanation="Workspace는 보이는 것, StarterGui는 GUI, ReplicatedStorage는 공유 저장소예요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: 변수 복습 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">복습 2</span>
+                <h2 class="title-section mb-6">📦 변수 핵심 정리</h2>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-lg mb-4">변수란?</h3>
+                <p class="text-ink-light mb-4">데이터를 담는 <strong>이름표가 붙은 상자</strong>예요. 나중에 다시 꺼내서 쓸 수 있어요!</p>
+
+                <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-sm mb-4">
+                    <span class="text-neon-sky">local</span> 변수이름 = 값
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4">
+                <!-- 문자열 -->
+                <div class="lesson-card">
+                    <div class="text-3xl mb-2">📝</div>
+                    <h4 class="font-bold mb-2">문자열 (String)</h4>
+                    <p class="text-sm text-ink-light mb-3">텍스트 데이터</p>
+                    <div class="bg-ink-pale rounded-lg p-3 font-mono text-xs">
+                        <span class="text-neon-sky">local</span> name = <span class="text-neon-mint">"철수"</span>
+                    </div>
+                </div>
+
+                <!-- 숫자 -->
+                <div class="lesson-card">
+                    <div class="text-3xl mb-2">🔢</div>
+                    <h4 class="font-bold mb-2">숫자 (Number)</h4>
+                    <p class="text-sm text-ink-light mb-3">숫자 데이터</p>
+                    <div class="bg-ink-pale rounded-lg p-3 font-mono text-xs">
+                        <span class="text-neon-sky">local</span> score = <span class="text-neon-gold">100</span>
+                    </div>
+                </div>
+
+                <!-- 불리언 -->
+                <div class="lesson-card">
+                    <div class="text-3xl mb-2">✅</div>
+                    <h4 class="font-bold mb-2">불리언 (Boolean)</h4>
+                    <p class="text-sm text-ink-light mb-3">참/거짓 데이터</p>
+                    <div class="bg-ink-pale rounded-lg p-3 font-mono text-xs">
+                        <span class="text-neon-sky">local</span> alive = <span class="text-neon-coral">true</span>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="문자열 연결하기">
+                두 문자열을 연결할 때는 <code>..</code> 을 사용해요!<br>
+                <code>"안녕" .. "하세요"</code> → <code>"안녕하세요"</code>
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: 변수 예제 코드 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">예제 코드</span>
+                <h2 class="text-xl font-bold">변수 만들기</h2>
+            </div>
+
+            <lua-code-block title="variables.lua" show-line-numbers>
+-- 다양한 타입의 변수 만들기
+
+-- 문자열 (텍스트)
+local playerName = "철수"
+local gameName = "나의 첫 게임"
+
+-- 숫자
+local playerAge = 15
+local score = 100
+local speed = 16.5
+
+-- 불리언 (참/거짓)
+local isAlive = true
+local isGameOver = false
+
+-- 출력해보기
+print("이름:", playerName)
+print("나이:", playerAge)
+print("생존:", isAlive)
+
+-- 문자열 연결
+local message = "안녕하세요, " .. playerName .. "님!"
+print(message)
+            </lua-code-block>
+
+            <HintBox type="info" title="복사해서 사용하세요">
+                코드 블록 우상단의 <strong>복사</strong> 버튼을 클릭하면 코드를 복사할 수 있어요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 변수 퀴즈 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <quiz-question
+                question="Lua에서 변수를 선언할 때 사용하는 키워드는?"
+                correct="A"
+                options={quiz2Options}
+                correct-explanation="Lua에서는 local 키워드로 변수를 선언해요!"
+                wrong-explanation="var은 JavaScript, let은 JavaScript/Swift, const는 상수 선언에 쓰여요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: Part 속성 종합 (신규) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">Part 속성</span>
+                <h2 class="title-section mb-6">🧱 Part 속성 종합 정리</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- 기본 속성 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-sky">📋 기본 속성</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Name</span>
+                            <span class="text-ink-light">오브젝트 이름</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Position</span>
+                            <span class="text-ink-light">위치 (X, Y, Z)</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Size</span>
+                            <span class="text-ink-light">크기 (X, Y, Z)</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Parent</span>
+                            <span class="text-ink-light">부모 오브젝트</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 외관 속성 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-mint">🎨 외관 속성</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">BrickColor</span>
+                            <span class="text-ink-light">레고 색상</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Color</span>
+                            <span class="text-ink-light">RGB 색상</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Transparency</span>
+                            <span class="text-ink-light">투명도 (0~1)</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Material</span>
+                            <span class="text-ink-light">재질 (Plastic, Metal...)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 물리 속성 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-gold">⚡ 물리 속성</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Anchored</span>
+                            <span class="text-ink-light">고정 여부</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">CanCollide</span>
+                            <span class="text-ink-light">충돌 여부</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Massless</span>
+                            <span class="text-ink-light">질량 없음</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 효과 속성 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-coral">✨ 효과 속성</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">Reflectance</span>
+                            <span class="text-ink-light">반사율 (0~1)</span>
+                        </div>
+                        <div class="flex justify-between bg-ink-pale rounded p-2">
+                            <span class="font-mono">CastShadow</span>
+                            <span class="text-ink-light">그림자 생성</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: X,Y,Z 좌표계 (신규) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">좌표계</span>
+                <h2 class="title-section mb-6">📐 X, Y, Z 좌표계 이해하기</h2>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-lg mb-4">로블록스 좌표계</h3>
+                <p class="text-ink-light mb-4">3D 공간에서 위치를 나타내는 <strong>세 가지 방향</strong>이에요!</p>
+
+                <div class="grid md:grid-cols-3 gap-4 mb-6">
+                    <!-- X축 -->
+                    <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4">
+                        <div class="text-3xl font-bold text-red-500 mb-2">X축</div>
+                        <div class="text-2xl mb-2">↔️ 좌우</div>
+                        <p class="text-sm text-ink-light">
+                            <strong>+X</strong> = 오른쪽<br>
+                            <strong>-X</strong> = 왼쪽
+                        </p>
+                    </div>
+
+                    <!-- Y축 -->
+                    <div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl p-4">
+                        <div class="text-3xl font-bold text-green-500 mb-2">Y축</div>
+                        <div class="text-2xl mb-2">↕️ 위아래</div>
+                        <p class="text-sm text-ink-light">
+                            <strong>+Y</strong> = 위<br>
+                            <strong>-Y</strong> = 아래
+                        </p>
+                    </div>
+
+                    <!-- Z축 -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-xl p-4">
+                        <div class="text-3xl font-bold text-blue-500 mb-2">Z축</div>
+                        <div class="text-2xl mb-2">↗️ 앞뒤</div>
+                        <p class="text-sm text-ink-light">
+                            <strong>+Z</strong> = 뒤<br>
+                            <strong>-Z</strong> = 앞
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Vector3 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">📍 Vector3 (위치/크기)</h4>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-sm mb-3">
+                        Vector3.new(<span class="text-red-400">X</span>, <span class="text-green-400">Y</span>, <span class="text-blue-400">Z</span>)
+                    </div>
+                    <div class="text-sm space-y-2">
+                        <div class="bg-ink-pale rounded p-2">
+                            <code class="text-xs">Vector3.new(10, 5, 0)</code><br>
+                            <span class="text-ink-light">→ 오른쪽 10, 위로 5</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <code class="text-xs">Vector3.new(4, 2, 6)</code><br>
+                            <span class="text-ink-light">→ 크기: 가로4, 높이2, 깊이6</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 실제 적용 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">🎯 실제 적용 예시</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono">part.Position</span>
+                            <span class="text-ink-light ml-2">= 파트 위치</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono">part.Size</span>
+                            <span class="text-ink-light ml-2">= 파트 크기</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono">humanoid:MoveTo()</span>
+                            <span class="text-ink-light ml-2">= 이동 목표</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="기억법">
+                <strong>X</strong>는 가로(↔️), <strong>Y</strong>는 높이(↕️), <strong>Z</strong>는 깊이(↗️)<br>
+                "XYZ = 가로, 높이, 깊이" 로 외우세요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: Part 속성 예제 코드 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">예제 코드</span>
+                <h2 class="text-xl font-bold">파트 속성 변경하기</h2>
+            </div>
+
+            <lua-code-block title="part-properties.lua" show-line-numbers>
+-- 스크립트가 들어있는 파트 가져오기
+local part = script.Parent
+
+-- 기본 속성 변경
+part.Name = "MyCoolPart"
+
+-- 색상 변경 (BrickColor 방식)
+part.BrickColor = BrickColor.new("Bright red")
+
+-- 색상 변경 (Color3 방식 - RGB)
+part.Color = Color3.fromRGB(255, 100, 50)
+
+-- 투명도 (0 = 불투명, 1 = 완전 투명)
+part.Transparency = 0.5
+
+-- 물리 속성
+part.Anchored = true      -- 고정 (떨어지지 않음)
+part.CanCollide = false   -- 충돌 안함 (통과 가능)
+
+-- 재질 변경
+part.Material = Enum.Material.Neon
+
+-- 크기 변경
+part.Size = Vector3.new(4, 2, 6)
+
+print("파트 설정 완료!")
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 함수 복습 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">복습 3</span>
+                <h2 class="title-section mb-6">🔧 함수 핵심 정리</h2>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-lg mb-4">함수란?</h3>
+                <p class="text-ink-light mb-4">코드를 묶어서 <strong>재사용</strong>할 수 있게 만든 것이에요. 버튼처럼 필요할 때 눌러서 실행해요!</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- 기본 함수 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">📦 기본 함수</h4>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-sm">
+                        <span class="text-neon-sky">local function</span> <span class="text-neon-gold">sayHello</span>()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-neon-mint">"안녕하세요!"</span>)<br>
+                        <span class="text-neon-sky">end</span><br><br>
+                        <span class="text-ink-light">-- 함수 호출</span><br>
+                        sayHello()
+                    </div>
+                </div>
+
+                <!-- 매개변수 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3">📥 매개변수 (입력값)</h4>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-sm">
+                        <span class="text-neon-sky">local function</span> <span class="text-neon-gold">greet</span>(<span class="text-neon-coral">name</span>)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-neon-mint">"안녕, "</span> .. name)<br>
+                        <span class="text-neon-sky">end</span><br><br>
+                        greet(<span class="text-neon-mint">"철수"</span>) <span class="text-ink-light">-- 안녕, 철수</span>
+                    </div>
+                </div>
+
+                <!-- return -->
+                <div class="lesson-card md:col-span-2">
+                    <h4 class="font-bold mb-3">↩️ return (반환값)</h4>
+                    <p class="text-sm text-ink-light mb-3">함수가 계산 결과를 돌려줘요</p>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-sm">
+                        <span class="text-neon-sky">local function</span> <span class="text-neon-gold">add</span>(a, b)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;<span class="text-neon-sky">return</span> a + b<br>
+                        <span class="text-neon-sky">end</span><br><br>
+                        <span class="text-neon-sky">local</span> result = add(<span class="text-neon-gold">3</span>, <span class="text-neon-gold">5</span>)<br>
+                        print(result) <span class="text-ink-light">-- 8</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 함수 예제 코드 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">예제 코드</span>
+                <h2 class="text-xl font-bold">함수 만들기</h2>
+            </div>
+
+            <lua-code-block title="functions.lua" show-line-numbers>
+-- 기본 함수
+local function sayHello()
+    print("안녕하세요!")
+end
+
+-- 매개변수가 있는 함수
+local function greet(name)
+    print("안녕, " .. name .. "님!")
+end
+
+-- 두 수를 더하는 함수 (return 사용)
+local function add(a, b)
+    return a + b
+end
+
+-- 인사 함수 (여러 매개변수)
+local function introduce(name, age)
+    print("이름: " .. name)
+    print("나이: " .. age .. "살")
+end
+
+-- 함수 호출하기
+sayHello()
+greet("철수")
+introduce("영희", 15)
+
+local result = add(10, 20)
+print("10 + 20 =", result)
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 함수 퀴즈 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <quiz-question
+                question="Lua에서 함수를 선언하는 올바른 형식은?"
+                correct="A"
+                options={quiz3Options}
+                correct-explanation="Lua에서는 function 이름() end 형태로 함수를 만들어요!"
+                wrong-explanation="def는 Python, func는 Swift/Go, void는 C/Java 문법이에요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: 이벤트 복습 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">복습 4</span>
+                <h2 class="title-section mb-6">⚡ 이벤트 핵심 정리</h2>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-lg mb-4">이벤트란?</h3>
+                <p class="text-ink-light mb-4">"무언가 일어났을 때" 자동으로 코드를 실행하는 시스템이에요!</p>
+
+                <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-sm">
+                    오브젝트.<span class="text-neon-gold">이벤트</span>:<span class="text-neon-sky">Connect</span>(실행할함수)
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Touched -->
+                <div class="lesson-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-coral/20 flex items-center justify-center text-2xl">👆</div>
+                        <div>
+                            <h4 class="font-bold">Touched 이벤트</h4>
+                            <p class="text-sm text-ink-light">파트에 무언가 닿았을 때</p>
+                        </div>
+                    </div>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-4 font-mono text-xs">
+                        <span class="text-neon-sky">local function</span> onTouched(other)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;print(<span class="text-neon-mint">"닿았다!"</span>)<br>
+                        <span class="text-neon-sky">end</span><br><br>
+                        part.<span class="text-neon-gold">Touched</span>:Connect(onTouched)
+                    </div>
+                </div>
+
+                <!-- Connect -->
+                <div class="lesson-card">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-neon-sky/20 flex items-center justify-center text-2xl">🔗</div>
+                        <div>
+                            <h4 class="font-bold">Connect</h4>
+                            <p class="text-sm text-ink-light">이벤트와 함수를 연결</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-ink-light">
+                        <p class="mb-2"><strong>역할:</strong> 이벤트가 발생하면 연결된 함수를 자동 실행</p>
+                        <p class="mb-2"><strong>매개변수:</strong> Touched 이벤트는 닿은 물체(Part)를 전달해요</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: 이벤트 종합 (신규) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">이벤트 종합</span>
+                <h2 class="title-section mb-6">📡 주요 이벤트 목록</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- Part 이벤트 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-mint">🧱 Part 이벤트</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">Touched</span>
+                            <span class="text-ink-light ml-2">파트에 닿을 때</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">TouchEnded</span>
+                            <span class="text-ink-light ml-2">파트에서 떨어질 때</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instance 이벤트 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-sky">📦 Instance 이벤트</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">Changed</span>
+                            <span class="text-ink-light ml-2">속성이 변경될 때</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">ChildAdded</span>
+                            <span class="text-ink-light ml-2">자식이 추가될 때</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">ChildRemoved</span>
+                            <span class="text-ink-light ml-2">자식이 제거될 때</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players 이벤트 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-gold">👥 Players 이벤트</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">PlayerAdded</span>
+                            <span class="text-ink-light ml-2">플레이어 입장</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">PlayerRemoving</span>
+                            <span class="text-ink-light ml-2">플레이어 퇴장</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Humanoid 이벤트 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-coral">💀 Humanoid 이벤트</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">Died</span>
+                            <span class="text-ink-light ml-2">캐릭터 사망</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">HealthChanged</span>
+                            <span class="text-ink-light ml-2">체력 변경</span>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <span class="font-mono font-bold">Running</span>
+                            <span class="text-ink-light ml-2">달리기 시작</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: 이벤트 예제 코드 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">예제 코드</span>
+                <h2 class="text-xl font-bold">이벤트 연결하기</h2>
+            </div>
+
+            <lua-code-block title="events.lua" show-line-numbers>
+local part = script.Parent
+
+-- Touched 이벤트: 파트에 닿았을 때
+local function onTouched(otherPart)
+    print("무언가 닿았어요!")
+    print("닿은 물체:", otherPart.Name)
+end
+
+part.Touched:Connect(onTouched)
+
+-- TouchEnded 이벤트: 파트에서 떨어졌을 때
+local function onTouchEnded(otherPart)
+    print("떨어졌어요!")
+end
+
+part.TouchEnded:Connect(onTouchEnded)
+
+-- PlayerAdded 이벤트 (ServerScriptService에서 사용)
+local Players = game:GetService("Players")
+
+local function onPlayerAdded(player)
+    print(player.Name .. "님이 입장했습니다!")
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 16: 이벤트 퀴즈 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <quiz-question
+                question="파트에 무언가 닿았을 때 발생하는 이벤트는?"
+                correct="A"
+                options={quiz5Options}
+                correct-explanation="Touched 이벤트가 파트에 무언가 닿았을 때 발생해요!"
+                wrong-explanation="Clicked는 클릭, Hit와 Contact는 Roblox에서 사용하지 않아요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: 메서드 종합 (신규) ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">메서드 종합</span>
+                <h2 class="title-section mb-6">🔨 주요 메서드 목록</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+                <!-- 찾기 메서드 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-sky">🔍 찾기 메서드</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">FindFirstChild(name)</div>
+                            <div class="text-ink-light text-xs">자식 오브젝트 찾기 (없으면 nil)</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">WaitForChild(name)</div>
+                            <div class="text-ink-light text-xs">자식 찾기 (나타날 때까지 대기)</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">GetChildren()</div>
+                            <div class="text-ink-light text-xs">모든 자식 목록 반환</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">GetDescendants()</div>
+                            <div class="text-ink-light text-xs">모든 후손 목록 반환</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 생성/삭제 메서드 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-mint">📦 생성/삭제 메서드</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">Clone()</div>
+                            <div class="text-ink-light text-xs">오브젝트 복제</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">Destroy()</div>
+                            <div class="text-ink-light text-xs">오브젝트 삭제</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">Instance.new(className)</div>
+                            <div class="text-ink-light text-xs">새 오브젝트 생성</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 확인 메서드 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-gold">✅ 확인 메서드</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">IsA(className)</div>
+                            <div class="text-ink-light text-xs">타입 확인 (Part인지, Model인지 등)</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">IsDescendantOf(ancestor)</div>
+                            <div class="text-ink-light text-xs">특정 오브젝트의 후손인지 확인</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 서비스 가져오기 -->
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-3 text-neon-coral">🎮 서비스 가져오기</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="bg-ink-pale rounded p-2">
+                            <div class="font-mono font-bold">game:GetService(name)</div>
+                            <div class="text-ink-light text-xs">서비스 가져오기</div>
+                        </div>
+                        <div class="bg-ink-pale rounded p-2 text-xs text-ink-light">
+                            예: game:GetService("Players")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 메서드 예제 코드 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">예제 코드</span>
+                <h2 class="text-xl font-bold">메서드 사용하기</h2>
+            </div>
+
+            <lua-code-block title="methods.lua" show-line-numbers>
+-- 자식 찾기
+local part = script.Parent
+local childPart = part:FindFirstChild("ChildPart")
+
+if childPart then
+    print("찾았다!", childPart.Name)
+else
+    print("없어요!")
+end
+
+-- 자식 대기하기 (나타날 때까지 기다림)
+local player = game.Players:WaitForChild("Player1")
+
+-- 모든 자식 가져오기
+local children = workspace:GetChildren()
+for _, child in pairs(children) do
+    print(child.Name)
+end
+
+-- 복제하기
+local clone = part:Clone()
+clone.Parent = workspace
+clone.Position = part.Position + Vector3.new(5, 0, 0)
+
+-- 삭제하기 (3초 후)
+task.wait(3)
+clone:Destroy()
+
+-- 타입 확인
+if part:IsA("Part") then
+    print("이건 Part예요!")
+end
+
+-- 서비스 가져오기
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 19: 조건문 복습 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">복습 5</span>
+                <h2 class="title-section mb-6">❓ 조건문 핵심 정리</h2>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <h3 class="font-bold text-lg mb-4">조건문이란?</h3>
+                <p class="text-ink-light mb-4">"만약 ~라면" 특정 코드를 실행하는 문법이에요. 갈림길에서 방향을 선택하는 것과 같아요!</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <!-- if -->
+                <div class="lesson-card">
+                    <h4 class="font-bold text-center mb-3 text-neon-mint">if (만약)</h4>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-3 font-mono text-xs">
+                        <span class="text-neon-sky">if</span> 조건 <span class="text-neon-sky">then</span><br>
+                        &nbsp;&nbsp;실행<br>
+                        <span class="text-neon-sky">end</span>
+                    </div>
+                </div>
+
+                <!-- elseif -->
+                <div class="lesson-card">
+                    <h4 class="font-bold text-center mb-3 text-neon-gold">elseif (아니고 만약)</h4>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-3 font-mono text-xs">
+                        <span class="text-neon-sky">if</span> 조건1 <span class="text-neon-sky">then</span><br>
+                        &nbsp;&nbsp;...<br>
+                        <span class="text-neon-sky">elseif</span> 조건2 <span class="text-neon-sky">then</span><br>
+                        &nbsp;&nbsp;...<br>
+                        <span class="text-neon-sky">end</span>
+                    </div>
+                </div>
+
+                <!-- else -->
+                <div class="lesson-card">
+                    <h4 class="font-bold text-center mb-3 text-neon-coral">else (그 외)</h4>
+                    <div class="bg-ink-deep text-ink-cream rounded-xl p-3 font-mono text-xs">
+                        <span class="text-neon-sky">if</span> 조건 <span class="text-neon-sky">then</span><br>
+                        &nbsp;&nbsp;...<br>
+                        <span class="text-neon-sky">else</span><br>
+                        &nbsp;&nbsp;...<br>
+                        <span class="text-neon-sky">end</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card">
+                <h4 class="font-bold mb-3">🔢 비교 연산자</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
+                    <div class="bg-ink-pale rounded-lg p-3 text-center">
+                        <code class="text-lg font-mono">==</code>
+                        <p class="text-ink-light">같다</p>
+                    </div>
+                    <div class="bg-ink-pale rounded-lg p-3 text-center">
+                        <code class="text-lg font-mono">~=</code>
+                        <p class="text-ink-light">다르다</p>
+                    </div>
+                    <div class="bg-ink-pale rounded-lg p-3 text-center">
+                        <code class="text-lg font-mono">&gt;</code>
+                        <p class="text-ink-light">크다</p>
+                    </div>
+                    <div class="bg-ink-pale rounded-lg p-3 text-center">
+                        <code class="text-lg font-mono">&lt;</code>
+                        <p class="text-ink-light">작다</p>
+                    </div>
+                    <div class="bg-ink-pale rounded-lg p-3 text-center">
+                        <code class="text-lg font-mono">&gt;=</code>
+                        <p class="text-ink-light">크거나 같다</p>
+                    </div>
+                    <div class="bg-ink-pale rounded-lg p-3 text-center">
+                        <code class="text-lg font-mono">&lt;=</code>
+                        <p class="text-ink-light">작거나 같다</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 20: 조건문 예제 코드 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">예제 코드</span>
+                <h2 class="text-xl font-bold">조건문 작성하기</h2>
+            </div>
+
+            <lua-code-block title="conditionals.lua" show-line-numbers>
+-- 기본 if문
+local score = 85
+
+if score >= 90 then
+    print("A등급! 최고예요!")
+elseif score >= 80 then
+    print("B등급! 잘했어요!")
+elseif score >= 70 then
+    print("C등급! 괜찮아요!")
+else
+    print("더 노력해봐요!")
+end
+
+-- 플레이어 확인하기
+local function onTouched(otherPart)
+    local humanoid = otherPart.Parent:FindFirstChild("Humanoid")
+
+    if humanoid then
+        print("플레이어가 닿았어요!")
+        -- 플레이어에게만 효과 적용
+        humanoid.Health = humanoid.Health - 10
+    else
+        print("플레이어가 아니에요")
+    end
+end
+
+-- and, or 사용하기
+local level = 10
+local hasKey = true
+
+if level >= 5 and hasKey then
+    print("문을 열 수 있어요!")
+end
+
+if level >= 20 or hasKey then
+    print("조건 중 하나라도 만족!")
+end
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 21: 조건문 퀴즈 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <quiz-question
+                question="Lua에서 '같다'를 비교할 때 사용하는 연산자는?"
+                correct="A"
+                options={quiz4Options}
+                correct-explanation="==는 두 값이 같은지 비교해요. =는 대입 연산자예요!"
+                wrong-explanation="=는 값을 넣을 때, ===는 JavaScript, :=는 Go 언어예요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 22: 종합 예제 1 ==================== -->
+    <section class="slide">
+        <div class="w-full px-12 py-6">
+            <div class="animate-in mb-3">
+                <span class="badge badge-lua mb-2">종합 예제 1</span>
+                <h2 class="text-xl font-bold">🎯 자기소개 함수</h2>
+            </div>
+
+            <lua-code-block title="introduce.lua" show-line-numbers>
+-- 나의 정보 (변수)
+local myName = "철수"
+local myAge = 15
+local myHobby = "게임 만들기"
+
+-- 자기소개 함수
+local function introduce()
+    print("========== 자기소개 ==========")
+    print("이름: " .. myName)
+    print("나이: " .. myAge .. "살")
+    print("취미: " .. myHobby)
+    print("==============================")
+end
+
+-- 좋아하는 것 소개 함수 (매개변수 사용)
+local function describeFavorite(category, item)
+    print(myName .. "의 좋아하는 " .. category .. ": " .. item)
+end
+
+-- 함수 호출
+introduce()
+describeFavorite("음식", "피자")
+describeFavorite("색상", "파랑")
+describeFavorite("게임", "로블록스")
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 23: 종합 예제 2 (색상 변환) - 드롭다운 퀴즈 ==================== -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="🎨 색상 변환 파트"
+            setup="Part 1개 (Anchored ✓)"
+            concepts={colorChangeConcepts}
+            blanks={colorChangeBlanks}
+            template={colorChangeTemplate}
+            full-code={colorChangeFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- ==================== 슬라이드 24: 종합 예제 3 (점프력 강화) - 드롭다운 퀴즈 ==================== -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="🦘 점프력 강화 파트"
+            setup="Part 1개 (Anchored ✓, 초록색 추천)"
+            concepts={jumpBoostConcepts}
+            blanks={jumpBoostBlanks}
+            template={jumpBoostTemplate}
+            full-code={jumpBoostFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- ==================== 슬라이드 25: 종합 예제 4 (체력 회복) - 드롭다운 퀴즈 ==================== -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="💚 체력 회복 파트"
+            setup="Part 1개 (Anchored ✓, 초록색 추천)"
+            concepts={healPartConcepts}
+            blanks={healPartBlanks}
+            template={healPartTemplate}
+            full-code={healPartFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- ==================== 슬라이드 26: 종합 예제 5 (Kill Part) - 드롭다운 퀴즈 ==================== -->
+    <section class="slide slide-fullscreen">
+        <roblox-quiz-example
+            name="💀 Kill Part (용암)"
+            setup="Part 1개 (Anchored ✓, Neon 재질, 주황색 추천)"
+            concepts={killPartConcepts}
+            blanks={killPartBlanks}
+            template={killPartTemplate}
+            full-code={killPartFullCode}
+        ></roblox-quiz-example>
+    </section>
+
+    <!-- ==================== 슬라이드 27: 종합 퀴즈 1 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <div class="text-center mb-6">
+                <span class="badge badge-quiz">종합 퀴즈 1/3</span>
+            </div>
+            <quiz-question
+                question="이벤트와 함수를 연결할 때 사용하는 메서드는?"
+                correct="A"
+                options={quiz6Options}
+                correct-explanation="Connect로 이벤트와 함수를 연결해요!"
+                wrong-explanation="Link, Bind, Attach는 다른 프로그래밍 환경에서 쓰여요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 28: 종합 퀴즈 2 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <div class="text-center mb-6">
+                <span class="badge badge-quiz">종합 퀴즈 2/3</span>
+            </div>
+            <quiz-question
+                question="자식 오브젝트를 찾을 때 사용하는 메서드는?"
+                correct="A"
+                options={quiz9Options}
+                correct-explanation="FindFirstChild로 자식 오브젝트를 찾아요!"
+                wrong-explanation="GetChild, SearchChild, LookupChild는 Roblox에서 사용하지 않아요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 29: 종합 퀴즈 3 ==================== -->
+    <section class="slide">
+        <div class="max-w-2xl mx-auto px-6 py-12">
+            <div class="text-center mb-6">
+                <span class="badge badge-quiz">종합 퀴즈 3/3</span>
+            </div>
+            <quiz-question
+                question="플레이어의 체력(Health)을 관리하는 오브젝트는?"
+                correct="A"
+                options={quiz8Options}
+                correct-explanation="Humanoid가 플레이어의 체력, 속도 등을 관리해요!"
+                wrong-explanation="Character는 전체 캐릭터, Player는 플레이어 객체, Health는 속성 이름이에요."
+            ></quiz-question>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 30: 마무리 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <div class="text-6xl mb-6">🎉</div>
+                <h2 class="title-display mb-4">
+                    1개월차<br>
+                    <span class="text-neon-mint">복습 완료!</span>
+                </h2>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    기초 문법을 완벽하게 익혔어요!<br>
+                    이제 더 재미있는 것들을 만들 준비가 되었어요!
+                </p>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-8">
+                    <div class="bg-gradient-to-br from-neon-sky/20 to-neon-sky/10 rounded-xl p-4">
+                        <div class="text-2xl mb-2">🎮</div>
+                        <p class="font-bold text-sm">스튜디오</p>
+                        <p class="text-xs text-ink-light">Explorer, Properties</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-neon-mint/20 to-neon-mint/10 rounded-xl p-4">
+                        <div class="text-2xl mb-2">📦</div>
+                        <p class="font-bold text-sm">변수 & 속성</p>
+                        <p class="text-xs text-ink-light">local, Part 속성</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-neon-gold/20 to-neon-gold/10 rounded-xl p-4">
+                        <div class="text-2xl mb-2">🔧</div>
+                        <p class="font-bold text-sm">함수 & 이벤트</p>
+                        <p class="text-xs text-ink-light">function, Touched</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-neon-coral/20 to-neon-coral/10 rounded-xl p-4">
+                        <div class="text-2xl mb-2">❓</div>
+                        <p class="font-bold text-sm">조건문</p>
+                        <p class="text-xs text-ink-light">if-then-end</p>
+                    </div>
+                </div>
+
+                <div class="info-box max-w-md mx-auto">
+                    <h3 class="font-bold mb-2">🚀 다음 단계</h3>
+                    <p class="text-sm text-ink-light">
+                        2개월차에서는 <strong>반복문</strong>과 <strong>Humanoid</strong>를 배워요!<br>
+                        더 복잡하고 재미있는 게임 로직을 만들 수 있어요!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        import('../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
