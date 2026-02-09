@@ -347,10 +347,10 @@ export class RobloxQuizExample extends LitElement {
         }
 
         .code-content {
-            padding: 0 1.25rem 0.75rem;
+            padding: 0 1.25rem 7rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.82rem;
-            line-height: 1.5;
+            line-height: 1;
             overflow-x: auto;
         }
 
@@ -358,8 +358,8 @@ export class RobloxQuizExample extends LitElement {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            min-height: 1.7em;
-            padding: 1px 0;
+            min-height: 1.2em;
+            padding: 0;
         }
 
         .code-text {
