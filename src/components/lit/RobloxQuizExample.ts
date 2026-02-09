@@ -196,18 +196,42 @@ export class RobloxQuizExample extends LitElement {
             display: block;
             font-family: 'Pretendard', sans-serif;
             height: 100%;
-            overflow-y: auto;
+            overflow: hidden;
         }
 
         .container {
-            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-template-rows: 1fr;
+            gap: 1rem;
+            height: 100%;
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 0.75rem 1.25rem;
+            padding: 0.75rem 2rem;
+            box-sizing: border-box;
+        }
+
+        /* 왼쪽 패널 */
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            align-self: start;
+        }
+
+        /* 오른쪽 패널 */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            min-height: 0;
+            overflow: hidden;
         }
 
         /* 헤더 */
         .header {
-            margin-bottom: 0.75rem;
+            margin-bottom: 0;
         }
 
         .title {
@@ -236,7 +260,7 @@ export class RobloxQuizExample extends LitElement {
 
         /* 개념 뱃지 영역 */
         .concepts-section {
-            margin-bottom: 0.6rem;
+            margin-bottom: 0;
         }
 
         .concepts-title {
@@ -314,8 +338,16 @@ export class RobloxQuizExample extends LitElement {
         .code-section {
             background: #1a1625;
             border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 0.75rem;
+            overflow-y: auto;
+            overflow-x: hidden;
+            margin-bottom: 0;
+            flex: 1;
+            min-height: 0;
+            scrollbar-width: none;
+        }
+
+        .code-section::-webkit-scrollbar {
+            display: none;
         }
 
         .code-header {
@@ -347,10 +379,10 @@ export class RobloxQuizExample extends LitElement {
         }
 
         .code-content {
-            padding: 0 1.25rem 7rem;
+            padding: 0 1.25rem 1rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.82rem;
-            line-height: 1;
+            line-height: 1.3;
             overflow-x: auto;
         }
 
@@ -478,6 +510,7 @@ export class RobloxQuizExample extends LitElement {
             flex-direction: column;
             align-items: center;
             gap: 0.5rem;
+            flex-shrink: 0;
         }
 
         .progress-text {
@@ -529,6 +562,7 @@ export class RobloxQuizExample extends LitElement {
             padding: 1rem;
             text-align: center;
             animation: celebrate 0.5s ease-out;
+            flex-shrink: 0;
         }
 
         @keyframes celebrate {
@@ -896,112 +930,113 @@ export class RobloxQuizExample extends LitElement {
 
         return html`
             <div class="container">
-                <!-- 헤더 -->
-                <div class="header">
-                    <h2 class="title">
-                        <span>🎮</span>
-                        ${this.name}
-                    </h2>
-                    ${this.setup ? html`
-                        <div class="setup">
-                            <span class="setup-label">📦 준비물:</span> ${this.setup}
+                <!-- 왼쪽 패널: 헤더 + 개념 -->
+                <div class="left-panel">
+                    <div class="header">
+                        <h2 class="title">
+                            <span>🎮</span>
+                            ${this.name}
+                        </h2>
+                        ${this.setup ? html`
+                            <div class="setup">
+                                <span class="setup-label">📦 준비물:</span> ${this.setup}
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${this.parsedConcepts.length > 0 ? html`
+                        <div class="concepts-section">
+                            <div class="concepts-title">💡 사용된 개념 (클릭하면 상세 설명!)</div>
+                            <div class="concept-badges">
+                                ${this.parsedConcepts.map(concept => {
+                                    const info = this.getConceptInfo(concept);
+                                    return html`
+                                        <button
+                                            class="concept-badge ${this.expandedConcept === concept ? 'expanded' : ''}"
+                                            @click=${() => this.toggleConcept(concept)}
+                                        >
+                                            <span class="concept-emoji">${info.emoji}</span>
+                                            <span>${concept}</span>
+                                        </button>
+                                    `;
+                                })}
+                            </div>
+                            ${this.expandedConcept ? html`
+                                <div class="concept-detail">
+                                    <div class="concept-detail-title">
+                                        <span>${this.getConceptInfo(this.expandedConcept).emoji}</span>
+                                        <span>${this.expandedConcept}</span>
+                                    </div>
+                                    <div class="concept-detail-text">
+                                        ${this.getConceptInfo(this.expandedConcept).detail}
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
                     ` : ''}
                 </div>
 
-                <!-- 개념 뱃지 -->
-                ${this.parsedConcepts.length > 0 ? html`
-                    <div class="concepts-section">
-                        <div class="concepts-title">💡 사용된 개념 (클릭하면 상세 설명!)</div>
-                        <div class="concept-badges">
-                            ${this.parsedConcepts.map(concept => {
-                                const info = this.getConceptInfo(concept);
-                                return html`
-                                    <button
-                                        class="concept-badge ${this.expandedConcept === concept ? 'expanded' : ''}"
-                                        @click=${() => this.toggleConcept(concept)}
-                                    >
-                                        <span class="concept-emoji">${info.emoji}</span>
-                                        <span>${concept}</span>
-                                    </button>
-                                `;
-                            })}
-                        </div>
-                        ${this.expandedConcept ? html`
-                            <div class="concept-detail">
-                                <div class="concept-detail-title">
-                                    <span>${this.getConceptInfo(this.expandedConcept).emoji}</span>
-                                    <span>${this.expandedConcept}</span>
-                                </div>
-                                <div class="concept-detail-text">
-                                    ${this.getConceptInfo(this.expandedConcept).detail}
-                                </div>
+                <!-- 오른쪽 패널: 코드 + 제출/복사 -->
+                <div class="right-panel">
+                    <div class="code-section">
+                        <div class="code-header">
+                            <div class="code-dots">
+                                <div class="code-dot red"></div>
+                                <div class="code-dot yellow"></div>
+                                <div class="code-dot green"></div>
                             </div>
-                        ` : ''}
-                    </div>
-                ` : ''}
-
-                <!-- 코드 블록 -->
-                <div class="code-section">
-                    <div class="code-header">
-                        <div class="code-dots">
-                            <div class="code-dot red"></div>
-                            <div class="code-dot yellow"></div>
-                            <div class="code-dot green"></div>
+                            <span class="code-title">빈칸을 채워주세요!</span>
                         </div>
-                        <span class="code-title">빈칸을 채워주세요!</span>
-                    </div>
-                    <div class="code-content">
-                        ${this.renderCodeWithBlanks()}
-                    </div>
-                </div>
-
-                <!-- 결과 메시지 -->
-                ${this.submitted && !this.allCorrect ? html`
-                    <div class="result-message ${this.correctCount > 0 ? 'partial' : 'wrong'}">
-                        ${this.correctCount > 0
-                            ? `${this.correctCount}/${totalBlanks}개 정답! 나머지도 맞춰보세요 💪`
-                            : '다시 한번 생각해보세요! 힌트: 개념 뱃지를 클릭해보세요 💡'
-                        }
-                    </div>
-                ` : ''}
-
-                <!-- 제출/복사 영역 -->
-                ${!this.allCorrect ? html`
-                    <div class="submit-section">
-                        <div class="lock-status">
-                            🔒 모든 빈칸을 맞춰야 복사 가능! (${this.submitted ? this.correctCount : 0}/${totalBlanks})
+                        <div class="code-content">
+                            ${this.renderCodeWithBlanks()}
                         </div>
-                        <button
-                            class="submit-btn"
-                            @click=${this.handleSubmit}
-                            ?disabled=${!allAnswered}
-                        >
-                            ✅ 제출하기
-                        </button>
-                        ${this.submitted ? html`
-                            <button class="reset-btn" @click=${this.handleReset}>
+                    </div>
+
+                    ${this.submitted && !this.allCorrect ? html`
+                        <div class="result-message ${this.correctCount > 0 ? 'partial' : 'wrong'}">
+                            ${this.correctCount > 0
+                                ? `${this.correctCount}/${totalBlanks}개 정답! 나머지도 맞춰보세요 💪`
+                                : '다시 한번 생각해보세요! 힌트: 개념 뱃지를 클릭해보세요 💡'
+                            }
+                        </div>
+                    ` : ''}
+
+                    ${!this.allCorrect ? html`
+                        <div class="submit-section">
+                            <div class="lock-status">
+                                🔒 모든 빈칸을 맞춰야 복사 가능! (${this.submitted ? this.correctCount : 0}/${totalBlanks})
+                            </div>
+                            <button
+                                class="submit-btn"
+                                @click=${this.handleSubmit}
+                                ?disabled=${!allAnswered}
+                            >
+                                ✅ 제출하기
+                            </button>
+                            ${this.submitted ? html`
+                                <button class="reset-btn" @click=${this.handleReset}>
+                                    🔄 다시 풀기
+                                </button>
+                            ` : ''}
+                        </div>
+                    ` : html`
+                        <div class="copy-section">
+                            <h3>🎉 모든 정답! (${totalBlanks}/${totalBlanks})</h3>
+                            <button
+                                class="copy-btn ${this.copied ? 'copied' : ''}"
+                                @click=${this.copyCode}
+                            >
+                                ${this.copied ? '✓ 복사됨!' : '📋 코드 복사하기'}
+                            </button>
+                            <div class="copy-hint">
+                                💡 로블록스 스튜디오에서 Part에 Script를 넣고 붙여넣기!
+                            </div>
+                            <button class="reset-btn" @click=${this.handleReset} style="margin-top: 1rem;">
                                 🔄 다시 풀기
                             </button>
-                        ` : ''}
-                    </div>
-                ` : html`
-                    <div class="copy-section">
-                        <h3>🎉 모든 정답! (${totalBlanks}/${totalBlanks})</h3>
-                        <button
-                            class="copy-btn ${this.copied ? 'copied' : ''}"
-                            @click=${this.copyCode}
-                        >
-                            ${this.copied ? '✓ 복사됨!' : '📋 코드 복사하기'}
-                        </button>
-                        <div class="copy-hint">
-                            💡 로블록스 스튜디오에서 Part에 Script를 넣고 붙여넣기!
                         </div>
-                        <button class="reset-btn" @click=${this.handleReset} style="margin-top: 1rem;">
-                            🔄 다시 풀기
-                        </button>
-                    </div>
-                `}
+                    `}
+                </div>
             </div>
         `;
     }
