@@ -2,78 +2,144 @@
 import LessonLayout from '../../../layouts/LessonLayout.astro';
 import HintBox from '../../../components/astro/HintBox.astro';
 
-// 퀴즈 옵션
-const quiz1Options = JSON.stringify(["HumanoidRootPart", "Head", "Torso", "Humanoid"]);
-const quiz2Options = JSON.stringify([":Destroy()", ":Remove()", ":Delete()", ":Kill()"]);
+// =========================================
+// MC 퀴즈 옵션 (최종 퀴즈용)
+// =========================================
+const quiz1Options = JSON.stringify(["CFrame", "Position", "Velocity", "Anchored"]);
+const quiz2Options = JSON.stringify(["while true + CFrame.Angles", "for + Position 변경", "if문 + Rotation", "Touched + CFrame"]);
+const quiz3Options = JSON.stringify(["Reverses = true", "RepeatCount = -1", "EasingStyle = Linear", "Direction = InOut"]);
 
 // =========================================
-// 드롭다운 퀴즈 데이터 (7개)
+// 드롭다운 퀴즈 데이터 (5개)
 // =========================================
 
-// 퀴즈 1: CFrame 좌표 이해 (텔레포트 좌표)
-const cframeBlanks = JSON.stringify([
+// 퀴즈 1: 킬 파트 (NEW)
+const killPartBlanks = JSON.stringify([
     { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
     { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
-    { id: "b3", correct: "HumanoidRootPart", options: ["Head", "HumanoidRootPart", "Torso", "Humanoid"] },
-    { id: "b4", correct: "CFrame.new(100, 20, 100)", options: ["CFrame.new(0, 0, 0)", "CFrame.new(100, 20, 100)", "CFrame.new(50, 10, 50)", "Vector3.new(100, 20, 100)"] }
+    { id: "b3", correct: "Health", options: ["HP", "Health", "Life", "MaxHealth"] },
+    { id: "b4", correct: "0", options: ["0", "1", "-1", "100"] }
 ]);
-const cframeTemplate = `-- ========================================
--- 🗺️ 좌표를 정해서 텔레포트!
+const killPartTemplate = `-- ========================================
+-- ☠️ 밟으면 죽는 킬 파트!
 -- ========================================
--- 📦 준비: Part 1개 (Anchored ✓) + Script
--- 💡 로블록스 좌표계:
---    X = 좌우 (+ 오른쪽, - 왼쪽)
---    Y = 높이 (+ 위, - 아래)
---    Z = 앞뒤 (+ 뒤, - 앞)
--- 💡 CFrame.new(X, Y, Z)로 위치 지정!
+-- 📦 준비: Part 1개 (빨간색, Anchored ✓, Neon)
+-- 💡 밟으면 → Humanoid 찾기 → 체력을 0으로!
 -- ========================================
 
--- 💡 이 스크립트가 붙어있는 파트를 가져와요
+-- 💡 이 스크립트가 붙어있는 파트 = 킬 파트
 local part = [b1]
-local debounce = false
 
--- 💡 Touched = 누군가 파트를 밟으면 실행!
+-- 💡 누군가 이 파트를 밟으면!
 part.Touched:Connect(function(hit)
-    -- 💡 debounce로 중복 실행 방지!
-    if debounce then return end
-
-    -- 💡 hit.Parent = 캐릭터, Humanoid 있으면 사람!
+    -- 💡 Humanoid 찾기 = 사람인지 확인!
     local humanoid = hit.Parent[b2]
     if humanoid then
-        debounce = true
-
-        -- 💡 캐릭터의 중심 파트를 찾아요
-        local rootPart = hit.Parent:FindFirstChild("[b3]")
-        if rootPart then
-            -- 💡 X=100, Y=20, Z=100 위치로 순간이동!
-            rootPart.CFrame = [b4]
-            print("먼 곳으로 텔레포트!")
-        end
-
-        task.wait(2)
-        debounce = false
+        -- 💡 6A에서 배운 Humanoid 속성!
+        -- Health를 0으로 설정 = 즉시 사망!
+        humanoid.[b3] = [b4]
     end
 end)`;
-const cframeFullCode = `-- 🗺️ 좌표를 정해서 텔레포트!
+const killPartFullCode = `-- ☠️ 킬 파트
 local part = script.Parent
-local debounce = false
 
 part.Touched:Connect(function(hit)
-    if debounce then return end
     local humanoid = hit.Parent:FindFirstChild("Humanoid")
     if humanoid then
-        debounce = true
-        local rootPart = hit.Parent:FindFirstChild("HumanoidRootPart")
-        if rootPart then
-            rootPart.CFrame = CFrame.new(100, 20, 100)
-            print("먼 곳으로 텔레포트!")
-        end
-        task.wait(2)
-        debounce = false
+        humanoid.Health = 0
     end
 end)`;
 
-// 퀴즈 2: 텔레포트 패드
+// 퀴즈 2: 회전 장애물 (NEW)
+const rotatingBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "while true do", options: ["for i = 1, 10 do", "while true do", "repeat", "if true then"] },
+    { id: "b3", correct: "CFrame.Angles(0, math.rad(5), 0)", options: ["CFrame.new(0, 5, 0)", "CFrame.Angles(0, math.rad(5), 0)", "Vector3.new(0, 5, 0)", "CFrame.Angles(5, 0, 0)"] },
+    { id: "b4", correct: "task.wait()", options: ["wait(1)", "task.wait()", "task.wait(1)", "task.delay(1)"] }
+]);
+const rotatingTemplate = `-- ========================================
+-- 🌀 빙글빙글 회전하는 장애물!
+-- ========================================
+-- 📦 준비: Part 1개 (긴 막대, Anchored ✓)
+--    Size 예시: 12, 2, 2 (가로로 긴 막대)
+-- 💡 CFrame.Angles로 매 프레임 조금씩 회전!
+-- 💡 math.rad() = 각도를 라디안으로 변환
+-- ========================================
+
+-- 💡 이 스크립트가 붙어있는 파트 = 장애물
+local part = [b1]
+
+-- 💡 무한 반복! (멈추지 않아요)
+[b2]
+    -- 💡 현재 위치에서 Y축으로 5도 회전!
+    -- CFrame.Angles(X축, Y축, Z축)
+    part.CFrame = part.CFrame * [b3]
+
+    -- 💡 다음 프레임까지 대기
+    [b4]
+end`;
+const rotatingFullCode = `-- 🌀 회전 장애물
+local part = script.Parent
+
+while true do
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(5), 0)
+    task.wait()
+end`;
+
+// 퀴즈 3: 움직이는 발판 (NEW)
+const movingBlanks = JSON.stringify([
+    { id: "b1", correct: "game:GetService(\"TweenService\")", options: ["game.TweenService", "game:GetService(\"TweenService\")", "require(\"TweenService\")", "workspace.TweenService"] },
+    { id: "b2", correct: "-1", options: ["0", "1", "-1", "10"] },
+    { id: "b3", correct: "true", options: ["true", "false", "nil", "1"] },
+    { id: "b4", correct: "tween:Play()", options: ["tween:Start()", "tween:Play()", "tween:Run()", "tween:Begin()"] }
+]);
+const movingTemplate = `-- ========================================
+-- ⬆️⬇️ 위아래로 움직이는 발판!
+-- ========================================
+-- 📦 준비: Part 1개 (넓은 발판, Anchored ✓)
+--    Size 예시: 8, 1, 8 (넓고 납작하게)
+-- 💡 TweenService = 부드러운 애니메이션 서비스
+-- 💡 RepeatCount = -1 → 무한 반복
+-- 💡 Reverses = true → 갔다가 돌아오기
+-- ========================================
+
+local part = script.Parent
+
+-- 💡 TweenService를 가져와요
+local TweenService = [b1]
+
+-- 💡 애니메이션 설정
+local tweenInfo = TweenInfo.new(
+    2,                           -- 2초 동안 이동
+    Enum.EasingStyle.Linear,     -- 일정한 속도
+    Enum.EasingDirection.InOut,  -- 부드럽게
+    [b2],                        -- 반복 횟수 (-1 = 무한!)
+    [b3]                         -- 왕복? (true = 갔다가 돌아옴!)
+)
+
+-- 💡 목표: 현재 위치에서 위로 20칸 이동!
+local goal = { Position = part.Position + Vector3.new(0, 20, 0) }
+
+-- 💡 Tween 만들고 재생!
+local tween = TweenService:Create(part, tweenInfo, goal)
+[b4]`;
+const movingFullCode = `-- ⬆️⬇️ 움직이는 발판
+local part = script.Parent
+local TweenService = game:GetService("TweenService")
+
+local tweenInfo = TweenInfo.new(
+    2,                           -- 2초 동안
+    Enum.EasingStyle.Linear,     -- 일정한 속도
+    Enum.EasingDirection.InOut,
+    -1,                          -- 무한 반복
+    true                         -- 왕복
+)
+
+local goal = { Position = part.Position + Vector3.new(0, 20, 0) }
+local tween = TweenService:Create(part, tweenInfo, goal)
+tween:Play()`;
+
+// 퀴즈 4: 텔레포트 패드 (기존 유지)
 const teleportBlanks = JSON.stringify([
     { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
     { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
@@ -134,297 +200,54 @@ part.Touched:Connect(function(hit)
     end
 end)`;
 
-// 퀴즈 3: 양방향 텔레포트
-const biTeleportBlanks = JSON.stringify([
-    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
-    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
-    { id: "b3", correct: "HumanoidRootPart", options: ["Head", "HumanoidRootPart", "Torso", "Humanoid"] },
-    { id: "b4", correct: "destination.Position + Vector3.new(0, 3, 0)", options: ["destination.Position", "destination.Position + Vector3.new(0, 3, 0)", "destination.CFrame", "Vector3.new(0, 3, 0)"] }
-]);
-const biTeleportTemplate = `-- ========================================
--- 🔄 A에서 B로 이동하는 양방향 텔레포트
--- ========================================
--- 📦 준비: Part 2개 (이름: TeleportA, TeleportB)
--- 💡 A를 밟으면 → B 위치로 순간이동!
--- 💡 Vector3.new(0, 3, 0) = 3칸 위에 도착
---    (바닥에 끼이지 않게!)
--- ========================================
-
--- 💡 이 스크립트가 붙은 파트 (TeleportA)
-local part = [b1]
--- 💡 도착할 파트 (TeleportB)를 찾아요
-local destination = workspace:FindFirstChild("TeleportB")
-local debounce = false
-
--- 💡 A 패드를 밟으면!
-part.Touched:Connect(function(hit)
-    if debounce then return end
-
-    -- 💡 사람인지 확인 + 도착지가 있는지 확인
-    local humanoid = hit.Parent[b2]
-    if humanoid and destination then
-        debounce = true
-
-        local rootPart = hit.Parent:FindFirstChild("[b3]")
-        if rootPart then
-            -- 💡 B 파트 위치 + 위로 3칸 (끼임 방지!)
-            rootPart.CFrame = CFrame.new([b4])
-            print("텔레포트 완료!")
-        end
-
-        task.wait(2)
-        debounce = false
-    end
-end)`;
-const biTeleportFullCode = `-- 🔄 양방향 텔레포트 (A → B)
-local part = script.Parent
-local destination = workspace:FindFirstChild("TeleportB")
-local debounce = false
-
-part.Touched:Connect(function(hit)
-    if debounce then return end
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid and destination then
-        debounce = true
-        local rootPart = hit.Parent:FindFirstChild("HumanoidRootPart")
-        if rootPart then
-            rootPart.CFrame = CFrame.new(destination.Position + Vector3.new(0, 3, 0))
-            print("텔레포트 완료!")
-        end
-        task.wait(2)
-        debounce = false
-    end
-end)`;
-
-// 퀴즈 4: 코인 수집 (1회성 - Destroy)
-const coinBlanks = JSON.stringify([
-    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
-    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
-    { id: "b3", correct: "1", options: ["0", "1", "5", "10"] },
-    { id: "b4", correct: ":Destroy()", options: [":Remove()", ":Destroy()", ":Delete()", ".Visible = false"] }
-]);
-const coinTemplate = `-- ========================================
--- 💰 먹으면 사라지는 코인!
--- ========================================
--- 📦 준비: 작은 Part (Anchored ✓, Neon, 노란색)
--- 💡 밟으면 → 점수 출력 → 코인 삭제!
--- 💡 :Destroy() = 파트를 완전히 삭제
---    (한번 먹으면 영원히 사라져요!)
--- ========================================
-
--- 💡 이 코인 파트를 가져와요
-local part = [b1]
--- 💡 코인 1개의 가치 (1점!)
-local coinValue = [b3]
-
--- 💡 누군가 코인을 밟으면!
-part.Touched:Connect(function(hit)
-    -- 💡 사람인지 확인
-    local humanoid = hit.Parent[b2]
-    if humanoid then
-        -- 💡 점수 알림!
-        print("+" .. coinValue .. " 코인!")
-        -- 💡 코인을 완전히 삭제!
-        part[b4]
-    end
-end)`;
-const coinFullCode = `-- 💰 1회성 코인
-local part = script.Parent
-local coinValue = 1
-
-part.Touched:Connect(function(hit)
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid then
-        print("+" .. coinValue .. " 코인!")
-        part:Destroy()  -- 영구 삭제!
-    end
-end)`;
-
-// 퀴즈 5: 코인 수집 시뮬레이션 (리스폰 코인 - 투명화)
-const respawnCoinBlanks = JSON.stringify([
-    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
-    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
-    { id: "b3", correct: "false", options: ["true", "false", "nil", "0"] },
-    { id: "b4", correct: "true", options: ["true", "false", "nil", "1"] }
-]);
-const respawnCoinTemplate = `-- ========================================
--- 🔄 먹어도 다시 나타나는 리스폰 코인!
--- ========================================
--- 📦 준비: 작은 Part (Anchored ✓, Neon, 노란색)
--- 💡 밟으면 → 투명해짐 → 5초 후 다시 나타남!
--- 💡 Transparency = 1 → 안 보임 (투명)
--- 💡 Transparency = 0 → 보임 (불투명)
--- 💡 CanCollide = false → 통과됨
--- 💡 CanCollide = true → 부딪힘
--- ========================================
-
--- 💡 이 코인 파트를 가져와요
-local part = [b1]
-local debounce = false
-
--- 💡 누군가 코인을 밟으면!
-part.Touched:Connect(function(hit)
-    -- 💡 이미 수집 중이면 무시
-    if debounce then return end
-
-    -- 💡 사람인지 확인
-    local humanoid = hit.Parent[b2]
-    if humanoid then
-        debounce = true
-
-        -- 💡 코인을 투명하게 + 통과되게!
-        part.Transparency = 1
-        part.CanCollide = [b3]
-        print("+1 코인!")
-
-        -- 💡 5초 기다렸다가...
-        task.wait(5)
-
-        -- 💡 다시 보이게 + 부딪히게!
-        part.Transparency = 0
-        part.CanCollide = [b4]
-        debounce = false
-    end
-end)`;
-const respawnCoinFullCode = `-- 🔄 리스폰 코인 (5초 후 재등장)
-local part = script.Parent
-local debounce = false
-
-part.Touched:Connect(function(hit)
-    if debounce then return end
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid then
-        debounce = true
-        part.Transparency = 1      -- 안 보이게
-        part.CanCollide = false    -- 통과되게
-        print("+1 코인!")
-        task.wait(5)               -- 5초 기다림
-        part.Transparency = 0      -- 다시 보이게
-        part.CanCollide = true     -- 다시 부딪히게
-        debounce = false
-    end
-end)`;
-
-// 퀴즈 6: 1회성 코인 점수 매기기 (coinValue 활용)
-const coinScoreBlanks = JSON.stringify([
-    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
-    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
-    { id: "b3", correct: "5", options: ["1", "3", "5", "10"] },
-    { id: "b4", correct: ":Destroy()", options: [":Remove()", ":Destroy()", ":Delete()", ".Visible = false"] }
-]);
-const coinScoreTemplate = `-- ========================================
--- ⭐ 5점짜리 고급 코인!
--- ========================================
--- 📦 준비: 큰 Part (Anchored ✓, Neon, 금색)
--- 💡 보통 코인(1점)보다 5배 가치!
--- 💡 어려운 곳에 배치하면 보상 느낌!
--- ========================================
-
--- 💡 이 코인 파트를 가져와요
-local part = [b1]
--- 💡 이 코인은 5점짜리! (보통은 1점)
-local coinValue = [b3]
-
--- 💡 누군가 코인을 밟으면!
-part.Touched:Connect(function(hit)
-    local humanoid = hit.Parent[b2]
-    if humanoid then
-        -- 💡 5점 획득 메시지!
-        print("⭐ +" .. coinValue .. " 코인! 대단해!")
-        -- 💡 코인 삭제
-        part[b4]
-    end
-end)`;
-const coinScoreFullCode = `-- ⭐ 5점짜리 고급 코인
-local part = script.Parent
-local coinValue = 5  -- 5점짜리!
-
-part.Touched:Connect(function(hit)
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid then
-        print("⭐ +" .. coinValue .. " 코인! 대단해!")
-        part:Destroy()
-    end
-end)`;
-
-// 퀴즈 7: 체크포인트 (스폰 위치 저장)
+// 퀴즈 5: 체크포인트 (기존 유지)
 const checkpointBlanks = JSON.stringify([
     { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
-    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
-    { id: "b3", correct: "\"Bright green\"", options: ["\"Bright red\"", "\"Bright green\"", "\"Bright blue\"", "\"Bright yellow\""] },
-    { id: "b4", correct: "part.CFrame + Vector3.new(0, 3, 0)", options: ["part.Position", "part.CFrame + Vector3.new(0, 3, 0)", "CFrame.new(0, 0, 0)", "workspace.SpawnLocation.CFrame"] }
+    { id: "b2", correct: ":GetPlayerFromCharacter(hit.Parent)", options: [":FindFirstChild(hit.Parent)", ":GetPlayerFromCharacter(hit.Parent)", ":GetPlayerByName(hit.Name)", ".LocalPlayer"] },
+    { id: "b3", correct: "checkpoint", options: ["part.Position", "checkpoint", "workspace.SpawnLocation", "CFrame.new(0, 5, 0)"] },
+    { id: "b4", correct: "\"Bright green\"", options: ["\"Bright red\"", "\"Bright green\"", "\"Bright blue\"", "\"Bright yellow\""] }
 ]);
 const checkpointTemplate = `-- ========================================
--- 🏁 체크포인트 (죽으면 여기서 부활!)
+-- 🏁 체크포인트 (SpawnLocation 방식)
 -- ========================================
--- 📦 준비: Part 1개 (Anchored ✓, 코스 중간)
--- 💡 밟으면 → 초록색으로 변경 (저장 완료!)
--- 💡 죽으면 → 이 파트 위에서 리스폰!
--- 💡 Vector3.new(0, 3, 0) = 3칸 위 (끼임 방지)
+-- 📦 준비: SpawnLocation 추가
+--    (Workspace → + 버튼 → SpawnLocation)
+-- 💡 속성 설정:
+--    AllowTeamChangeOnTouch = false
+--    Neutral = true, Duration = 0
+-- 💡 SpawnLocation 안에 Script 넣기!
 -- ========================================
 
--- 💡 이 체크포인트 파트
-local part = [b1]
-local debounce = false
+-- 💡 이 스크립트가 들어있는 SpawnLocation
+local checkpoint = [b1]
 
--- 💡 체크포인트를 밟으면!
-part.Touched:Connect(function(hit)
-    if debounce then return end
-
-    local humanoid = hit.Parent[b2]
-    if humanoid then
-        debounce = true
+-- 💡 누군가 체크포인트를 밟으면!
+checkpoint.Touched:Connect(function(hit)
+    -- 💡 밟은 캐릭터 → 플레이어 찾기
+    local player = game.Players[b2]
+    if player then
+        -- 💡 이 체크포인트를 부활 지점으로 저장!
+        player.RespawnLocation = [b3]
 
         -- 💡 초록색으로 바꿔서 "저장됨!" 표시
-        part.BrickColor = BrickColor.new([b3])
+        checkpoint.BrickColor = BrickColor.new([b4])
         print("체크포인트 저장!")
-
-        -- 💡 이 캐릭터가 죽으면 여기서 부활!
-        humanoid.Died:Connect(function()
-            task.wait(3)
-            local player = game.Players:GetPlayerFromCharacter(hit.Parent)
-            if player and player.Character then
-                local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    -- 💡 체크포인트 위치 + 3칸 위에 부활!
-                    rootPart.CFrame = [b4]
-                end
-            end
-        end)
-
-        task.wait(1)
-        debounce = false
     end
 end)`;
-const checkpointFullCode = `-- 🏁 체크포인트
-local part = script.Parent
-local debounce = false
+const checkpointFullCode = `-- 🏁 체크포인트 (SpawnLocation)
+local checkpoint = script.Parent
 
-part.Touched:Connect(function(hit)
-    if debounce then return end
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid then
-        debounce = true
-        part.BrickColor = BrickColor.new("Bright green")  -- 저장 표시!
+checkpoint.Touched:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        player.RespawnLocation = checkpoint
+        checkpoint.BrickColor = BrickColor.new("Bright green")
         print("체크포인트 저장!")
-
-        humanoid.Died:Connect(function()
-            task.wait(3)
-            local player = game.Players:GetPlayerFromCharacter(hit.Parent)
-            if player and player.Character then
-                local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
-                if rootPart then
-                    rootPart.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-                end
-            end
-        end)
-        task.wait(1)
-        debounce = false
     end
 end)`;
 ---
 
-<LessonLayout title="미니 오비 만들기" lessonNumber={6} totalSlides={12}>
+<LessonLayout title="미니 오비 만들기" lessonNumber={6} totalSlides={14}>
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
@@ -434,21 +257,24 @@ end)`;
                     미니 <span class="text-neon-mint">오비</span> 만들기
                 </h1>
                 <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
-                    텔레포트, 코인 수집, 장애물을 조합해서<br>
-                    나만의 미니 오비(장애물 코스)를 설계해요!
+                    킬 파트, 회전 장애물, 움직이는 발판을 조합해서<br>
+                    나만의 미니 오비(장애물 코스)를 만들어요!
                 </p>
                 <div class="flex gap-3 justify-center flex-wrap">
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🌀 텔레포트 패드</span>
+                        <span class="font-bold">☠️ 킬 파트</span>
                     </div>
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">💰 코인 수집</span>
+                        <span class="font-bold">🌀 회전 장애물</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⬆️ 움직이는 발판</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🌀 텔레포트</span>
                     </div>
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
                         <span class="font-bold">🏁 체크포인트</span>
-                    </div>
-                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🎮 장애물 코스</span>
                     </div>
                 </div>
 
@@ -456,93 +282,409 @@ end)`;
                     <div class="text-3xl mb-2">🎯</div>
                     <h3 class="font-bold mb-2">오늘의 목표</h3>
                     <ul class="text-left text-sm text-ink-light space-y-1">
-                        <li>✓ 텔레포트 패드로 순간이동 구현하기</li>
-                        <li>✓ 코인 수집 시스템 만들기</li>
-                        <li>✓ 체크포인트 + 장애물 코스 설계하기</li>
+                        <li>✓ 킬 파트로 위험 구역 만들기</li>
+                        <li>✓ 회전 장애물 &amp; 움직이는 발판 구현</li>
+                        <li>✓ 텔레포트 패드 + 체크포인트 설계</li>
                     </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 2: 텔레포트 개념 -->
+    <!-- 슬라이드 2: 오비 기본 설정 - SpawnLocation -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
-                <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">텔레포트의 원리</h2>
+                <span class="badge badge-roblox mb-4">Step 1</span>
+                <h2 class="title-section mb-6">오비 기본 설정</h2>
             </div>
 
-            <div class="flex flex-col gap-8">
-                <div class="animate-in">
-                    <div class="lesson-card">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span class="text-2xl">🌀</span>
-                            캐릭터를 순간이동시키기
-                        </h3>
-                        <p class="text-ink-light mb-4">
-                            캐릭터의 위치를 바꾸려면 <strong>HumanoidRootPart</strong>의 <strong>CFrame</strong>을 변경해요!<br>
-                            HumanoidRootPart는 캐릭터의 "중심" 파트예요.
-                        </p>
-                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4">
-                            <div class="text-sm font-bold mb-3">🌳 캐릭터에서 RootPart 찾기</div>
-                            <div class="font-mono text-sm space-y-1">
-                                <div>📁 <strong>Character</strong></div>
-                                <div class="ml-4">├ 🧠 Humanoid (6A에서 배움!)</div>
-                                <div class="ml-4">├ 🎯 <strong class="text-violet-600">HumanoidRootPart</strong> ← 이걸 이동!</div>
-                                <div class="ml-4">├ 🗣️ Head</div>
-                                <div class="ml-4">└ ... (팔, 다리 등)</div>
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🟢</span>
+                        SpawnLocation이란?
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        캐릭터가 <strong>처음 등장</strong>하거나 <strong>죽었을 때 부활</strong>하는 위치예요!<br>
+                        새 게임을 만들면 Baseplate 위에 기본으로 하나 있어요.
+                    </p>
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4">
+                        <div class="text-sm font-bold mb-3">📋 SpawnLocation 설정법</div>
+                        <ol class="text-sm space-y-2 list-decimal list-inside">
+                            <li>Workspace에서 <strong>+ 버튼</strong> → <strong>SpawnLocation</strong> 추가</li>
+                            <li>Properties에서 설정:
+                                <ul class="ml-6 mt-1 space-y-1 list-disc">
+                                    <li><code>AllowTeamChangeOnTouch</code> = <strong>false</strong></li>
+                                    <li><code>Neutral</code> = <strong>true</strong></li>
+                                    <li><code>Duration</code> = <strong>0</strong> (깜빡임 방지)</li>
+                                </ul>
+                            </li>
+                            <li>코스 시작 지점에 배치!</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-2 border-neon-coral/30">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">⚠️</span>
+                        Baseplate 처리하기
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        오비에서는 떨어지면 죽어야 해요! 두 가지 방법:
+                    </p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-red-50 rounded-xl">
+                            <div class="font-bold text-sm mb-2">방법 1: Baseplate = 킬 존</div>
+                            <div class="text-sm text-ink-light">
+                                Baseplate에 Kill 스크립트를 넣으면<br>
+                                떨어졌을 때 바로 사망!
+                            </div>
+                        </div>
+                        <div class="p-4 bg-blue-50 rounded-xl">
+                            <div class="font-bold text-sm mb-2">방법 2: Baseplate 삭제</div>
+                            <div class="text-sm text-ink-light">
+                                Baseplate를 삭제하고<br>
+                                아래에 큰 KillPart를 배치!<br>
+                                (Y = -50 정도)
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="animate-in">
-                    <div class="lesson-card">
-                        <h3 class="font-bold text-lg mb-4">텔레포트 코드 패턴</h3>
-                        <lua-code-block title="텔레포트 기본" show-line-numbers>
--- 1. Humanoid 확인 (사람인지 체크)
-local humanoid = hit.Parent:FindFirstChild("Humanoid")
-if humanoid then
-    -- 2. HumanoidRootPart 찾기 (캐릭터 중심)
-    local rootPart = hit.Parent:FindFirstChild("HumanoidRootPart")
-    if rootPart then
-        -- 3. CFrame 변경 = 순간이동!
-        rootPart.CFrame = CFrame.new(50, 10, 50)
-    end
-end
-                        </lua-code-block>
-                    </div>
-                </div>
-
-                <HintBox type="info" title="CFrame vs Position">
-                    <strong>Position</strong>은 위치만 바꾸지만 캐릭터가 끼일 수 있어요.<br>
-                    <strong>CFrame</strong>은 위치+방향을 바꿔서 안전하게 텔레포트! 항상 CFrame을 쓰세요.
+                <HintBox type="tip" title="오비 시작 설정 순서">
+                    1. Baseplate를 킬 존으로 만들기 (또는 삭제 후 KillPart 배치)<br>
+                    2. SpawnLocation을 코스 시작점에 배치<br>
+                    3. 점프할 플랫폼(Part)들을 Anchored ✓로 배치<br>
+                    → 이것만으로 기본 오비 완성!
                 </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 3: CFrame 좌표 실습 (드롭다운 퀴즈로 대체) -->
+    <!-- 슬라이드 3: 킬 파트 개념 + 코드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">Step 2</span>
+                <h2 class="title-section mb-6">킬 파트 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">☠️</span>
+                        킬 파트란?
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        밟으면 <strong>캐릭터가 죽는</strong> 위험 파트예요!<br>
+                        용암, 가시, 레이저 등 다양한 장애물에 사용해요.
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-3 mb-4">
+                        <div class="p-3 bg-red-50 rounded-xl text-center">
+                            <div class="text-2xl mb-1">🔥</div>
+                            <div class="text-sm font-bold">용암</div>
+                            <div class="text-xs text-ink-light">빨간색 + Neon</div>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-xl text-center">
+                            <div class="text-2xl mb-1">🗡️</div>
+                            <div class="text-sm font-bold">가시</div>
+                            <div class="text-xs text-ink-light">뾰족한 Wedge</div>
+                        </div>
+                        <div class="p-3 bg-red-50 rounded-xl text-center">
+                            <div class="text-2xl mb-1">⚡</div>
+                            <div class="text-sm font-bold">레이저</div>
+                            <div class="text-xs text-ink-light">얇은 Part + Neon</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">킬 파트 코드</h3>
+                    <p class="text-ink-light mb-3">
+                        6A에서 배운 <strong>Humanoid.Health</strong>를 활용해요!<br>
+                        Health를 0으로 설정하면 캐릭터가 즉시 사망합니다.
+                    </p>
+                    <lua-code-block title="KillPart.lua" show-line-numbers>
+-- Part (빨간색, Anchored ✓, Neon) 안에 Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0  -- 즉시 사망!
+    end
+end)
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="info" title="debounce가 필요 없는 이유">
+                    킬 파트는 한 번 닿으면 바로 죽으니까 <strong>debounce가 필요 없어요!</strong><br>
+                    죽은 뒤에는 Humanoid가 사라져서 다시 실행되지 않아요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 킬 파트 퀴즈 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🗺️ 좌표를 정해서 텔레포트"
-                setup="Part 1개 (Anchored ✓, 납작하게 Size: 6, 0.5, 6)"
-                concepts='["script.Parent", "Touched", "Humanoid", "HumanoidRootPart", "CFrame", "debounce"]'
-                blanks={cframeBlanks}
-                template={cframeTemplate}
-                full-code={cframeFullCode}
+                name="☠️ 킬 파트 (밟으면 사망!)"
+                setup="Part 1개 (빨간색, Anchored ✓, Material = Neon) + Script"
+                concepts='["script.Parent", "Touched", "Humanoid", "Health"]'
+                blanks={killPartBlanks}
+                template={killPartTemplate}
+                full-code={killPartFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 4: 텔레포트 퀴즈 -->
+    <!-- 슬라이드 5: 회전 장애물 개념 + 코드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">Step 3</span>
+                <h2 class="title-section mb-6">회전 장애물 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🌀</span>
+                        CFrame.Angles로 파트 회전!
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        <strong>CFrame.Angles(X, Y, Z)</strong>로 파트를 회전시킬 수 있어요!<br>
+                        <strong>math.rad()</strong>로 각도(도)를 라디안으로 변환해요.
+                    </p>
+                    <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4 mb-4">
+                        <div class="text-sm font-bold mb-3">🎡 회전축 설명</div>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div class="p-2 bg-white rounded-lg">
+                                <div class="font-bold text-red-500">X축</div>
+                                <div class="text-xs text-ink-light">앞뒤로 회전</div>
+                                <div class="text-lg">↕️</div>
+                            </div>
+                            <div class="p-2 bg-white rounded-lg border-2 border-violet-300">
+                                <div class="font-bold text-violet-600">Y축</div>
+                                <div class="text-xs text-ink-light">좌우로 회전</div>
+                                <div class="text-lg">🔄</div>
+                            </div>
+                            <div class="p-2 bg-white rounded-lg">
+                                <div class="font-bold text-blue-500">Z축</div>
+                                <div class="text-xs text-ink-light">옆으로 회전</div>
+                                <div class="text-lg">🔃</div>
+                            </div>
+                        </div>
+                        <div class="text-xs text-ink-light text-center mt-2">
+                            대부분의 오비 장애물은 <strong class="text-violet-600">Y축 회전</strong>을 사용해요!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">회전 장애물 코드</h3>
+                    <p class="text-ink-light mb-3">
+                        <strong>while true do</strong> 무한 반복 안에서<br>
+                        매 프레임마다 조금씩 회전시켜요!
+                    </p>
+                    <lua-code-block title="SpinObstacle.lua" show-line-numbers>
+-- Part (긴 막대, Size: 12,2,2, Anchored ✓) + Script
+local part = script.Parent
+
+while true do
+    -- 현재 위치에서 Y축으로 5도 회전!
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(5), 0)
+    -- 다음 프레임까지 대기
+    task.wait()
+end
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="tip" title="회전 속도 조절">
+                    <strong>math.rad(5)</strong>의 숫자를 바꾸면 속도가 달라져요!<br>
+                    • <code>math.rad(2)</code> → 느린 회전<br>
+                    • <code>math.rad(5)</code> → 보통 속도<br>
+                    • <code>math.rad(10)</code> → 빠른 회전<br>
+                    킬 파트와 조합하면 더 어려운 장애물이 돼요!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 회전 장애물 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🌀 회전 장애물 (빙글빙글!)"
+                setup="Part 1개 (긴 막대, Size: 12, 2, 2, Anchored ✓) + Script"
+                concepts='["script.Parent", "while true do", "CFrame.Angles", "math.rad", "task.wait"]'
+                blanks={rotatingBlanks}
+                template={rotatingTemplate}
+                full-code={rotatingFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 움직이는 발판 개념 + 코드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">Step 4</span>
+                <h2 class="title-section mb-6">움직이는 발판 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">⬆️</span>
+                        TweenService란?
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        <strong>TweenService</strong>는 파트를 <strong>부드럽게 이동/회전/크기 변경</strong>시키는 서비스예요!<br>
+                        while 반복문보다 훨씬 깔끔하고 부드러워요.
+                    </p>
+                    <div class="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-4">
+                        <div class="text-sm font-bold mb-3">📋 TweenInfo 파라미터</div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <code class="bg-white px-2 py-0.5 rounded text-xs">시간</code>
+                                <span class="text-ink-light">몇 초 동안 이동할지 (예: 2초)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="bg-white px-2 py-0.5 rounded text-xs">EasingStyle</code>
+                                <span class="text-ink-light">속도 곡선 (Linear = 일정)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="bg-white px-2 py-0.5 rounded text-xs font-bold text-violet-600">RepeatCount</code>
+                                <span class="text-ink-light"><strong>-1 = 무한 반복!</strong> (0=1회, 3=3회)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="bg-white px-2 py-0.5 rounded text-xs font-bold text-violet-600">Reverses</code>
+                                <span class="text-ink-light"><strong>true = 왕복!</strong> (갔다가 돌아옴)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">움직이는 발판 코드</h3>
+                    <lua-code-block title="MovingPlatform.lua" show-line-numbers>
+-- Part (넓은 발판, Size: 8,1,8, Anchored ✓) + Script
+local part = script.Parent
+local TweenService = game:GetService("TweenService")
+
+local tweenInfo = TweenInfo.new(
+    2,                           -- 2초 동안
+    Enum.EasingStyle.Linear,     -- 일정한 속도
+    Enum.EasingDirection.InOut,
+    -1,                          -- 무한 반복
+    true                         -- 왕복 (갔다 돌아옴)
+)
+
+-- 현재 위치에서 위로 20칸!
+local goal = {'{'}Position = part.Position + Vector3.new(0, 20, 0){'}'}
+local tween = TweenService:Create(part, tweenInfo, goal)
+tween:Play()  -- 재생!
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="tip" title="이동 방향 바꾸기">
+                    <strong>Vector3.new(X, Y, Z)</strong>에서 값을 바꾸면 방향이 달라져요!<br>
+                    • <code>Vector3.new(0, 20, 0)</code> → 위아래 이동<br>
+                    • <code>Vector3.new(20, 0, 0)</code> → 좌우 이동<br>
+                    • <code>Vector3.new(0, 0, 20)</code> → 앞뒤 이동
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 움직이는 발판 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⬆️⬇️ 움직이는 발판 (TweenService)"
+                setup="Part 1개 (넓은 발판, Size: 8, 1, 8, Anchored ✓) + Script"
+                concepts='["TweenService", "TweenInfo", "RepeatCount", "Reverses", ":Play()"]'
+                blanks={movingBlanks}
+                template={movingTemplate}
+                full-code={movingFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 텔레포트 패드 개념 + 코드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">Step 5</span>
+                <h2 class="title-section mb-6">텔레포트 패드 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🌀</span>
+                        CFrame으로 순간이동!
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        캐릭터의 위치를 바꾸려면 <strong>HumanoidRootPart</strong>의 <strong>CFrame</strong>을 변경해요!<br>
+                        <code>CFrame.new(X, Y, Z)</code>로 좌표를 지정하면 순간이동!
+                    </p>
+                    <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4 mb-4">
+                        <div class="text-sm font-bold mb-3">🌳 캐릭터에서 RootPart 찾기</div>
+                        <div class="font-mono text-sm space-y-1">
+                            <div>📁 <strong>Character</strong></div>
+                            <div class="ml-4">├ 🧠 Humanoid (6A에서 배움!)</div>
+                            <div class="ml-4">├ 🎯 <strong class="text-violet-600">HumanoidRootPart</strong> ← 이걸 이동!</div>
+                            <div class="ml-4">├ 🗣️ Head</div>
+                            <div class="ml-4">└ ... (팔, 다리 등)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">텔레포트 패드 코드</h3>
+                    <lua-code-block title="TeleportPad.lua" show-line-numbers>
+-- Part (납작, Anchored ✓, Neon) + Script
+-- 💡 좌표(X, Y, Z)를 게임에 맞게 수정하세요!
+local part = script.Parent
+local debounce = false
+
+part.Touched:Connect(function(hit)
+    if debounce then return end
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        debounce = true
+        local rootPart = hit.Parent:FindFirstChild("HumanoidRootPart")
+        if rootPart then
+            -- 골인 지점 좌표 (X, Y, Z)
+            rootPart.CFrame = CFrame.new(50, 10, 50)
+        end
+        task.wait(2)
+        debounce = false
+    end
+end)
+                    </lua-code-block>
+                </div>
+
+                <HintBox type="warning" title="양방향 텔레포트 주의!">
+                    A패드 → B패드로 텔레포트하면, B패드의 Touched가 발동해서<br>
+                    <strong>A→B→A→B... 무한 루프</strong>가 발생할 수 있어요!<br>
+                    해결법: <strong>착지 지점(Landing Part)</strong>을 따로 만들어서<br>
+                    패드가 아닌 빈 파트 위에 착지하게 하면 루프가 발생하지 않아요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 텔레포트 퀴즈 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
                 name="🌀 텔레포트 패드"
-                setup="Part 1개 (Anchored ✓, 납작하게 Size: 6, 0.5, 6)"
+                setup="Part 1개 (Anchored ✓, 납작하게 Size: 6, 0.5, 6) + Script"
                 concepts='["script.Parent", "Touched", "Humanoid", "HumanoidRootPart", "CFrame"]'
                 blanks={teleportBlanks}
                 template={teleportTemplate}
@@ -551,215 +693,167 @@ end
         </div>
     </section>
 
-    <!-- 슬라이드 5: 양방향 텔레포트 퀴즈 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🔄 양방향 텔레포트 (A → B)"
-                setup="Part 2개 (TeleportA, TeleportB 이름 지정, Anchored ✓)"
-                concepts='["script.Parent", "Touched", "Humanoid", "HumanoidRootPart", "CFrame", "Vector3"]'
-                blanks={biTeleportBlanks}
-                template={biTeleportTemplate}
-                full-code={biTeleportFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 6: 아이템 수집 개념 -->
+    <!-- 슬라이드 11: 체크포인트 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
-                <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">코인 수집 시스템</h2>
+                <span class="badge badge-roblox mb-4">Step 6</span>
+                <h2 class="title-section mb-6">체크포인트 만들기</h2>
             </div>
 
-            <div class="flex flex-col gap-6">
-                <div class="animate-in">
-                    <div class="lesson-card">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span class="text-2xl">💰</span>
-                            코인을 먹으면 사라지기!
-                        </h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div class="p-4 bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl">
-                                <div class="text-2xl mb-2 text-center">🗑️</div>
-                                <div class="font-bold text-center mb-2">:Destroy()</div>
-                                <div class="text-sm text-ink-light">
-                                    파트를 완전히 삭제해요!<br>
-                                    한 번 먹으면 영원히 사라짐
-                                </div>
-                            </div>
-                            <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-                                <div class="text-2xl mb-2 text-center">👻</div>
-                                <div class="font-bold text-center mb-2">투명 + 재등장</div>
-                                <div class="text-sm text-ink-light">
-                                    투명하게 만든 후 시간이 지나면 다시 등장!<br>
-                                    Transparency + CanCollide
-                                </div>
-                            </div>
-                        </div>
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🏁</span>
+                        체크포인트 = SpawnLocation!
+                    </h3>
+                    <p class="text-ink-light mb-4">
+                        체크포인트는 <strong>SpawnLocation</strong>을 활용해요!<br>
+                        플레이어가 밟으면 <code>RespawnLocation</code>을 변경해서<br>
+                        다음에 죽었을 때 <strong>여기서 부활</strong>하게 만들어요.
+                    </p>
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4">
+                        <div class="text-sm font-bold mb-3">🔧 체크포인트 만드는 법</div>
+                        <ol class="text-sm space-y-2 list-decimal list-inside">
+                            <li>코스 중간에 <strong>SpawnLocation</strong> 추가</li>
+                            <li>속성 설정: <code>AllowTeamChangeOnTouch = false</code></li>
+                            <li><code>Neutral = true</code>, <code>Duration = 0</code></li>
+                            <li>SpawnLocation 안에 <strong>Script</strong> 추가</li>
+                            <li>아래 코드 입력!</li>
+                        </ol>
                     </div>
                 </div>
 
-                <div class="animate-in">
-                    <div class="lesson-card">
-                        <h3 class="font-bold text-lg mb-4">코드 비교</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <div class="text-sm text-neon-coral font-bold mb-1">1회성 코인 (Destroy)</div>
-                                <lua-code-block>
-part.Touched:Connect(function(hit)
-    local h = hit.Parent:FindFirstChild("Humanoid")
-    if h then
-        print("+1 코인!")
-        part:Destroy()  -- 영구 삭제
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">체크포인트 핵심 코드</h3>
+                    <lua-code-block title="Checkpoint.lua" show-line-numbers>
+-- SpawnLocation 안에 Script 넣기!
+-- 속성: AllowTeamChangeOnTouch = false
+--       Neutral = true, Duration = 0
+local checkpoint = script.Parent
+
+checkpoint.Touched:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        -- 핵심! 부활 위치를 이 체크포인트로!
+        player.RespawnLocation = checkpoint
+        checkpoint.BrickColor = BrickColor.new("Bright green")
+        print("체크포인트 저장!")
     end
 end)
-                                </lua-code-block>
-                            </div>
-                            <div>
-                                <div class="text-sm text-neon-mint font-bold mb-1">리스폰 코인 (투명화)</div>
-                                <lua-code-block>
-part.Touched:Connect(function(hit)
-    local h = hit.Parent:FindFirstChild("Humanoid")
-    if h then
-        print("+1 코인!")
-        part.Transparency = 1     -- 투명
-        part.CanCollide = false   -- 통과
-        task.wait(5)              -- 5초 후
-        part.Transparency = 0     -- 다시 보임
-        part.CanCollide = true    -- 다시 충돌
-    end
-end)
-                                </lua-code-block>
-                            </div>
-                        </div>
-                    </div>
+                    </lua-code-block>
                 </div>
 
-                <HintBox type="tip" title="CanCollide란?">
-                    <strong>CanCollide = true</strong>: 다른 파트와 부딪힘 (기본값)<br>
-                    <strong>CanCollide = false</strong>: 통과함 (투명 코인이 발에 안 걸리게!)
+                <HintBox type="warning" title="왜 SpawnLocation을 사용하나요?">
+                    일반 Part에서 <code>Died</code> 이벤트로 부활시키는 방법은 <strong>버그가 많아요!</strong><br>
+                    캐릭터가 죽으면 기존 캐릭터가 삭제되어 참조가 끊어져요.<br>
+                    <strong>SpawnLocation + RespawnLocation</strong>은 로블록스가 자동 처리해줘서 안전!
                 </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 7: 코인 수집 퀴즈 (드롭다운 퀴즈로 대체) -->
+    <!-- 슬라이드 12: 체크포인트 퀴즈 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="💰 코인 수집 (1회성)"
-                setup="Part 여러 개 (작은 정육면체, Neon 재질, 노란색, Anchored ✓)"
-                concepts='["script.Parent", "Touched", "Humanoid", ":Destroy()"]'
-                blanks={coinBlanks}
-                template={coinTemplate}
-                full-code={coinFullCode}
+                name="🏁 체크포인트 (SpawnLocation 방식)"
+                setup="SpawnLocation 추가 → 속성 설정 (AllowTeamChangeOnTouch=false, Neutral=true, Duration=0) → Script 추가"
+                concepts='["script.Parent", "Touched", "Players", "GetPlayerFromCharacter", "RespawnLocation", "BrickColor"]'
+                blanks={checkpointBlanks}
+                template={checkpointTemplate}
+                full-code={checkpointFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 8: 리스폰 코인 퀴즈 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🔄 리스폰 코인 (5초 후 재등장)"
-                setup="Part 여러 개 (작은 정육면체, Neon 재질, 노란색, Anchored ✓)"
-                concepts='["script.Parent", "Touched", "Humanoid", "Transparency", "CanCollide", "debounce"]'
-                blanks={respawnCoinBlanks}
-                template={respawnCoinTemplate}
-                full-code={respawnCoinFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 9: 고급 코인 퀴즈 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="⭐ 5점짜리 고급 코인"
-                setup="큰 Part 1개 (Anchored ✓, Neon 재질, 금색, 어려운 곳에 배치)"
-                concepts='["script.Parent", "Touched", "Humanoid", ":Destroy()"]'
-                blanks={coinScoreBlanks}
-                template={coinScoreTemplate}
-                full-code={coinScoreFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 10: 장애물 코스 조합 + 스튜디오 가이드 -->
+    <!-- 슬라이드 13: 전체 코스 구성도 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
-                <span class="badge badge-roblox mb-4">🎮 종합</span>
-                <h2 class="title-section mb-6">미니 오비 설계하기</h2>
+                <span class="badge badge-roblox mb-4">완성!</span>
+                <h2 class="title-section mb-6">전체 코스 구성도</h2>
             </div>
 
             <div class="flex flex-col gap-6 animate-in">
-                <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">지금까지 배운 것 총동원!</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        <div class="p-3 bg-red-50 rounded-xl text-center">
-                            <div class="text-2xl mb-1">☠️</div>
-                            <div class="font-bold text-sm">킬 파트</div>
-                            <div class="text-xs text-ink-light">4주차</div>
-                        </div>
-                        <div class="p-3 bg-blue-50 rounded-xl text-center">
-                            <div class="text-2xl mb-1">🌀</div>
-                            <div class="font-bold text-sm">회전 장애물</div>
-                            <div class="text-xs text-ink-light">5주차</div>
-                        </div>
-                        <div class="p-3 bg-violet-50 rounded-xl text-center">
-                            <div class="text-2xl mb-1">🏃</div>
-                            <div class="font-bold text-sm">Humanoid</div>
-                            <div class="text-xs text-ink-light">6주차 A</div>
-                        </div>
-                        <div class="p-3 bg-green-50 rounded-xl text-center">
-                            <div class="text-2xl mb-1">🌀💰🏁</div>
-                            <div class="font-bold text-sm">오늘!</div>
-                            <div class="text-xs text-ink-light">6주차 B</div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="lesson-card border-2 border-neon-mint/30">
                     <h4 class="font-bold mb-3 flex items-center gap-2">
                         <span class="text-xl">🗺️</span>
-                        오비 코스 예시 설계
+                        미니 오비 코스 예시
                     </h4>
                     <div class="bg-gradient-to-r from-sky-50 to-blue-50 rounded-xl p-4 font-mono text-sm space-y-2">
-                        <div>🟢 <strong>스타트</strong> → SpawnLocation</div>
+                        <div>🟢 <strong>스타트</strong> → SpawnLocation (Step 1)</div>
                         <div class="ml-4">↓ 점프 구간 (플랫폼 5개)</div>
-                        <div>💰 <strong>코인 3개</strong> → 리스폰 코인 배치</div>
-                        <div class="ml-4">↓ 회전 장애물 구간</div>
-                        <div>🔴 <strong>킬 파트</strong> → 떨어지면 사망</div>
+                        <div>🔴 <strong>킬 파트</strong> → 떨어지면 사망 (Step 2)</div>
                         <div class="ml-4">↓ 좁은 통로</div>
-                        <div>🏁 <strong>체크포인트</strong> → 여기서 리스폰!</div>
-                        <div class="ml-4">↓ 움직이는 발판 구간</div>
-                        <div>💰 <strong>코인 3개</strong> → 보너스 코인</div>
+                        <div>🌀 <strong>회전 장애물</strong> → 피해서 지나가기 (Step 3)</div>
+                        <div class="ml-4">↓ 점프 구간</div>
+                        <div>🏁 <strong>체크포인트 1</strong> → SpawnLocation (Step 6)</div>
+                        <div class="ml-4">↓ 어려운 점프 구간</div>
+                        <div>⬆️ <strong>움직이는 발판</strong> → 타이밍 맞춰 점프 (Step 4)</div>
                         <div class="ml-4">↓ 마지막 점프</div>
-                        <div>🌀 <strong>텔레포트</strong> → 골인 지점으로!</div>
+                        <div>🌀 <strong>텔레포트</strong> → 골인 지점으로! (Step 5)</div>
                         <div>🏆 <strong>골인!</strong></div>
                     </div>
                 </div>
 
-                <!-- 복붙 예제 -->
-                <div class="lesson-card border-2 border-neon-mint/30">
+                <div class="lesson-card">
                     <h4 class="font-bold mb-3 flex items-center gap-2">
                         <span class="text-xl">📋</span>
-                        복사해서 바로 테스트!
+                        코스에 넣을 스크립트 총정리
                     </h4>
 
                     <div class="grid md:grid-cols-2 gap-4">
                         <div>
-                            <div class="text-sm text-neon-sky font-bold mb-2">🌀 텔레포트 패드</div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">☠️ 킬 파트</div>
+                            <lua-code-block title="KillPart.lua">
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local h = hit.Parent:FindFirstChild("Humanoid")
+    if h then
+        h.Health = 0
+    end
+end)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-violet-600 font-bold mb-2">🌀 회전 장애물</div>
+                            <lua-code-block title="SpinObstacle.lua">
+local part = script.Parent
+
+while true do
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(5), 0)
+    task.wait()
+end
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">⬆️ 움직이는 발판</div>
+                            <lua-code-block title="MovingPlatform.lua">
+local part = script.Parent
+local TS = game:GetService("TweenService")
+
+local info = TweenInfo.new(2,
+    Enum.EasingStyle.Linear,
+    Enum.EasingDirection.InOut,
+    -1, true)
+
+local goal = {'{'}
+    Position = part.Position + Vector3.new(0, 20, 0)
+{'}'}
+TS:Create(part, info, goal):Play()
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🌀 텔레포트 패드</div>
                             <lua-code-block title="TeleportPad.lua">
--- ========================================
--- 🌀 텔레포트 패드
--- ========================================
--- 📦 Part (Anchored ✓, Neon) + Script
--- 💡 좌표를 게임에 맞게 수정하세요!
--- ========================================
+-- 일방향이라 A→B→A 루프 걱정 없음!
 local part = script.Parent
 local debounce = false
 
@@ -771,7 +865,6 @@ part.Touched:Connect(function(hit)
         local root = hit.Parent:FindFirstChild("HumanoidRootPart")
         if root then
             root.CFrame = CFrame.new(50, 10, 50)
-            print("텔레포트!")
         end
         task.wait(2)
         debounce = false
@@ -779,111 +872,33 @@ part.Touched:Connect(function(hit)
 end)
                             </lua-code-block>
                         </div>
-
-                        <div>
-                            <div class="text-sm text-neon-gold font-bold mb-2">💰 리스폰 코인</div>
-                            <lua-code-block title="RespawnCoin.lua">
--- ========================================
--- 💰 리스폰 코인
--- ========================================
--- 📦 Part (Anchored ✓, Neon, 작게)
--- 💡 먹으면 사라졌다 5초 후 다시!
--- ========================================
-local part = script.Parent
-local debounce = false
-
-part.Touched:Connect(function(hit)
-    if debounce then return end
-    local h = hit.Parent:FindFirstChild("Humanoid")
-    if h then
-        debounce = true
-        part.Transparency = 1
-        part.CanCollide = false
-        print("+1 코인!")
-        task.wait(5)
-        part.Transparency = 0
-        part.CanCollide = true
-        debounce = false
-    end
-end)
-                            </lua-code-block>
-                        </div>
                     </div>
 
-                    <div class="grid md:grid-cols-2 gap-4 mt-4">
-                        <div>
-                            <div class="text-sm text-neon-mint font-bold mb-2">🏁 체크포인트</div>
-                            <lua-code-block title="Checkpoint.lua">
--- ========================================
--- 🏁 체크포인트
--- ========================================
--- 📦 Part (Anchored ✓) + Script
--- 💡 밟으면 초록색으로 변경!
--- 💡 죽으면 여기서 리스폰
--- ========================================
-local part = script.Parent
+                    <div class="mt-4">
+                        <div class="text-sm text-neon-gold font-bold mb-2">🏁 체크포인트</div>
+                        <lua-code-block title="Checkpoint.lua">
+local checkpoint = script.Parent
 
-part.Touched:Connect(function(hit)
-    local h = hit.Parent:FindFirstChild("Humanoid")
-    if h then
-        part.BrickColor = BrickColor.new("Bright green")
-
-        h.Died:Connect(function()
-            task.wait(3)
-            local player = game.Players:GetPlayerFromCharacter(hit.Parent)
-            if player and player.Character then
-                local root = player.Character:FindFirstChild("HumanoidRootPart")
-                if root then
-                    root.CFrame = part.CFrame + Vector3.new(0, 3, 0)
-                end
-            end
-        end)
+checkpoint.Touched:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        player.RespawnLocation = checkpoint
+        checkpoint.BrickColor = BrickColor.new("Bright green")
     end
 end)
-                            </lua-code-block>
-                        </div>
-
-                        <div>
-                            <div class="text-sm text-neon-coral font-bold mb-2">☠️ 킬 파트 (복습)</div>
-                            <lua-code-block title="KillPart.lua">
--- ========================================
--- ☠️ 킬 파트 (4주차 복습)
--- ========================================
--- 📦 Part (Anchored ✓, 빨간색)
--- 💡 밟으면 캐릭터 사망!
--- ========================================
-local part = script.Parent
-
-part.Touched:Connect(function(hit)
-    local h = hit.Parent:FindFirstChild("Humanoid")
-    if h then
-        h.Health = 0
-        print("사망!")
-    end
-end)
-                            </lua-code-block>
-                        </div>
+                        </lua-code-block>
                     </div>
                 </div>
+
+                <HintBox type="warning" title="모든 장애물 파트는 반드시 Anchored!">
+                    킬 파트, 회전 장애물, 발판, 텔레포트 패드 모두 <strong>Anchored ✓</strong> 필수!<br>
+                    Anchored가 아니면 중력에 의해 <strong>바닥으로 추락</strong>해요!
+                </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 11: 체크포인트 퀴즈 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🏁 체크포인트 (죽으면 여기서 부활!)"
-                setup="Part 1개 (Anchored ✓, 코스 중간에 배치)"
-                concepts='["script.Parent", "Touched", "Humanoid", "BrickColor", "CFrame", "Vector3"]'
-                blanks={checkpointBlanks}
-                template={checkpointTemplate}
-                full-code={checkpointFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 12: 퀴즈 + 마무리 -->
+    <!-- 슬라이드 14: 최종 퀴즈 + 마무리 -->
     <section class="slide">
         <div class="max-w-3xl mx-auto px-6 py-12">
             <div class="animate-in">
@@ -894,21 +909,31 @@ end)
             <div class="space-y-6">
                 <div class="animate-in">
                     <quiz-question
-                        question="캐릭터를 텔레포트시킬 때 CFrame을 변경하는 파트는?"
+                        question="캐릭터를 순간이동시킬 때 변경하는 속성은?"
                         correct="A"
                         options={quiz1Options}
-                        correct-explanation="정답! HumanoidRootPart는 캐릭터의 중심이에요. 이 파트의 CFrame을 바꾸면 순간이동합니다."
-                        wrong-explanation="HumanoidRootPart가 정답이에요. 캐릭터의 중심 파트로, CFrame을 변경하면 텔레포트됩니다."
+                        correct-explanation="정답! HumanoidRootPart의 CFrame을 변경하면 캐릭터가 순간이동합니다."
+                        wrong-explanation="CFrame이 정답이에요. Position은 끼임 문제가 있어서, 항상 CFrame을 사용하세요!"
                     ></quiz-question>
                 </div>
 
                 <div class="animate-in">
                     <quiz-question
-                        question="파트를 완전히 삭제하는 함수는?"
+                        question="파트를 계속 회전시키는 코드 패턴은?"
                         correct="A"
                         options={quiz2Options}
-                        correct-explanation="맞아요! :Destroy()는 파트를 완전히 삭제해요. 1회성 코인에 사용합니다."
-                        wrong-explanation=":Destroy()가 정답이에요. part:Destroy()로 파트를 게임에서 완전히 제거합니다."
+                        correct-explanation="맞아요! while true do 안에서 CFrame.Angles로 매 프레임 회전시킵니다."
+                        wrong-explanation="while true do + CFrame.Angles가 정답이에요. 무한 반복으로 매 프레임 조금씩 회전!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="TweenService에서 발판이 왕복하게 하려면 어떤 속성을 true로?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! Reverses = true면 목표 도달 후 원래 위치로 돌아옵니다."
+                        wrong-explanation="Reverses = true가 정답이에요. RepeatCount는 반복 횟수, Reverses가 왕복 여부를 결정해요."
                     ></quiz-question>
                 </div>
             </div>
@@ -918,15 +943,16 @@ end)
                     <div class="text-3xl mb-3">🎉</div>
                     <h3 class="font-bold text-xl mb-2">6주차 완료!</h3>
                     <p class="text-ink-light mb-4">
-                        Humanoid, 텔레포트, 코인, 체크포인트까지!<br>
-                        이제 미니 오비를 직접 만들 수 있어요.
+                        Humanoid, 킬 파트, 회전 장애물, 움직이는 발판,<br>
+                        텔레포트, 체크포인트까지! 이제 미니 오비를 만들 수 있어요.
                     </p>
                     <div class="flex flex-wrap justify-center gap-2">
                         <span class="badge badge-success">Humanoid</span>
+                        <span class="badge badge-success">킬 파트</span>
+                        <span class="badge badge-success">회전 장애물</span>
+                        <span class="badge badge-success">움직이는 발판</span>
                         <span class="badge badge-success">텔레포트</span>
-                        <span class="badge badge-success">코인 수집</span>
                         <span class="badge badge-success">체크포인트</span>
-                        <span class="badge badge-success">오비 설계</span>
                     </div>
                     <p class="text-ink-light text-sm mt-4">
                         다음 시간: <strong>7주차 - GUI 기초</strong><br>
