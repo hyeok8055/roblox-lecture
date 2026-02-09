@@ -202,20 +202,20 @@ export class RobloxQuizExample extends LitElement {
         .container {
             max-width: 900px;
             margin: 0 auto;
-            padding: 1.5rem;
+            padding: 0.75rem 1.25rem;
         }
 
         /* 헤더 */
         .header {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .title {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: #1a1625;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -224,9 +224,9 @@ export class RobloxQuizExample extends LitElement {
         .setup {
             background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
             border-left: 4px solid #0ea5e9;
-            border-radius: 0 12px 12px 0;
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
+            border-radius: 0 10px 10px 0;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8rem;
             color: #0369a1;
         }
 
@@ -236,31 +236,31 @@ export class RobloxQuizExample extends LitElement {
 
         /* 개념 뱃지 영역 */
         .concepts-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.6rem;
         }
 
         .concepts-title {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #64748b;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.4rem;
             font-weight: 500;
         }
 
         .concept-badges {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.35rem;
         }
 
         .concept-badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.375rem;
-            padding: 0.5rem 0.875rem;
+            gap: 0.25rem;
+            padding: 0.3rem 0.6rem;
             background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 0.78rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -313,26 +313,26 @@ export class RobloxQuizExample extends LitElement {
         /* 코드 블록 */
         .code-section {
             background: #1a1625;
-            border-radius: 16px;
+            border-radius: 12px;
             overflow: hidden;
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.75rem;
         }
 
         .code-header {
             display: flex;
             align-items: center;
-            padding: 12px 16px;
-            gap: 8px;
+            padding: 8px 14px;
+            gap: 6px;
         }
 
         .code-dots {
             display: flex;
-            gap: 8px;
+            gap: 6px;
         }
 
         .code-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
         }
 
@@ -341,16 +341,16 @@ export class RobloxQuizExample extends LitElement {
         .code-dot.green { background: #3DFFA2; }
 
         .code-title {
-            margin-left: 8px;
+            margin-left: 6px;
             color: #9CA3AF;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
         }
 
         .code-content {
-            padding: 0.5rem 1.5rem 1.5rem;
+            padding: 0 1.25rem 0.75rem;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
-            line-height: 2;
+            font-size: 0.82rem;
+            line-height: 1.5;
             overflow-x: auto;
         }
 
@@ -358,8 +358,8 @@ export class RobloxQuizExample extends LitElement {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            min-height: 2.2em;
-            padding: 2px 0;
+            min-height: 1.7em;
+            padding: 1px 0;
         }
 
         .code-text {
@@ -388,17 +388,17 @@ export class RobloxQuizExample extends LitElement {
         .dropdown-button {
             background: #2d2640;
             border: 2px solid #6BCFFF;
-            border-radius: 8px;
-            padding: 4px 12px;
+            border-radius: 6px;
+            padding: 2px 8px;
             color: #6BCFFF;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
+            font-size: 0.82rem;
             cursor: pointer;
             transition: all 0.15s ease;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            min-width: 100px;
+            gap: 4px;
+            min-width: 80px;
             justify-content: space-between;
         }
 
@@ -447,12 +447,12 @@ export class RobloxQuizExample extends LitElement {
         }
 
         .dropdown-option {
-            padding: 10px 14px;
+            padding: 7px 12px;
             color: #E8E6E3;
             cursor: pointer;
             transition: background 0.1s;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 1rem;
+            font-size: 0.82rem;
         }
 
         .dropdown-option:first-child {
@@ -477,11 +477,11 @@ export class RobloxQuizExample extends LitElement {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
         .progress-text {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #64748b;
         }
 
@@ -495,12 +495,12 @@ export class RobloxQuizExample extends LitElement {
             color: white;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
-            padding: 14px 32px;
-            border-radius: 14px;
+            font-size: 0.9rem;
+            padding: 10px 24px;
+            border-radius: 12px;
             border: none;
             cursor: pointer;
-            box-shadow: 0 6px 0 #2563eb, 0 6px 20px rgba(59, 130, 246, 0.35);
+            box-shadow: 0 4px 0 #2563eb, 0 4px 14px rgba(59, 130, 246, 0.35);
             transform: translateY(0);
             transition: all 0.15s;
         }
@@ -525,8 +525,8 @@ export class RobloxQuizExample extends LitElement {
         .copy-section {
             background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
             border: 2px solid #3DFFA2;
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 1rem;
             text-align: center;
             animation: celebrate 0.5s ease-out;
         }
@@ -613,11 +613,11 @@ export class RobloxQuizExample extends LitElement {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem;
+            gap: 0.4rem;
+            padding: 0.4rem 0.75rem;
             background: #f1f5f9;
-            border-radius: 12px;
-            font-size: 0.9rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
             color: #64748b;
         }
 
