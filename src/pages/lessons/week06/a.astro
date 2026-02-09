@@ -132,6 +132,8 @@ part.Touched:Connect(function(hit)
     if humanoid then
         -- 💡 이동 속도 2.5배!
         humanoid.WalkSpeed = [b3]
+        -- 💡 JumpPower 사용 모드로 전환!
+        humanoid.UseJumpPower = true
         -- 💡 점프력 2배!
         humanoid.JumpPower = [b4]
         print("슈퍼 파워업!")
@@ -143,8 +145,9 @@ local part = script.Parent
 part.Touched:Connect(function(hit)
     local humanoid = hit.Parent:FindFirstChild("Humanoid")
     if humanoid then
-        humanoid.WalkSpeed = 40   -- 2.5배 속도
-        humanoid.JumpPower = 100  -- 2배 점프
+        humanoid.WalkSpeed = 40        -- 2.5배 속도
+        humanoid.UseJumpPower = true   -- ⚠️ 필수!
+        humanoid.JumpPower = 100       -- 2배 점프
         print("슈퍼 파워업!")
     end
 end)`;
@@ -205,6 +208,8 @@ local part = [b1]
 part.Touched:Connect(function(hit)
     local humanoid = hit.Parent[b2]
     if humanoid then
+        -- 💡 JumpPower 사용 모드로 전환!
+        humanoid.UseJumpPower = true
         -- 💡 점프력을 기본(50)의 2배로!
         humanoid.JumpPower = [b3]
         print("슈퍼 점프!")
@@ -216,7 +221,8 @@ local part = script.Parent
 part.Touched:Connect(function(hit)
     local humanoid = hit.Parent:FindFirstChild("Humanoid")
     if humanoid then
-        humanoid.JumpPower = 100  -- 2배 점프!
+        humanoid.UseJumpPower = true  -- ⚠️ 필수!
+        humanoid.JumpPower = 100      -- 2배 점프!
         print("슈퍼 점프!")
     end
 end)`;
@@ -285,7 +291,7 @@ part.Touched:Connect(function(hit)
 end)`;
 ---
 
-<LessonLayout title="Humanoid 속성" lessonNumber={6} totalSlides={11}>
+<LessonLayout title="Humanoid 속성" lessonNumber={6} totalSlides={12}>
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
@@ -483,7 +489,165 @@ end)
         </div>
     </section>
 
-    <!-- 슬라이드 6: JumpPower + 스튜디오 가이드 -->
+    <!-- 슬라이드 6: Touched 반복 문제 & 해결법 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">💡 심화 학습</span>
+                <h2 class="title-section mb-4">잠깐! Touched의 비밀 🤔</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <!-- 문제 설명 -->
+                <div class="animate-in">
+                    <div class="lesson-card border-2 border-neon-coral/30">
+                        <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                            <span class="text-2xl">⚠️</span>
+                            Touched는 생각보다 많이 발생해요!
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            캐릭터가 파트를 밟으면, <strong>다리·몸통·팔</strong> 등 여러 부위가 각각 닿아요.<br>
+                            한 번 걸어도 Touched가 <strong>10번 이상</strong> 발생할 수 있어요!
+                        </p>
+                        <div class="bg-red-50 rounded-xl p-4 font-mono text-sm space-y-1">
+                            <div>🦵 LeftLeg 닿음 → <span class="text-neon-coral font-bold">Touched 발생!</span></div>
+                            <div>🦵 RightLeg 닿음 → <span class="text-neon-coral font-bold">Touched 또 발생!</span></div>
+                            <div>🦵 LeftLeg 살짝 떨어짐 → <span class="text-neon-sky font-bold">TouchEnded 발생!</span></div>
+                            <div class="mt-2 pt-2 border-t border-red-200 text-neon-coral font-bold">
+                                😱 아직 파트 위인데 속도가 복구돼 버림!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <h3 class="font-bold text-lg mb-2">해결 방법은 다양해요! 🛠️</h3>
+                    <p class="text-ink-light text-sm mb-2">같은 문제도 여러 가지 방법으로 해결할 수 있어요.</p>
+                </div>
+
+                <!-- 방법 1: 디바운스 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 bg-neon-gold/20 rounded-full text-xs font-bold" style="color: var(--neon-gold);">쉬움</span>
+                            <h4 class="font-bold">방법 1: 디바운스 (쿨다운)</h4>
+                        </div>
+                        <p class="text-ink-light text-sm mb-3">
+                            한 번 실행되면 <strong>일정 시간 동안 다시 실행 안 되게</strong> 잠금!
+                            부스트, 아이템 획득 같은 <strong>1회성 효과</strong>에 딱!
+                        </p>
+                        <lua-code-block title="Debounce 방식" show-line-numbers>
+local part = script.Parent
+local debounce = false
+
+part.Touched:Connect(function(hit)
+    if debounce then return end  -- 잠겨있으면 무시!
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        debounce = true          -- 잠금!
+        humanoid.WalkSpeed = 5
+        task.wait(3)             -- 3초 후
+        humanoid.WalkSpeed = 16  -- 복구
+        debounce = false         -- 잠금 해제
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <!-- 방법 2: 터치 카운트 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 bg-neon-sky/20 rounded-full text-xs font-bold" style="color: var(--neon-sky);">중간</span>
+                            <h4 class="font-bold">방법 2: 터치 카운트</h4>
+                        </div>
+                        <p class="text-ink-light text-sm mb-3">
+                            닿은 파트 수를 <strong>세서</strong>, 전부 떠나야 효과 해제!
+                            <strong>영역 안에 있는 동안</strong> 효과를 유지하고 싶을 때 좋아요.
+                        </p>
+                        <lua-code-block title="Touch Count 방식" show-line-numbers>
+local part = script.Parent
+local touchCount = 0
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    touchCount = touchCount + 1
+    if touchCount == 1 then  -- 처음 닿을 때만!
+        humanoid.WalkSpeed = 5
+    end
+end)
+
+part.TouchEnded:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if not humanoid then return end
+    touchCount = touchCount - 1
+    if touchCount == 0 then  -- 전부 떠났을 때만!
+        humanoid.WalkSpeed = 16
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <!-- 방법 3: GetPartsInPart -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <div class="flex items-center gap-2 mb-3">
+                            <span class="px-3 py-1 bg-neon-mint/20 rounded-full text-xs font-bold" style="color: var(--neon-mint);">고급</span>
+                            <h4 class="font-bold">방법 3: 영역 검사 (GetPartsInPart)</h4>
+                        </div>
+                        <p class="text-ink-light text-sm mb-3">
+                            매 프레임마다 <strong>파트 안에 누가 있는지 직접 확인!</strong>
+                            Touched 이벤트를 안 쓰니까 가장 정확해요.
+                        </p>
+                        <lua-code-block title="GetPartsInPart 방식" show-line-numbers>
+local part = script.Parent
+local RunService = game:GetService("RunService")
+local slowed = {}  -- 느려진 플레이어 기록
+
+RunService.Heartbeat:Connect(function()
+    local touching = workspace:GetPartsInPart(part)
+    local inZone = {}
+
+    for _, p in pairs(touching) do
+        local hum = p.Parent:FindFirstChild("Humanoid")
+        if hum then
+            local plr = game.Players:GetPlayerFromCharacter(p.Parent)
+            if plr then
+                inZone[plr] = true
+                if not slowed[plr] then
+                    hum.WalkSpeed = 5  -- 들어옴!
+                    slowed[plr] = true
+                end
+            end
+        end
+    end
+
+    for plr, _ in pairs(slowed) do
+        if not inZone[plr] and plr.Character then
+            local hum = plr.Character:FindFirstChild("Humanoid")
+            if hum then hum.WalkSpeed = 16 end
+            slowed[plr] = nil  -- 나감!
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="어떤 방법을 쓸까?">
+                    <strong>디바운스</strong> = 간단한 1회성 효과 (부스트, 아이템 획득)<br>
+                    <strong>터치 카운트</strong> = 영역 안에 있는 동안 효과 유지 (슬로우 트랩)<br>
+                    <strong>영역 검사</strong> = 가장 정확! 하지만 코드가 복잡 (고급 게임)<br><br>
+                    지금은 이해 안 돼도 괜찮아요! 나중에 게임 만들 때 다시 보면 돼요 😊
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: JumpPower + 스튜디오 가이드 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
@@ -578,6 +742,7 @@ local part = script.Parent
 part.Touched:Connect(function(hit)
     local humanoid = hit.Parent:FindFirstChild("Humanoid")
     if humanoid then
+        humanoid.UseJumpPower = true
         humanoid.JumpPower = 120
         print("슈퍼 점프!")
     end
@@ -623,6 +788,7 @@ part.Touched:Connect(function(hit)
     local humanoid = hit.Parent:FindFirstChild("Humanoid")
     if humanoid then
         humanoid.WalkSpeed = 40
+        humanoid.UseJumpPower = true
         humanoid.JumpPower = 100
         print("파워업!")
     end
@@ -631,11 +797,20 @@ end)
                         </div>
                     </div>
                 </div>
+
+                <HintBox type="warning" title="⚠️ JumpPower 필수! UseJumpPower = true">
+                    로블록스는 점프 방식이 2가지예요:<br>
+                    • <strong>JumpPower</strong> = 힘으로 점프 (숫자가 클수록 높이 뜀)<br>
+                    • <strong>JumpHeight</strong> = 높이로 점프 (정확한 높이 지정)<br><br>
+                    새 프로젝트는 기본이 <strong>JumpHeight 모드</strong>라서,<br>
+                    JumpPower를 쓰려면 <strong>반드시</strong> 먼저 이 코드를 써야 해요!<br><br>
+                    <code>humanoid.UseJumpPower = true</code> ← 이거 없으면 JumpPower 안 먹힘!
+                </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 7: 능력치 동시 변경 (드롭다운) -->
+    <!-- 슬라이드 8: 능력치 동시 변경 (드롭다운) -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
@@ -649,7 +824,7 @@ end)
         </div>
     </section>
 
-    <!-- 슬라이드 8: 초고속 파트 (드롭다운) -->
+    <!-- 슬라이드 9: 초고속 파트 (드롭다운) -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
@@ -663,7 +838,7 @@ end)
         </div>
     </section>
 
-    <!-- 슬라이드 9: JumpPower (드롭다운) -->
+    <!-- 슬라이드 10: JumpPower (드롭다운) -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
@@ -677,7 +852,7 @@ end)
         </div>
     </section>
 
-    <!-- 슬라이드 10: 부스트 + 디바운스 (드롭다운) -->
+    <!-- 슬라이드 11: 부스트 + 디바운스 (드롭다운) -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
@@ -691,7 +866,7 @@ end)
         </div>
     </section>
 
-    <!-- 슬라이드 11: 퀴즈 + 마무리 -->
+    <!-- 슬라이드 12: 퀴즈 + 마무리 -->
     <section class="slide">
         <div class="max-w-3xl mx-auto px-6 py-12">
             <div class="animate-in">

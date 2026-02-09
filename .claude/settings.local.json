@@ -24,7 +24,9 @@
       "Bash(git commit:*)",
       "Bash(git push)",
       "Bash(powershell:*)",
-      "Bash(ls -la \"C:\\\\workspace\\\\_26_로블록스_과외\\\\.claude\"\" 2>nul || echo \"No .claude dir \")"
+      "Bash(ls -la \"C:\\\\workspace\\\\_26_로블록스_과외\\\\.claude\"\" 2>nul || echo \"No .claude dir \")",
+      "WebFetch(domain:devforum.roblox.com)",
+      "WebFetch(domain:robloxapi.github.io)"
     ],
     "deny": [
       "mcp__plugin_serena_serena__delete_memory"
