@@ -605,11 +605,11 @@ end)
                         <lua-code-block title="GetPartsInPart 방식" show-line-numbers>
 local part = script.Parent
 local RunService = game:GetService("RunService")
-local slowed = {}  -- 느려진 플레이어 기록
+local slowed = {'{}'}  -- 느려진 플레이어 기록
 
 RunService.Heartbeat:Connect(function()
     local touching = workspace:GetPartsInPart(part)
-    local inZone = {}
+    local inZone = {'{}'}
 
     for _, p in pairs(touching) do
         local hum = p.Parent:FindFirstChild("Humanoid")
