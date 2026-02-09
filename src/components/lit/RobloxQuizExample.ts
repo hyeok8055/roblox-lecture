@@ -156,6 +156,36 @@ const CONCEPT_DICTIONARY: Record<string, ConceptInfo> = {
         emoji: '👆',
         short: '파트에 닿았을 때 이벤트',
         detail: '터치 감지 👆 - part.Touched:Connect(함수)로 연결하면, 누군가 파트에 닿을 때마다 함수가 실행돼요!'
+    },
+    'WalkSpeed': {
+        emoji: '🏃',
+        short: '캐릭터 이동 속도 (기본: 16)',
+        detail: '달리기 속도 🏃 - humanoid.WalkSpeed로 이동 속도를 바꿔요! 0=정지, 16=기본, 32=2배 빠름, 50+=초고속! 스피드 패드에서 많이 사용해요.'
+    },
+    'JumpPower': {
+        emoji: '🦘',
+        short: '캐릭터 점프력 (기본: 50)',
+        detail: '점프력 🦘 - humanoid.JumpPower로 점프 높이를 바꿔요! 0=점프 불가, 50=기본, 100=2배, 200+=로켓 점프! 점프 패드에서 사용해요.'
+    },
+    'Humanoid': {
+        emoji: '🧠',
+        short: '캐릭터의 두뇌 (능력치 관리)',
+        detail: '캐릭터의 두뇌 🧠 - Health(체력), WalkSpeed(속도), JumpPower(점프력) 등 캐릭터의 모든 능력치를 관리해요! hit.Parent:FindFirstChild("Humanoid")로 찾아요.'
+    },
+    'HumanoidRootPart': {
+        emoji: '🎯',
+        short: '캐릭터의 중심 파트',
+        detail: '캐릭터의 중심 🎯 - 캐릭터 모델의 "기준점"이에요. 텔레포트할 때 이 파트의 CFrame을 바꾸면 캐릭터가 순간이동해요!'
+    },
+    ':Destroy()': {
+        emoji: '🗑️',
+        short: '오브젝트를 완전히 삭제',
+        detail: '완전 삭제 🗑️ - part:Destroy()하면 파트가 게임에서 완전히 사라져요! 코인 수집, 아이템 획득 등에 사용. 한 번 삭제하면 되돌릴 수 없어요!'
+    },
+    'CanCollide': {
+        emoji: '💨',
+        short: '충돌 여부 (true/false)',
+        detail: '충돌 설정 💨 - true면 다른 파트와 부딪히고, false면 통과해요! 투명 코인이 발에 걸리지 않게 하려면 CanCollide = false!'
     }
 };
 

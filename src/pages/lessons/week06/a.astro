@@ -1,0 +1,751 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["WalkSpeed", "RunSpeed", "MoveSpeed", "Speed"]);
+const quiz2Options = JSON.stringify(["JumpPower", "JumpHeight", "JumpForce", "JumpSpeed"]);
+const quiz3Options = JSON.stringify(["Humanoid", "Character", "Player", "Part"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (6개)
+// =========================================
+
+// 퀴즈 1: 밟으면 2배 속도 (기초)
+const speedBasicBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
+    { id: "b3", correct: "32", options: ["0", "16", "32", "100"] }
+]);
+const speedBasicTemplate = `-- ========================================
+-- 🏃 밟으면 2배 빨라지는 파트
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+-- 💡 WalkSpeed = 캐릭터 이동 속도
+--    기본값: 16 (보통 걷기)
+--    32 = 기본보다 2배 빠름!
+-- ========================================
+
+local part = [b1]
+
+-- 💡 Touched = 누군가 이 파트를 밟으면 실행!
+part.Touched:Connect(function(hit)
+    -- 💡 hit = 닿은 파트 (발, 다리 등)
+    -- 💡 hit.Parent = 캐릭터 모델 전체
+    local humanoid = hit.Parent[b2]
+
+    -- 💡 Humanoid가 있다 = 사람이다!
+    if humanoid then
+        -- 💡 기본(16)의 2배 속도로 변경!
+        humanoid.WalkSpeed = [b3]
+        print("2배 속도!")
+    end
+end)`;
+const speedBasicFullCode = `-- 🏃 밟으면 2배 빨라지는 파트
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 32  -- 2배 속도!
+        print("2배 속도!")
+    end
+end)`;
+
+// 퀴즈 2: 슬로우 트랩 (Touched + TouchEnded)
+const slowTrapBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
+    { id: "b3", correct: "5", options: ["0", "5", "8", "16"] },
+    { id: "b4", correct: "16", options: ["0", "5", "16", "32"] }
+]);
+const slowTrapTemplate = `-- ========================================
+-- 🐌 밟으면 느려지는 트랩!
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓, 빨간색) + Script
+-- 💡 Touched = 밟으면 → 느려짐!
+-- 💡 TouchEnded = 떠나면 → 원래대로!
+-- ========================================
+
+local part = [b1]
+
+-- 💡 밟는 순간 → 느려짐!
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent[b2]
+    if humanoid then
+        -- 💡 속도를 5로! (기본 16의 1/3)
+        humanoid.WalkSpeed = [b3]
+        print("느려졌다...")
+    end
+end)
+
+-- 💡 파트에서 떠나면 → 원래 속도로!
+part.TouchEnded:Connect(function(hit)
+    local humanoid = hit.Parent[b2]
+    if humanoid then
+        -- 💡 기본 속도(16)로 복구!
+        humanoid.WalkSpeed = [b4]
+        print("속도 복구!")
+    end
+end)`;
+const slowTrapFullCode = `-- 🐌 밟으면 느려지는 트랩
+local part = script.Parent
+
+-- 밟으면 느려짐
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 5  -- 느리게!
+        print("느려졌다...")
+    end
+end)
+
+-- 떠나면 원래 속도
+part.TouchEnded:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 16  -- 기본값 복구
+        print("속도 복구!")
+    end
+end)`;
+
+// 퀴즈 3: 능력치 동시 변경 (WalkSpeed + JumpPower)
+const powerUpBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
+    { id: "b3", correct: "40", options: ["16", "32", "40", "100"] },
+    { id: "b4", correct: "100", options: ["0", "50", "100", "200"] }
+]);
+const powerUpTemplate = `-- ========================================
+-- 🎯 속도 + 점프력 동시 파워업!
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+-- 💡 WalkSpeed = 이동 속도 (기본 16)
+-- 💡 JumpPower = 점프 높이 (기본 50)
+-- 💡 둘 다 올리면 슈퍼 캐릭터!
+-- ========================================
+
+local part = [b1]
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent[b2]
+    if humanoid then
+        -- 💡 이동 속도 2.5배!
+        humanoid.WalkSpeed = [b3]
+        -- 💡 점프력 2배!
+        humanoid.JumpPower = [b4]
+        print("슈퍼 파워업!")
+    end
+end)`;
+const powerUpFullCode = `-- 🎯 속도 + 점프력 동시 파워업
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 40   -- 2.5배 속도
+        humanoid.JumpPower = 100  -- 2배 점프
+        print("슈퍼 파워업!")
+    end
+end)`;
+
+// 퀴즈 4: WalkSpeed 변경 (Touched 패턴)
+const walkSpeedBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
+    { id: "b3", correct: "50", options: ["0", "16", "50", "100"] }
+]);
+const walkSpeedTemplate = `-- ========================================
+-- 🏃 밟으면 초고속!
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+-- 💡 WalkSpeed = 50이면 기본의 3배!
+-- ========================================
+
+local part = [b1]
+
+-- 💡 Touched = 닿으면 실행!
+part.Touched:Connect(function(hit)
+    -- 💡 닿은 것의 부모에서 Humanoid 찾기
+    local humanoid = hit.Parent[b2]
+    if humanoid then
+        -- 💡 50 = 기본(16)의 약 3배!
+        humanoid.WalkSpeed = [b3]
+        print("초고속!")
+    end
+end)`;
+const walkSpeedFullCode = `-- 🏃 밟으면 초고속!
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 50  -- 약 3배 속도!
+        print("초고속!")
+    end
+end)`;
+
+// 퀴즈 5: JumpPower 변경
+const jumpPowerBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
+    { id: "b3", correct: "100", options: ["0", "50", "100", "200"] }
+]);
+const jumpPowerTemplate = `-- ========================================
+-- 🦘 밟으면 높이 뛰는 파트
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+-- 💡 JumpPower = 점프 높이
+--    기본값: 50
+--    100 = 기본의 2배!
+-- ========================================
+
+local part = [b1]
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent[b2]
+    if humanoid then
+        -- 💡 점프력을 기본(50)의 2배로!
+        humanoid.JumpPower = [b3]
+        print("슈퍼 점프!")
+    end
+end)`;
+const jumpPowerFullCode = `-- 🦘 밟으면 높이 뛰는 파트
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.JumpPower = 100  -- 2배 점프!
+        print("슈퍼 점프!")
+    end
+end)`;
+
+// 퀴즈 6: 속도 부스트 + 디바운스 (심화)
+const boostBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":FindFirstChild(\"Humanoid\")", options: [".Humanoid", ":FindFirstChild(\"Humanoid\")", ":GetHumanoid()", ".Character"] },
+    { id: "b3", correct: "50", options: ["16", "32", "50", "100"] },
+    { id: "b4", correct: "16", options: ["0", "16", "32", "50"] }
+]);
+const boostTemplate = `-- ========================================
+-- 🚀 3초 스피드 부스트 (디바운스)
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+-- 💡 밟으면 빨라졌다가 3초 후 원래대로!
+-- 💡 debounce = 중복 실행 방지 잠금장치
+-- ========================================
+
+local part = [b1]
+
+-- 💡 debounce = 지금 부스트 중인지?
+-- 💡 false = 사용 가능, true = 사용 중!
+local debounce = false
+
+part.Touched:Connect(function(hit)
+    -- 💡 이미 부스트 중이면 무시!
+    if debounce then return end
+
+    local humanoid = hit.Parent[b2]
+    if humanoid then
+        -- 💡 잠금! (다른 사람 실행 불가)
+        debounce = true
+
+        -- 💡 속도 UP! (16 → 50)
+        humanoid.WalkSpeed = [b3]
+        print("부스트 ON!")
+
+        -- 💡 3초 기다리기
+        task.wait(3)
+
+        -- 💡 원래 속도(16)로 복구!
+        humanoid.WalkSpeed = [b4]
+        print("부스트 OFF!")
+
+        -- 💡 잠금 해제! (다시 사용 가능)
+        debounce = false
+    end
+end)`;
+const boostFullCode = `-- 🚀 3초 스피드 부스트 (디바운스)
+local part = script.Parent
+local debounce = false
+
+part.Touched:Connect(function(hit)
+    if debounce then return end
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        debounce = true
+        humanoid.WalkSpeed = 50   -- 부스트!
+        print("부스트 ON!")
+        task.wait(3)              -- 3초 대기
+        humanoid.WalkSpeed = 16   -- 복구
+        print("부스트 OFF!")
+        debounce = false
+    end
+end)`;
+---
+
+<LessonLayout title="Humanoid 속성" lessonNumber={6} totalSlides={11}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">6주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-sky">Humanoid</span> 속성
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    캐릭터의 이동 속도와 점프력을 조절해요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🏃 WalkSpeed</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🦘 JumpPower</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🎮 능력치 변경</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ Humanoid가 무엇인지 이해하기</li>
+                        <li>✓ WalkSpeed로 이동 속도 변경하기</li>
+                        <li>✓ JumpPower로 점프력 변경하기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Humanoid란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Humanoid란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🧑</span>
+                            캐릭터 구조 알아보기
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            로블록스 캐릭터는 여러 파트와 <strong>Humanoid</strong>로 이루어져 있어요.
+                            Humanoid는 캐릭터의 <strong>"두뇌"</strong> 같은 것이에요!
+                        </p>
+                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4">
+                            <div class="text-sm font-bold mb-3">🌳 캐릭터 구조 (Explorer)</div>
+                            <div class="font-mono text-sm space-y-1">
+                                <div>📁 <strong>Character</strong> (모델)</div>
+                                <div class="ml-4">├ 🧠 <strong class="text-violet-600">Humanoid</strong> ← 두뇌! (속성 관리)</div>
+                                <div class="ml-4">├ 🗣️ Head</div>
+                                <div class="ml-4">├ 👕 UpperTorso</div>
+                                <div class="ml-4">├ 👖 LowerTorso</div>
+                                <div class="ml-4">├ 💪 LeftArm / RightArm</div>
+                                <div class="ml-4">└ 🦵 LeftLeg / RightLeg</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">Humanoid의 주요 속성</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">❤️</div>
+                                <div class="font-bold">Health</div>
+                                <div class="text-xs text-ink-light">체력 (기본: 100)</div>
+                                <div class="text-xs text-ink-light mt-1">4주차에서 배웠어요!</div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl text-center border-2 border-neon-sky/30">
+                                <div class="text-2xl mb-2">🏃</div>
+                                <div class="font-bold text-neon-sky">WalkSpeed</div>
+                                <div class="text-xs text-ink-light">이동 속도 (기본: 16)</div>
+                                <div class="text-xs text-neon-sky mt-1">오늘 배울 내용!</div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-center border-2 border-neon-mint/30">
+                                <div class="text-2xl mb-2">🦘</div>
+                                <div class="font-bold text-neon-mint">JumpPower</div>
+                                <div class="text-xs text-ink-light">점프력 (기본: 50)</div>
+                                <div class="text-xs text-neon-mint mt-1">오늘 배울 내용!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="복습: Humanoid 찾는 법">
+                    3주차에서 배운 <code>hit.Parent:FindFirstChild("Humanoid")</code>로 찾아요!<br>
+                    Touched 이벤트에서 닿은 것(hit)의 부모(Parent)에서 Humanoid를 찾습니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: WalkSpeed 상세 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">WalkSpeed</span>
+                <h2 class="title-section mb-6">WalkSpeed - 이동 속도</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">속도 값별 변화</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="p-3 bg-gray-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">🚫</div>
+                                <div class="font-bold text-lg">0</div>
+                                <div class="text-xs text-ink-light">못 움직임</div>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded-xl text-center border-2 border-blue-200">
+                                <div class="text-2xl mb-1">🚶</div>
+                                <div class="font-bold text-lg text-blue-600">16</div>
+                                <div class="text-xs text-ink-light">기본 속도</div>
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">🏃</div>
+                                <div class="font-bold text-lg text-sky-600">32</div>
+                                <div class="text-xs text-ink-light">2배 빠름</div>
+                            </div>
+                            <div class="p-3 bg-violet-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">🚀</div>
+                                <div class="font-bold text-lg text-violet-600">50+</div>
+                                <div class="text-xs text-ink-light">초고속!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">코드로 속도 변경하기</h3>
+                        <lua-code-block title="WalkSpeed 변경" show-line-numbers>
+-- 밟으면 속도가 변하는 파트
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 32  -- 2배 속도!
+        print("속도 업!")
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="WalkSpeed 팁">
+                    <strong>0</strong> = 움직임 잠금 (컷신, 대화 중에 사용)<br>
+                    <strong>8</strong> = 느린 구간 (늪지대, 독 웅덩이)<br>
+                    <strong>16</strong> = 기본값 (원래 속도로 복구할 때)<br>
+                    <strong>32~50</strong> = 스피드 부스트
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 밟으면 2배 속도 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🏃 밟으면 2배 빨라지는 파트"
+                setup="Part 1개 (Anchored ✓, 바닥에 배치)"
+                concepts='["script.Parent", "Touched", "Humanoid", "WalkSpeed"]'
+                blanks={speedBasicBlanks}
+                template={speedBasicTemplate}
+                full-code={speedBasicFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 슬로우 트랩 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🐌 밟으면 느려지는 트랩 (떠나면 복구!)"
+                setup="Part 1개 (Anchored ✓, 빨간색, 바닥에 배치)"
+                concepts='["script.Parent", "Touched", "Humanoid", "WalkSpeed"]'
+                blanks={slowTrapBlanks}
+                template={slowTrapTemplate}
+                full-code={slowTrapFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: JumpPower + 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎮 JumpPower</span>
+                <h2 class="title-section mb-6">JumpPower - 점프력</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">점프력 값별 변화</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div class="p-3 bg-gray-50 rounded-xl text-center">
+                            <div class="text-2xl mb-1">🚫</div>
+                            <div class="font-bold text-lg">0</div>
+                            <div class="text-xs text-ink-light">점프 불가</div>
+                        </div>
+                        <div class="p-3 bg-green-50 rounded-xl text-center border-2 border-green-200">
+                            <div class="text-2xl mb-1">🐰</div>
+                            <div class="font-bold text-lg text-green-600">50</div>
+                            <div class="text-xs text-ink-light">기본 점프</div>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded-xl text-center">
+                            <div class="text-2xl mb-1">🦘</div>
+                            <div class="font-bold text-lg text-emerald-600">100</div>
+                            <div class="text-xs text-ink-light">2배 점프</div>
+                        </div>
+                        <div class="p-3 bg-teal-50 rounded-xl text-center">
+                            <div class="text-2xl mb-1">🚀</div>
+                            <div class="font-bold text-lg text-teal-600">200+</div>
+                            <div class="text-xs text-ink-light">초점프!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🛠️</span>
+                        스튜디오에서 직접 테스트하기
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div><strong>Part 생성</strong> → Anchored 체크 → 바닥에 배치</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div>Part 우클릭 → <strong>Insert Object → Script</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div>퀴즈를 풀고 <strong>복사 → 붙여넣기</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div><strong>F5</strong>로 플레이 → 파트 위를 밟아보세요!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- 복붙 예제 4개 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트!
+                    </h4>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">🏃 스피드 부스터</div>
+                            <lua-code-block title="SpeedBoost.lua">
+-- 🏃 밟으면 빨라지는 파트
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 50
+        print("스피드 부스트!")
+    end
+end)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🦘 슈퍼 점프</div>
+                            <lua-code-block title="SuperJump.lua">
+-- 🦘 밟으면 높이 뛰는 파트
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.JumpPower = 120
+        print("슈퍼 점프!")
+    end
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">🐌 슬로우 트랩</div>
+                            <lua-code-block title="SlowTrap.lua">
+-- 🐌 밟으면 느려지고 떠나면 복구
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 5
+        print("느려졌다...")
+    end
+end)
+
+part.TouchEnded:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 16
+        print("속도 복구!")
+    end
+end)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">🎯 능력치 올인원</div>
+                            <lua-code-block title="PowerUp.lua">
+-- 🎯 속도 + 점프 동시 변경
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 40
+        humanoid.JumpPower = 100
+        print("파워업!")
+    end
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 능력치 동시 변경 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🎯 속도 + 점프력 동시 파워업!"
+                setup="Part 1개 (Anchored ✓, 바닥에 배치)"
+                concepts='["script.Parent", "Touched", "Humanoid", "WalkSpeed", "JumpPower"]'
+                blanks={powerUpBlanks}
+                template={powerUpTemplate}
+                full-code={powerUpFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 초고속 파트 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🏃 밟으면 초고속!"
+                setup="Part 1개 (Anchored ✓, 바닥에 배치)"
+                concepts='["script.Parent", "Touched", "Humanoid", "WalkSpeed"]'
+                blanks={walkSpeedBlanks}
+                template={walkSpeedTemplate}
+                full-code={walkSpeedFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: JumpPower (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🦘 밟으면 높이 뛰는 파트"
+                setup="Part 1개 (Anchored ✓, 바닥에 배치)"
+                concepts='["script.Parent", "Touched", "Humanoid", "JumpPower"]'
+                blanks={jumpPowerBlanks}
+                template={jumpPowerTemplate}
+                full-code={jumpPowerFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 부스트 + 디바운스 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🚀 3초 스피드 부스트 (디바운스)"
+                setup="Part 1개 (Anchored ✓, 바닥에 배치)"
+                concepts='["script.Parent", "Touched", "Humanoid", "WalkSpeed", "debounce", "task.wait"]'
+                blanks={boostBlanks}
+                template={boostTemplate}
+                full-code={boostFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="캐릭터의 이동 속도를 변경하는 Humanoid 속성은?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! WalkSpeed는 캐릭터의 이동 속도예요. 기본값은 16입니다."
+                        wrong-explanation="WalkSpeed가 정답이에요. humanoid.WalkSpeed = 32 처럼 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="캐릭터의 점프력을 변경하는 Humanoid 속성은?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! JumpPower는 캐릭터의 점프 높이를 결정해요. 기본값은 50입니다."
+                        wrong-explanation="JumpPower가 정답이에요. humanoid.JumpPower = 100 처럼 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="캐릭터의 체력, 속도, 점프력 등을 관리하는 오브젝트는?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! Humanoid는 캐릭터의 '두뇌'예요. Health, WalkSpeed, JumpPower 등을 관리합니다."
+                        wrong-explanation="Humanoid가 정답이에요. 캐릭터의 모든 능력치를 관리하는 오브젝트입니다."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-sky/20 to-neon-mint/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">6주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 텔레포트, 코인, 체크포인트로<br>
+                        미니 오비를 만들어요! ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

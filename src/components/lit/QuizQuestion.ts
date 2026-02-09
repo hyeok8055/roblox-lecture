@@ -23,30 +23,36 @@ export class QuizQuestion extends LitElement {
 
         .quiz-container {
             background: white;
-            border-radius: 20px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 20px;
             box-shadow: 0 2px 4px rgba(26,22,37,0.04), 0 4px 8px rgba(26,22,37,0.06), 0 8px 16px rgba(26,22,37,0.06);
         }
 
         .question {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             color: #1a1625;
         }
 
         .options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
         }
 
         .option {
             background: white;
             border: 2px solid #f8f6f4;
-            border-radius: 16px;
-            padding: 16px 20px;
+            border-radius: 12px;
+            padding: 10px 14px;
             cursor: pointer;
             position: relative;
             overflow: hidden;
@@ -55,10 +61,10 @@ export class QuizQuestion extends LitElement {
             text-align: left;
             width: 100%;
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .option::before {
@@ -136,10 +142,10 @@ export class QuizQuestion extends LitElement {
         }
 
         .result {
-            margin-top: 1rem;
-            padding: 1rem 1.25rem;
-            border-radius: 12px;
-            font-size: 0.9rem;
+            margin-top: 0.75rem;
+            padding: 0.65rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
             animation: slideUp 0.3s ease-out;
         }
 
@@ -156,15 +162,16 @@ export class QuizQuestion extends LitElement {
         }
 
         .retry-btn {
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             background: white;
             color: #1a1625;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 600;
-            padding: 10px 20px;
-            border-radius: 10px;
+            padding: 8px 16px;
+            border-radius: 8px;
             border: 2px solid #f8f6f4;
             cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.15s;
         }
         .retry-btn:hover {
