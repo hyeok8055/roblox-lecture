@@ -18,8 +18,8 @@ const curriculum = [
     { week: 5, part: 'B', title: '반복문 (while)', desc: 'while true do, 회전 장애물', active: true, path: '/lessons/week05/b' },
     { week: 6, part: 'A', title: 'Humanoid', desc: 'WalkSpeed, JumpPower', active: true, path: '/lessons/week06/a' },
     { week: 6, part: 'B', title: '미니 오비 만들기', desc: '텔레포트, 코인, 체크포인트', active: true, path: '/lessons/week06/b' },
-    { week: 7, part: 'A', title: 'GUI 기초', desc: 'ScreenGui, TextLabel', active: false, path: '/lessons/week07/a' },
-    { week: 7, part: 'B', title: '시작 화면', desc: 'TextButton, 클릭 이벤트', active: false, path: '/lessons/week07/b' },
+    { week: 7, part: 'A', title: 'GUI 기초', desc: 'ScreenGui, TextButton, 클릭 이벤트', active: true, path: '/lessons/week07/a' },
+    { week: 7, part: 'B', title: 'GUI 활용', desc: 'UICorner, TweenService, BillboardGui', active: true, path: '/lessons/week07/b' },
     { week: 8, part: 'A', title: 'Leaderstats', desc: '점수 시스템 기초', active: false, path: '/lessons/week08/a' },
     { week: 8, part: 'B', title: '점수 시스템', desc: '코인 수집, 자동 수입', active: false, path: '/lessons/week08/b' },
 
@@ -191,6 +191,34 @@ const month3 = curriculum.slice(16, 24); // 9~12주
                                 </p>
                             </div>
                             <div class="text-neon-gold text-2xl group-hover:translate-x-1 transition-transform">
+                                →
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- 지형 생성 보너스 카드 -->
+                <div class="mt-4">
+                    <a
+                        href="/lessons/bonus/terrain-editor"
+                        class="block w-full lesson-card group bg-gradient-to-r from-neon-mint/10 via-neon-sky/10 to-neon-gold/10 border-2 border-neon-mint/30 hover:border-neon-mint/60 transition-all"
+                    >
+                        <div class="flex items-center gap-4">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-mint to-neon-sky flex items-center justify-center text-white text-2xl font-bold shrink-0">
+                                🏔️
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-bold text-lg text-ink-deep group-hover:text-neon-mint transition-colors">
+                                        지형 생성과 편집
+                                    </h3>
+                                    <span class="badge badge-lesson text-xs">보너스</span>
+                                </div>
+                                <p class="text-sm text-ink-light">
+                                    Terrain Editor로 산, 호수, 섬 만들기 • Generate, Sculpt, Paint | 코딩 없이 스튜디오만!
+                                </p>
+                            </div>
+                            <div class="text-neon-mint text-2xl group-hover:translate-x-1 transition-transform">
                                 →
                             </div>
                         </div>

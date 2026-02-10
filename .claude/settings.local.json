@@ -1,32 +1,29 @@
 {
   "permissions": {
     "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash(*)",
+      "WebSearch",
+      "WebFetch",
       "mcp__plugin_serena_serena__*",
       "mcp__plugin_context7_context7__*",
       "mcp__plugin_playwright_playwright__*",
-      "mcp__claude-in-chrome__*",
-      "Bash(start *)",
-      "WebSearch",
-      "Bash(dir /s \"G:\\\\내 드라이브\\\\_26_로블록스_과외\")",
-      "Bash(xargs ls:*)",
-      "Bash(ls -la \"H:\\\\내 드라이브\\\\_26_로블록스_과외\\\\assets\\\\js\\\\core\"\" 2>/dev/null || dir \"H:내 드라이브_26_로블록스_과외assetsjscore\"\")",
-      "Bash(dir /s \"H:\\\\내 드라이브\\\\_26_로블록스_과외\")",
-      "Bash(dir:*)",
-      "Bash(powershell -Command \"\\(Get-Content ''H:\\\\내 드라이브\\\\_26_로블록스_과외\\\\1차시\\\\Lesson01.html'' | Measure-Object -Line\\).Lines\")",
-      "Bash(ls -la \"H:\\\\내 드라이브\\\\_26_로블록스_과외\\\\2차시\"\" 2>/dev/null || dir \"H:내 드라이브_26_로블록스_과외2차시\"\")",
-      "Bash(npm create:*)",
-      "Bash(npm install)",
-      "Bash(npm install:*)",
-      "Bash(npm run build:*)",
-      "Bash(timeout 3 npm run preview:*)",
-      "Bash(npm run dev:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push)",
-      "Bash(powershell:*)",
-      "Bash(ls -la \"C:\\\\workspace\\\\_26_로블록스_과외\\\\.claude\"\" 2>nul || echo \"No .claude dir \")"
+      "mcp__plugin_Notion_notion__*",
+      "mcp__claude-in-chrome__*"
     ],
     "deny": [
+      "Bash(rm *)",
+      "Bash(rm -rf *)",
+      "Bash(rmdir *)",
+      "Bash(del *)",
+      "Bash(Remove-Item *)",
+      "Bash(powershell*Remove-Item*)",
+      "Bash(git reset --hard*)",
+      "Bash(git push --force*)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -D*)",
       "mcp__plugin_serena_serena__delete_memory"
     ]
   }

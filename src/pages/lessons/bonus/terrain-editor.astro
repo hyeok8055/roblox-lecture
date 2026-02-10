@@ -1,0 +1,975 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 이미지 베이스 URL (Roblox 공식 문서)
+const imgBase = "https://prod.docsiteassets.roblox.com/assets";
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["Generate", "Draw", "Paint", "Fill"]);
+const quiz2Options = JSON.stringify(["Paint", "Draw", "Sculpt", "Flatten"]);
+const quiz3Options = JSON.stringify(["Smooth", "Flatten", "Erode", "Sculpt"]);
+const quiz4Options = JSON.stringify(["Fill (Source: Air → Target: Water)", "Paint (Water 소재)", "Sea Level", "Draw (Water 소재)"]);
+---
+
+<LessonLayout title="지형 생성과 편집" lessonNumber={0} totalSlides={13}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">보너스 차시</span>
+                <h1 class="title-display mb-4">
+                    지형 <span class="text-neon-mint">생성과 편집</span>
+                </h1>
+                <p class="text-xl text-ink-light mb-8 max-w-lg mx-auto">
+                    Terrain Editor로 산, 호수, 섬을 만들어요!
+                </p>
+
+                <!-- 지형 쇼케이스 이미지 -->
+                <div class="rounded-2xl overflow-hidden border-2 border-ink-pale mb-8 max-w-2xl mx-auto">
+                    <img
+                        src={`${imgBase}/modeling/terrain/Showcase.jpg`}
+                        alt="Roblox 지형 쇼케이스"
+                        class="w-full"
+                        loading="lazy"
+                    />
+                </div>
+
+                <div class="lesson-card inline-block text-left">
+                    <h3 class="font-bold text-ink-deep mb-3">오늘 배울 내용</h3>
+                    <ul class="space-y-2 text-ink-light">
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">1.</span>
+                            Terrain Editor 도구 전체 살펴보기
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">2.</span>
+                            Generate로 자동 지형 생성
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">3.</span>
+                            Draw, Sculpt, Paint로 직접 편집
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <span class="text-neon-mint">4.</span>
+                            실습: 섬 & 산과 호수 만들기
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="mt-8 flex items-center justify-center gap-4 text-sm text-ink-light">
+                    <span class="px-3 py-1 bg-neon-sky/20 text-neon-sky rounded-full">코딩 없음! 스튜디오만!</span>
+                    <span class="px-3 py-1 bg-neon-gold/20 text-neon-gold rounded-full">난이도: 쉬움</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Terrain Editor 열기 + 전체 도구 소개 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">시작하기</span>
+                <h2 class="title-section mb-6">Terrain Editor 열기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <!-- 열기 방법 -->
+                <div class="animate-in">
+                    <div class="lesson-card border-l-4 border-l-neon-mint">
+                        <div class="flex items-start gap-4">
+                            <span class="w-10 h-10 rounded-full bg-neon-mint/20 flex items-center justify-center text-neon-mint font-bold shrink-0">!</span>
+                            <div>
+                                <h3 class="font-bold text-ink-deep mb-2">열기 방법</h3>
+                                <p class="text-ink-light">
+                                    상단 메뉴에서 <strong>Home</strong> 탭 → <strong>Terrain Editor</strong> 클릭!
+                                </p>
+                                <div class="mt-3 rounded-xl overflow-hidden border border-ink-pale inline-block">
+                                    <img
+                                        src={`${imgBase}/studio/general/Toolbar-Terrain-Editor.png`}
+                                        alt="Terrain Editor 버튼 위치"
+                                        class="h-12"
+                                        loading="lazy"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Create / Edit 탭 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">2개의 탭</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl">
+                                <div class="font-bold text-lg mb-2">📦 Create 탭</div>
+                                <div class="text-sm text-ink-light mb-3">지형을 한 번에 만들거나 지우기</div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-sky rounded-full"></span>
+                                        <strong>Generate</strong> - 자동 지형 생성
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-sky rounded-full"></span>
+                                        <strong>Import</strong> - 높이맵 불러오기
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-coral rounded-full"></span>
+                                        <strong>Clear</strong> - 전체 삭제
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                                <div class="font-bold text-lg mb-2">✏️ Edit 탭</div>
+                                <div class="text-sm text-ink-light mb-3">브러시로 직접 편집하기</div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-mint rounded-full"></span>
+                                        <strong>Draw</strong> - 그리기 (추가/제거)
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-mint rounded-full"></span>
+                                        <strong>Sculpt</strong> - 조각 (섬세하게)
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-mint rounded-full"></span>
+                                        <strong>Smooth</strong> - 부드럽게
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-mint rounded-full"></span>
+                                        <strong>Flatten</strong> - 평평하게
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-gold rounded-full"></span>
+                                        <strong>Paint</strong> - 소재 칠하기
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 bg-neon-gold rounded-full"></span>
+                                        <strong>Fill</strong> / <strong>Sea Level</strong> - 채우기
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: Generate - 자동 지형 생성 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">Create 탭</span>
+                <h2 class="title-section mb-6">Generate - 자동 지형 생성</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3">한 번 클릭으로 맵 생성!</h3>
+                            <p class="text-ink-light mb-4 text-sm">
+                                Create 탭 → <strong>Generate</strong>를 선택하면<br>
+                                자동으로 멋진 지형이 만들어져요!
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Create-Tab-Generate.png`}
+                                    alt="Generate 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3">설정 옵션</h3>
+                            <div class="space-y-3">
+                                <div class="p-3 bg-sky-50 rounded-xl">
+                                    <div class="font-bold text-sm">📏 Position & Size</div>
+                                    <div class="text-xs text-ink-light">생성 영역의 위치와 크기</div>
+                                    <div class="text-xs text-ink-light mt-1">Size를 크게 하면 넓은 맵!</div>
+                                </div>
+                                <div class="p-3 bg-green-50 rounded-xl">
+                                    <div class="font-bold text-sm">🌍 Biomes (생태계)</div>
+                                    <div class="text-xs text-ink-light">어떤 지형을 포함할지 선택</div>
+                                    <div class="text-xs text-ink-light mt-1">사막, 산, 평원, 눈 등</div>
+                                </div>
+                                <div class="p-3 bg-amber-50 rounded-xl">
+                                    <div class="font-bold text-sm">🎲 Seed (씨앗값)</div>
+                                    <div class="text-xs text-ink-light">같은 숫자 = 같은 지형!</div>
+                                    <div class="text-xs text-ink-light mt-1">다른 숫자 = 완전 다른 지형</div>
+                                </div>
+                                <div class="p-3 bg-violet-50 rounded-xl">
+                                    <div class="font-bold text-sm">🕳️ Caves (동굴)</div>
+                                    <div class="text-xs text-ink-light">체크하면 동굴도 생성!</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="Seed 활용 팁">
+                    마음에 드는 지형이 나오면 <strong>Seed 번호를 메모</strong>해두세요!<br>
+                    나중에 같은 Seed를 입력하면 동일한 지형을 다시 생성할 수 있어요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: Draw - 브러시로 그리기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">Edit 탭</span>
+                <h2 class="title-section mb-6">Draw - 브러시로 지형 그리기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">✏️</span> Draw 도구
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                마우스로 클릭/드래그하면 지형이 추가돼요!<br>
+                                <strong>Ctrl(⌘) + 클릭</strong> = 지형 제거
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Draw.png`}
+                                    alt="Draw 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3">브러시 설정</h3>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/tutorials/create-an-environment-with-terrain/Terrain-Editor-Draw-Settings.png`}
+                                    alt="Draw 설정 화면"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="space-y-2">
+                                <div class="p-2 bg-sky-50 rounded-lg">
+                                    <div class="font-bold text-xs">🖌️ Brush Shape (브러시 모양)</div>
+                                    <div class="text-xs text-ink-light">구, 상자, 원기둥 중 선택</div>
+                                </div>
+                                <div class="p-2 bg-green-50 rounded-lg">
+                                    <div class="font-bold text-xs">📏 Base Size (크기)</div>
+                                    <div class="text-xs text-ink-light">1~64 스터드 (클수록 넓게 그림)</div>
+                                </div>
+                                <div class="p-2 bg-amber-50 rounded-lg">
+                                    <div class="font-bold text-xs">🎨 Material (소재)</div>
+                                    <div class="text-xs text-ink-light">잔디, 모래, 바위 등 선택</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="브러시 모양 3가지">
+                    <strong>Sphere (구)</strong> = 둥글게 | <strong>Box (상자)</strong> = 네모나게 | <strong>Cylinder (원기둥)</strong> = 기둥 모양<br>
+                    대부분 <strong>Sphere</strong>를 쓰면 자연스러워요!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: Sculpt & Smooth -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">Edit 탭</span>
+                <h2 class="title-section mb-6">Sculpt & Smooth - 조각과 다듬기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Sculpt -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">⛏️</span> Sculpt (조각)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                Draw와 비슷하지만 <strong>Strength(강도)</strong> 조절 가능!<br>
+                                약하게 → 섬세한 조각, 강하게 → 빠른 변형
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Sculpt.png`}
+                                    alt="Sculpt 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl text-sm">
+                                <strong>Strength 팁:</strong><br>
+                                산 만들기 → 0.5~0.8 (중~강)<br>
+                                세밀한 언덕 → 0.1~0.3 (약)
+                            </div>
+                        </div>
+
+                        <!-- Smooth -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">🧈</span> Smooth (부드럽게)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                울퉁불퉁한 지형을 <strong>부드럽게</strong> 만들어요!<br>
+                                Draw/Sculpt로 만든 후 Smooth로 다듬으면 자연스러워요.
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Smooth.png`}
+                                    alt="Smooth 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl text-sm">
+                                <strong>사용 순서:</strong><br>
+                                1️⃣ Draw/Sculpt로 대략 만들기<br>
+                                2️⃣ Smooth로 부드럽게 다듬기!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="Ctrl(⌘) 기억!">
+                    모든 Edit 도구에서 <strong>Ctrl(⌘) + 클릭</strong> = 반대 동작!<br>
+                    Draw: 추가↔제거 | Sculpt: 올리기↔깎기
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: Flatten & Paint -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">Edit 탭</span>
+                <h2 class="title-section mb-6">Flatten & Paint</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Flatten -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">📐</span> Flatten (평탄화)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                지형을 <strong>평평하게</strong> 만들어요!<br>
+                                건물이나 도로를 놓을 부지를 만들 때 필수!
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Flatten.png`}
+                                    alt="Flatten 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl text-sm">
+                                <strong>Flatten Mode:</strong><br>
+                                • <strong>Fixed</strong> = 지정한 높이로 맞춤<br>
+                                • <strong>Adaptive</strong> = 처음 클릭한 곳 기준
+                            </div>
+                        </div>
+
+                        <!-- Paint -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">🎨</span> Paint (소재 칠하기)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                기존 지형의 <strong>소재(Material)</strong>를 바꿔요!<br>
+                                잔디 위에 모래를 칠하거나, 눈을 덮을 수 있어요.
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Paint.png`}
+                                    alt="Paint 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale">
+                                <img
+                                    src={`${imgBase}/tutorials/create-an-environment-with-terrain/Terrain-Editor-Paint-Settings.png`}
+                                    alt="Paint 설정 화면"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="warning" title="Paint vs Draw 차이!">
+                    <strong>Draw</strong> = 새로운 지형을 <strong>추가</strong> (크기가 커짐)<br>
+                    <strong>Paint</strong> = 기존 지형의 <strong>겉모습만</strong> 변경 (크기 변화 없음)
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 소재(Material) 갤러리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">소재 갤러리</span>
+                <h2 class="title-section mb-6">지형 소재 (Material) 한눈에 보기</h2>
+            </div>
+
+            <div class="animate-in">
+                <p class="text-ink-light mb-6 text-sm">
+                    로블록스는 <strong>23가지 지형 소재</strong>를 제공해요! 자주 쓰는 12가지를 소개합니다.
+                </p>
+
+                <div class="grid grid-cols-3 md:grid-cols-4 gap-3">
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Grass.jpg`} alt="Grass" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🌿 Grass</div>
+                            <div class="text-xs text-ink-light">잔디</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Sand.jpg`} alt="Sand" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🏖️ Sand</div>
+                            <div class="text-xs text-ink-light">모래</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Rock.jpg`} alt="Rock" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🪨 Rock</div>
+                            <div class="text-xs text-ink-light">바위</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Water.jpg`} alt="Water" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🌊 Water</div>
+                            <div class="text-xs text-ink-light">물</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Snow.jpg`} alt="Snow" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">❄️ Snow</div>
+                            <div class="text-xs text-ink-light">눈</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Mud.jpg`} alt="Mud" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🟤 Mud</div>
+                            <div class="text-xs text-ink-light">진흙</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Ice.jpg`} alt="Ice" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🧊 Ice</div>
+                            <div class="text-xs text-ink-light">얼음</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Cracked-Lava.jpg`} alt="Cracked Lava" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🌋 CrackedLava</div>
+                            <div class="text-xs text-ink-light">용암</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Leafy-Grass.jpg`} alt="Leafy Grass" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🍃 LeafyGrass</div>
+                            <div class="text-xs text-ink-light">풀잎 잔디</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Sandstone.jpg`} alt="Sandstone" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🏜️ Sandstone</div>
+                            <div class="text-xs text-ink-light">사암</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Concrete.jpg`} alt="Concrete" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🏗️ Concrete</div>
+                            <div class="text-xs text-ink-light">콘크리트</div>
+                        </div>
+                    </div>
+                    <div class="bg-white border-2 border-ink-pale rounded-xl overflow-hidden">
+                        <img src={`${imgBase}/modeling/terrain/Material-Basalt.jpg`} alt="Basalt" class="w-full aspect-square object-cover" loading="lazy" />
+                        <div class="p-2 text-center">
+                            <div class="font-bold text-xs">🌑 Basalt</div>
+                            <div class="text-xs text-ink-light">현무암</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: Fill & Sea Level - 물 채우기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">Edit 탭</span>
+                <h2 class="title-section mb-6">Fill & Sea Level - 물 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Fill -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">🌊</span> Fill (채우기)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                선택 영역을 <strong>특정 소재로 채우기</strong>!<br>
+                                호수나 바다를 만들 때 핵심 도구!
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Fill.png`}
+                                    alt="Fill 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl text-sm">
+                                <strong>바다 만들기:</strong><br>
+                                1. Fill 도구 선택<br>
+                                2. Size를 크게 설정 (1000+)<br>
+                                3. <strong>Source: Air → Target: Water</strong><br>
+                                4. 빈 공간이 물로 채워짐!
+                            </div>
+                        </div>
+
+                        <!-- Sea Level -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">🏝️</span> Sea Level (해수면)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                일정 높이까지 <strong>물을 자동 채우기</strong>!<br>
+                                특정 높이 아래를 모두 바다로 만들 수 있어요.
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Edit-Tab-Sea-Level.png`}
+                                    alt="Sea Level 도구 UI"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl text-sm">
+                                <strong>설정 화면에서:</strong><br>
+                                • <strong>Create</strong> = 해수면 높이에 물 생성<br>
+                                • <strong>Evaporate</strong> = 물 제거<br>
+                                • 높이를 조절하면 수위가 변해요!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="rounded-xl overflow-hidden border border-ink-pale max-w-lg mx-auto">
+                        <img
+                            src={`${imgBase}/studio/terrain-editor/Fill-Region.jpg`}
+                            alt="Fill로 물 채운 결과"
+                            class="w-full"
+                            loading="lazy"
+                        />
+                        <div class="p-2 bg-ink-pale text-center text-xs text-ink-light">
+                            Fill 도구로 물을 채운 모습
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 실습 1 - 섬 만들기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🏝️ 실습 1</span>
+                <h2 class="title-section mb-6">섬 만들기!</h2>
+            </div>
+
+            <div class="flex flex-col gap-4 animate-in">
+                <div class="lesson-card border-l-4 border-l-neon-mint">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-mint text-white flex items-center justify-center font-bold shrink-0">1</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Draw로 모래 섬 만들기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Draw</strong> → Material: <strong>Sand</strong> → Brush Size: <strong>32</strong><br>
+                                스폰 위치 근처를 클릭하여 모래 덩어리 생성!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-sky">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-sky text-white flex items-center justify-center font-bold shrink-0">2</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Flatten으로 윗면 평탄화</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Flatten</strong> → Brush Size: <strong>18</strong> → Mode: <strong>Fixed</strong>, Y = <strong>0</strong><br>
+                                위쪽을 쓸어서 평평하게 만들기!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-gold">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-gold text-white flex items-center justify-center font-bold shrink-0">3</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Sculpt로 해안선 다듬기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Sculpt</strong> → Material: <strong>Sand</strong> → Strength: <strong>0.3</strong><br>
+                                섬 가장자리를 자연스럽게 깎아주기! (Ctrl = 제거)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-green-500">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shrink-0">4</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Paint로 잔디 칠하기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Paint</strong> → Material: <strong>Leafy Grass</strong><br>
+                                섬 중앙을 잔디로 칠하기! 가장자리는 모래 유지.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-blue-500">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold shrink-0">5</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Fill로 바다 채우기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Fill</strong> → Size: <strong>1800, 5, 1800</strong> → Position: <strong>0, -15, 0</strong><br>
+                                Source: <strong>Air</strong> → Target: <strong>Water</strong> → Fill 클릭!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="F5로 테스트!">
+                    F5를 눌러 직접 걸어보세요! 섬이 너무 작거나 크면 되돌리고(Ctrl+Z) 다시 만들어봐요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 실습 2 - 산과 호수 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">⛰️ 실습 2</span>
+                <h2 class="title-section mb-6">산과 호수 만들기!</h2>
+            </div>
+
+            <div class="flex flex-col gap-4 animate-in">
+                <div class="lesson-card border-l-4 border-l-neon-mint">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-mint text-white flex items-center justify-center font-bold shrink-0">1</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Generate로 기본 지형 생성</h3>
+                            <p class="text-sm text-ink-light">
+                                Create → <strong>Generate</strong> → Size: <strong>500, 100, 500</strong><br>
+                                Biomes: <strong>Mountains</strong> 체크! → Generate 클릭
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-sky">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-sky text-white flex items-center justify-center font-bold shrink-0">2</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Sculpt로 호수 파기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Sculpt</strong> → Brush Size: <strong>20</strong><br>
+                                <strong>Ctrl + 클릭</strong>으로 평지를 파내서 움푹 파인 곳 만들기!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-neon-gold">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-neon-gold text-white flex items-center justify-center font-bold shrink-0">3</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Smooth로 지형 다듬기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Smooth</strong> → Brush Size: <strong>15</strong><br>
+                                울퉁불퉁한 곳을 쓸어서 자연스럽게!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-blue-500">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold shrink-0">4</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Fill로 호수에 물 채우기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Fill</strong> → 파낸 영역 크기로 설정<br>
+                                Source: <strong>Air</strong> → Target: <strong>Water</strong> → Fill!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-l-4 border-l-green-500">
+                    <div class="flex items-start gap-4">
+                        <span class="w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center font-bold shrink-0">5</span>
+                        <div>
+                            <h3 class="font-bold text-ink-deep mb-1">Paint로 산꼭대기에 눈 칠하기</h3>
+                            <p class="text-sm text-ink-light">
+                                Edit → <strong>Paint</strong> → Material: <strong>Snow</strong><br>
+                                산 높은 곳에만 눈을 칠하면 설산 완성! ❄️
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="실습 포인트">
+                    Generate로 빠르게 기본 지형을 만들고,<br>
+                    Edit 도구로 세밀하게 다듬는 것이 포인트!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: Select & Transform - 영역 도구 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">Edit 탭</span>
+                <h2 class="title-section mb-6">Select & Transform - 영역 편집</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Select -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">🔲</span> Select (선택)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                지형의 <strong>영역을 선택</strong>해요!<br>
+                                선택한 영역을 복사, 이동, 삭제할 수 있어요.
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Select-Region-Labeled.jpg`}
+                                    alt="영역 선택 모습"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Transform -->
+                        <div class="lesson-card">
+                            <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
+                                <span class="text-2xl">🔄</span> Transform (변형)
+                            </h3>
+                            <p class="text-ink-light mb-3 text-sm">
+                                선택한 영역을 <strong>이동, 회전, 크기 변경</strong>!<br>
+                                만든 산을 복사해서 산맥을 만들 수 있어요.
+                            </p>
+                            <div class="rounded-xl overflow-hidden border border-ink-pale mb-3">
+                                <img
+                                    src={`${imgBase}/studio/terrain-editor/Transform-Region-Labeled.jpg`}
+                                    alt="영역 변형 모습"
+                                    class="w-full"
+                                    loading="lazy"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="복사 활용법">
+                    멋진 산을 만들었으면 <strong>Select → Copy → Paste</strong>로 복사해서<br>
+                    여러 개의 산을 빠르게 만들 수 있어요! 산맥이나 섬 군도에 유용!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 물 속성 & 잔디 장식 커스터마이징 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">꾸미기</span>
+                <h2 class="title-section mb-6">물 속성 & 잔디 장식</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🌊</span> 물(Water) 속성 커스터마이징
+                        </h3>
+                        <p class="text-ink-light mb-3 text-sm">
+                            Explorer에서 <strong>Terrain</strong> 선택 → Properties에서 설정!
+                        </p>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <div class="p-3 bg-sky-50 rounded-xl">
+                                <div class="font-bold text-sm">🎨 WaterColor</div>
+                                <div class="text-xs text-ink-light">물의 색 (깊은 파랑, 에메랄드 등)</div>
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl">
+                                <div class="font-bold text-sm">🔍 WaterTransparency</div>
+                                <div class="text-xs text-ink-light">투명도 (0=불투명, 1=투명)</div>
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl">
+                                <div class="font-bold text-sm">🌊 WaterWaveSize</div>
+                                <div class="text-xs text-ink-light">파도 크기 (0~1)</div>
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl">
+                                <div class="font-bold text-sm">💨 WaterWaveSpeed</div>
+                                <div class="text-xs text-ink-light">파도 속도 (0~100)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🌿</span> 잔디 애니메이션
+                        </h3>
+                        <p class="text-ink-light mb-3 text-sm">
+                            Explorer에서 <strong>Terrain</strong> → Properties → <strong>Decoration</strong> 체크!
+                        </p>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm">✅ Decoration</div>
+                                <div class="text-xs text-ink-light">체크하면 잔디가 흔들려요!</div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm">📏 GrassLength</div>
+                                <div class="text-xs text-ink-light">잔디 길이 (0.1~1)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="분위기 만들기">
+                    • <strong>열대 바다</strong>: WaterColor = 에메랄드, Transparency = 0.7<br>
+                    • <strong>어두운 늪</strong>: WaterColor = 짙은 초록, Transparency = 0.1<br>
+                    • <strong>잔잔한 호수</strong>: WaveSize = 0.1, WaveSpeed = 5
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="Biome과 Seed를 설정해서 한 번에 지형을 자동 생성하는 도구는?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! Generate는 Create 탭에 있으며, Biome(생태계), Seed(씨앗값), Size(크기) 등을 설정해서 자동으로 지형을 만들어요!"
+                        wrong-explanation="Generate가 정답이에요. Create 탭 → Generate에서 Biome, Seed, Size를 설정하면 자동 지형 생성!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="기존 지형의 겉모습(소재)만 바꾸고 싶을 때 사용하는 도구는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! Paint는 지형의 크기를 변경하지 않고 소재(Material)만 바꿔요. 잔디→모래, 바위→눈 등으로 변경!"
+                        wrong-explanation="Paint가 정답이에요. Draw는 새 지형을 추가하는 거고, Paint는 기존 지형의 소재만 바꿔요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="울퉁불퉁한 지형을 자연스럽게 부드럽게 만드는 도구는?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! Smooth는 거친 표면을 부드럽게 다듬어줘요. Draw/Sculpt 후에 Smooth로 마무리하면 자연스러워요!"
+                        wrong-explanation="Smooth가 정답이에요. Flatten은 '평평하게' 만드는 거고, Smooth는 '부드럽게' 만드는 거예요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="빈 공간(Air)을 물(Water)로 채워서 호수를 만드는 방법은?"
+                        correct="A"
+                        options={quiz4Options}
+                        correct-explanation="맞아요! Fill 도구에서 Source를 Air, Target을 Water로 설정하면 빈 공간이 물로 채워져요!"
+                        wrong-explanation="Fill 도구에서 Source: Air → Target: Water로 설정하는 것이 정답이에요. Paint는 표면만 바꾸고, Draw는 물 블록을 하나씩 그려야 해요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8">
+                <div class="bg-gradient-to-r from-neon-mint/20 via-neon-sky/20 to-neon-gold/20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-3">🏔️</div>
+                    <h3 class="font-bold text-xl mb-2">지형 편집 마스터!</h3>
+                    <p class="text-ink-light mb-4">
+                        이제 산, 호수, 섬, 동굴까지<br>
+                        원하는 지형을 자유롭게 만들 수 있어요!
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <span class="badge badge-success">Generate</span>
+                        <span class="badge badge-success">Draw</span>
+                        <span class="badge badge-success">Sculpt</span>
+                        <span class="badge badge-success">Smooth</span>
+                        <span class="badge badge-success">Paint</span>
+                        <span class="badge badge-success">Fill</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

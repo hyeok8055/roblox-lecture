@@ -186,6 +186,106 @@ const CONCEPT_DICTIONARY: Record<string, ConceptInfo> = {
         emoji: '💨',
         short: '충돌 여부 (true/false)',
         detail: '충돌 설정 💨 - true면 다른 파트와 부딪히고, false면 통과해요! 투명 코인이 발에 걸리지 않게 하려면 CanCollide = false!'
+    },
+    'ScreenGui': {
+        emoji: '🖥️',
+        short: '화면 UI의 컨테이너',
+        detail: '화면 액자 🖥️ - 화면에 보이는 모든 UI(버튼, 글자, 이미지)를 담는 큰 액자예요! StarterGui 안에 넣으면 게임 시작할 때 자동으로 플레이어 화면에 나타나요.'
+    },
+    'Frame': {
+        emoji: '📦',
+        short: 'UI 요소들을 묶는 상자',
+        detail: '정리 상자 📦 - 여러 UI(TextLabel, TextButton 등)를 하나로 묶어주는 컨테이너예요! 배경색, 투명도, 크기를 설정할 수 있고, 안에 넣은 UI들을 함께 이동/숨기기 할 수 있어요.'
+    },
+    'TextButton': {
+        emoji: '🔘',
+        short: '클릭할 수 있는 버튼',
+        detail: '누르는 버튼 🔘 - TextLabel처럼 글자를 보여주지만, 클릭할 수 있어요! MouseButton1Click 이벤트로 클릭했을 때 동작을 연결해요.'
+    },
+    'UDim2': {
+        emoji: '📐',
+        short: 'UI 크기/위치 설정 값',
+        detail: 'UI 자 📐 - UDim2.new(scaleX, offsetX, scaleY, offsetY)로 크기와 위치를 정해요! Scale(비율): 0.5 = 화면의 50%, Offset(픽셀): 100 = 100픽셀. 보통 Scale을 많이 써요!'
+    },
+    'MouseButton1Click': {
+        emoji: '🖱️',
+        short: '마우스 왼쪽 클릭 이벤트',
+        detail: '클릭 감지 🖱️ - TextButton을 마우스로 클릭하면 실행! button.MouseButton1Click:Connect(function() ... end)로 연결해요. Touched처럼 이벤트예요!'
+    },
+    'LocalScript': {
+        emoji: '💻',
+        short: '클라이언트(내 컴퓨터)에서 실행',
+        detail: '내 컴퓨터 전용 스크립트 💻 - GUI(버튼, 텍스트)를 다루려면 LocalScript를 써야 해요! 일반 Script는 서버에서 실행되지만, LocalScript는 내 화면에서 실행돼요.'
+    },
+    'StarterGui': {
+        emoji: '🏠',
+        short: 'GUI를 넣어두는 시작 폴더',
+        detail: 'GUI 보관함 🏠 - StarterGui에 ScreenGui를 넣으면 게임 시작할 때 모든 플레이어 화면에 자동으로 나타나요! Explorer에서 StarterGui를 찾아보세요.'
+    },
+    'BackgroundTransparency': {
+        emoji: '👻',
+        short: 'UI 배경 투명도 (0=보임, 1=투명)',
+        detail: 'UI 투명도 👻 - 0이면 배경이 완전히 보이고, 1이면 완전 투명! 글자만 보이게 하려면 BackgroundTransparency = 1로 설정해요.'
+    },
+    ':WaitForChild()': {
+        emoji: '⏳',
+        short: '자식 오브젝트가 로드될 때까지 대기',
+        detail: '기다리기 ⏳ - :FindFirstChild()는 없으면 nil을 반환하지만, :WaitForChild()는 나타날 때까지 기다려요! GUI 요소를 찾을 때 안전하게 사용해요.'
+    },
+    'UICorner': {
+        emoji: '⭕',
+        short: 'UI 모서리를 둥글게',
+        detail: '둥근 모서리 ⭕ - Frame이나 Button에 UICorner를 넣으면 모서리가 둥글어져요! CornerRadius로 얼마나 둥글게 할지 정해요. UDim.new(0, 12)는 12픽셀만큼 둥글게!'
+    },
+    'UIStroke': {
+        emoji: '🖊️',
+        short: 'UI 테두리/외곽선',
+        detail: '테두리 그리기 🖊️ - UI에 외곽선을 추가해요! Thickness(두께), Color(색상)을 설정할 수 있어요. 예쁜 버튼을 만들 때 필수!'
+    },
+    'ImageLabel': {
+        emoji: '🖼️',
+        short: '이미지를 보여주는 UI',
+        detail: '사진 액자 🖼️ - 화면에 이미지를 표시해요! Image 속성에 rbxassetid://숫자 형태로 이미지 ID를 넣어요. Toolbox에서 이미지를 찾을 수 있어요!'
+    },
+    'ImageButton': {
+        emoji: '🎯',
+        short: '클릭 가능한 이미지 버튼',
+        detail: '이미지 버튼 🎯 - ImageLabel처럼 이미지를 보여주면서 클릭도 가능해요! MouseButton1Click으로 클릭 이벤트를 연결할 수 있어요.'
+    },
+    'TweenService': {
+        emoji: '🎬',
+        short: '부드러운 애니메이션 서비스',
+        detail: '애니메이션 감독 🎬 - 위치, 크기, 투명도 등을 부드럽게 변화시켜요! TweenService:Create(대상, 정보, 목표)로 만들고 :Play()로 재생!'
+    },
+    'TweenInfo': {
+        emoji: '⚙️',
+        short: '트윈 애니메이션 설정',
+        detail: '애니메이션 설정 ⚙️ - TweenInfo.new(시간, 스타일)로 얼마나 걸릴지, 어떤 느낌으로 움직일지 정해요! Enum.EasingStyle.Quad는 부드러운 가감속!'
+    },
+    'BillboardGui': {
+        emoji: '🏷️',
+        short: '3D 파트 위에 뜨는 GUI',
+        detail: '머리 위 이름표 🏷️ - 파트 위에 떠다니는 GUI예요! 이름표, 체력바, 표시판 등에 사용해요. StudsOffset으로 얼마나 위에 뜰지 정하고, Size로 크기를 정해요.'
+    },
+    'Visible': {
+        emoji: '👁️',
+        short: 'UI 보이기/숨기기 (true/false)',
+        detail: '보이기 설정 👁️ - Visible = true면 보이고, false면 안 보여요! 버튼 클릭으로 패널을 열고 닫을 때 사용해요. not으로 토글: frame.Visible = not frame.Visible'
+    },
+    'TextScaled': {
+        emoji: '🔤',
+        short: '글자 크기 자동 맞춤',
+        detail: '자동 크기 🔤 - TextScaled = true로 설정하면 글자가 UI 크기에 맞게 자동으로 커지거나 작아져요! 다양한 화면 크기에서도 깔끔하게 보여요.'
+    },
+    'SurfaceGui': {
+        emoji: '🪧',
+        short: '파트 표면에 붙는 GUI',
+        detail: '표면 GUI 🪧 - 파트의 표면에 직접 붙는 GUI예요! 간판, 안내판, TV 화면, 점수판 등에 사용해요. Face 속성으로 어느 면(Front, Back, Top 등)에 표시할지 정해요. BillboardGui와 달리 파트와 함께 회전해요!'
+    },
+    'Enum.NormalId': {
+        emoji: '🧭',
+        short: 'SurfaceGui가 붙을 면 방향',
+        detail: '면 방향 🧭 - SurfaceGui의 Face 속성에 사용해요! Front(앞), Back(뒤), Top(위), Bottom(아래), Left(왼쪽), Right(오른쪽) 6가지가 있어요.'
     }
 };
 

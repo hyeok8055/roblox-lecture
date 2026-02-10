@@ -1,0 +1,1055 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["UICorner", "UIStroke", "UIListLayout", "UIPadding"]);
+const quiz2Options = JSON.stringify(["TweenService", "RunService", "UserInputService", "GuiService"]);
+const quiz3Options = JSON.stringify(["BillboardGui", "SurfaceGui", "ScreenGui", "ProximityPrompt"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (6개)
+// =========================================
+
+// 퀴즈 1: UICorner + UIStroke 꾸미기
+const uiDecorateBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "\"UICorner\"", options: ["\"UICorner\"", "\"UIStroke\"", "\"Frame\"", "\"UIListLayout\""] },
+    { id: "b3", correct: "UDim.new(0, 16)", options: ["UDim.new(0, 16)", "UDim.new(0, 0)", "UDim2.new(0, 16)", "16"] },
+    { id: "b4", correct: "\"UIStroke\"", options: ["\"UICorner\"", "\"UIStroke\"", "\"UIBorder\"", "\"UIOutline\""] }
+]);
+const uiDecorateTemplate = `-- ========================================
+-- ⭕ 코드로 UI를 예쁘게 꾸미기!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → Frame
+--         Frame 안에 LocalScript 넣기!
+-- 💡 UICorner = 모서리를 둥글게
+-- 💡 UIStroke = 테두리(외곽선) 추가
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = Frame
+local frame = [b1]
+
+-- 💡 1. 둥근 모서리 추가!
+local corner = Instance.new([b2])
+-- 💡 16픽셀만큼 둥글게!
+corner.CornerRadius = [b3]
+-- 💡 Frame의 자식으로 넣기!
+corner.Parent = frame
+
+-- 💡 2. 테두리 추가!
+local stroke = Instance.new([b4])
+-- 💡 테두리 두께 = 3
+stroke.Thickness = 3
+-- 💡 금색 테두리!
+stroke.Color = Color3.fromRGB(255, 215, 0)
+stroke.Parent = frame
+
+print("Frame 꾸미기 완료!")`;
+const uiDecorateFullCode = `-- ⭕ UI 꾸미기 (UICorner + UIStroke)
+-- 📦 StarterGui → ScreenGui → Frame → LocalScript
+local frame = script.Parent
+
+-- 둥근 모서리
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 16)
+corner.Parent = frame
+
+-- 금색 테두리
+local stroke = Instance.new("UIStroke")
+stroke.Thickness = 3
+stroke.Color = Color3.fromRGB(255, 215, 0)
+stroke.Parent = frame`;
+
+// 퀴즈 2: 버튼 꾸미기 (크기 + 색상 + 둥근 모서리)
+const buttonStyleBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "UDim2.new(0.3, 0, 0.08, 0)", options: ["UDim2.new(0.3, 0, 0.08, 0)", "UDim2.new(0, 100, 0, 50)", "UDim2.new(1, 0, 1, 0)", "Vector2.new(0.3, 0.08)"] },
+    { id: "b3", correct: "UDim2.new(0.5, 0, 0.5, 0)", options: ["UDim2.new(0, 0, 0, 0)", "UDim2.new(0.5, 0, 0.5, 0)", "UDim2.new(1, 0, 1, 0)", "UDim2.new(0.5, 0, 0, 0)"] },
+    { id: "b4", correct: "Vector2.new(0.5, 0.5)", options: ["Vector2.new(0, 0)", "Vector2.new(0.5, 0.5)", "Vector2.new(1, 1)", "UDim2.new(0.5, 0, 0.5, 0)"] }
+]);
+const buttonStyleTemplate = `-- ========================================
+-- 🎨 코드로 버튼 스타일링!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 UDim2 = UI 크기/위치 설정
+-- 💡 AnchorPoint = 기준점 (0.5 = 가운데)
+-- ========================================
+
+local button = [b1]
+
+-- 💡 버튼 크기: 가로 30%, 세로 8%
+button.Size = [b2]
+-- 💡 버튼 위치: 화면 정중앙!
+button.Position = [b3]
+-- 💡 기준점을 가운데로 (정확한 중앙 배치!)
+button.AnchorPoint = [b4]
+
+-- 💡 예쁘게 꾸미기
+button.Text = "멋진 버튼!"
+button.TextSize = 24
+button.Font = Enum.Font.GothamBold
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+
+-- 💡 둥근 모서리 추가
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = button`;
+const buttonStyleFullCode = `-- 🎨 버튼 스타일링
+-- 📦 StarterGui → ScreenGui → TextButton → LocalScript
+local button = script.Parent
+
+button.Size = UDim2.new(0.3, 0, 0.08, 0)
+button.Position = UDim2.new(0.5, 0, 0.5, 0)
+button.AnchorPoint = Vector2.new(0.5, 0.5)
+
+button.Text = "멋진 버튼!"
+button.TextSize = 24
+button.Font = Enum.Font.GothamBold
+button.TextColor3 = Color3.fromRGB(255, 255, 255)
+button.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = button`;
+
+// 퀴즈 3: TweenService GUI 페이드인
+const tweenFadeBlanks = JSON.stringify([
+    { id: "b1", correct: "game:GetService(\"TweenService\")", options: ["game.TweenService", "game:GetService(\"TweenService\")", "require(\"TweenService\")", "TweenService.new()"] },
+    { id: "b2", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b3", correct: "TweenInfo.new(1, Enum.EasingStyle.Quad)", options: ["TweenInfo.new(1)", "TweenInfo.new(1, Enum.EasingStyle.Quad)", "TweenInfo(1)", "1"] },
+    { id: "b4", correct: "{BackgroundTransparency = 0}", options: ["{BackgroundTransparency = 0}", "{BackgroundTransparency = 1}", "{Visible = true}", "{Size = UDim2.new(1, 0, 1, 0)}"] }
+]);
+const tweenFadeTemplate = `-- ========================================
+-- 🎬 GUI가 부드럽게 나타나는 페이드인!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → Frame
+--         Frame 안에 LocalScript 넣기!
+-- 💡 TweenService = 부드러운 애니메이션!
+-- 💡 BackgroundTransparency: 1→0 = 투명→불투명
+-- ========================================
+
+-- 💡 TweenService 가져오기 (게임 서비스!)
+local TweenService = [b1]
+local frame = [b2]
+
+-- 💡 처음에는 투명하게!
+frame.BackgroundTransparency = 1
+
+-- 💡 1초 동안 부드럽게(Quad) 변화!
+local tweenInfo = [b3]
+
+-- 💡 목표: 투명도를 0으로 (완전 보이게!)
+local goal = [b4]
+
+-- 💡 트윈 만들고 재생!
+local tween = TweenService:Create(frame, tweenInfo, goal)
+tween:Play()
+
+print("페이드인 시작!")`;
+const tweenFadeFullCode = `-- 🎬 GUI 페이드인 애니메이션
+-- 📦 StarterGui → ScreenGui → Frame → LocalScript
+local TweenService = game:GetService("TweenService")
+local frame = script.Parent
+
+-- 처음엔 투명
+frame.BackgroundTransparency = 1
+
+-- 1초 동안 부드럽게
+local tweenInfo = TweenInfo.new(1, Enum.EasingStyle.Quad)
+local goal = {BackgroundTransparency = 0}
+
+local tween = TweenService:Create(frame, tweenInfo, goal)
+tween:Play()`;
+
+// 퀴즈 4: 버튼 클릭시 패널 슬라이드
+const tweenSlideBlanks = JSON.stringify([
+    { id: "b1", correct: "game:GetService(\"TweenService\")", options: ["game.TweenService", "game:GetService(\"TweenService\")", "require(\"TweenService\")", "TweenService.new()"] },
+    { id: "b2", correct: ":WaitForChild(\"Panel\")", options: [".Panel", ":WaitForChild(\"Panel\")", ":FindFirstChild(\"Panel\")", "[\"Panel\"]"] },
+    { id: "b3", correct: "not isOpen", options: ["true", "false", "not isOpen", "isOpen"] },
+    { id: "b4", correct: "UDim2.new(0.5, 0, 0.5, 0)", options: ["UDim2.new(0, 0, 0, 0)", "UDim2.new(0.5, 0, 0.5, 0)", "UDim2.new(1, 0, 1, 0)", "UDim2.new(0.5, 0, -0.5, 0)"] }
+]);
+const tweenSlideTemplate = `-- ========================================
+-- 📦 버튼 클릭하면 패널이 슬라이드!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui 안에
+--         Frame(Panel, 화면 밖 배치) + TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 TweenService로 위치를 부드럽게 이동!
+-- ========================================
+
+local TweenService = [b1]
+local button = script.Parent
+-- 💡 ScreenGui에서 Panel 찾기
+local panel = button.Parent[b2]
+local isOpen = false
+
+-- 💡 Panel 초기 위치 (화면 위, 안 보이는 곳)
+panel.Position = UDim2.new(0.5, 0, -0.5, 0)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
+
+button.MouseButton1Click:Connect(function()
+    -- 💡 열고 닫기 토글!
+    isOpen = [b3]
+
+    local goal
+    if isOpen then
+        -- 💡 화면 중앙으로 슬라이드!
+        goal = {Position = [b4]}
+    else
+        -- 💡 화면 밖으로 슬라이드!
+        goal = {Position = UDim2.new(0.5, 0, -0.5, 0)}
+    end
+
+    -- 💡 0.3초 동안 부드럽게 이동!
+    local tween = TweenService:Create(
+        panel,
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        goal
+    )
+    tween:Play()
+end)`;
+const tweenSlideFullCode = `-- 📦 패널 슬라이드 애니메이션
+-- 📦 StarterGui → ScreenGui → Frame(Panel) + TextButton → LocalScript
+local TweenService = game:GetService("TweenService")
+local button = script.Parent
+local panel = button.Parent:WaitForChild("Panel")
+local isOpen = false
+
+panel.Position = UDim2.new(0.5, 0, -0.5, 0)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
+
+button.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    local goal
+    if isOpen then
+        goal = {Position = UDim2.new(0.5, 0, 0.5, 0)}
+    else
+        goal = {Position = UDim2.new(0.5, 0, -0.5, 0)}
+    end
+    local tween = TweenService:Create(
+        panel,
+        TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        goal
+    )
+    tween:Play()
+end)`;
+
+// 퀴즈 5: BillboardGui 이름표
+const billboardBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "\"BillboardGui\"", options: ["\"ScreenGui\"", "\"BillboardGui\"", "\"SurfaceGui\"", "\"Frame\""] },
+    { id: "b3", correct: "UDim2.new(0, 200, 0, 50)", options: ["UDim2.new(0, 200, 0, 50)", "Vector2.new(200, 50)", "UDim2.new(1, 0, 1, 0)", "UDim2.new(200, 0, 50, 0)"] },
+    { id: "b4", correct: "Vector3.new(0, 3, 0)", options: ["Vector3.new(0, 0, 0)", "Vector3.new(0, 3, 0)", "Vector3.new(3, 0, 0)", "UDim2.new(0, 0, 0, 3)"] }
+]);
+const billboardTemplate = `-- ========================================
+-- 🏷️ 파트 위에 뜨는 이름표!
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+--         (BillboardGui는 서버에서도 가능!)
+-- 💡 BillboardGui = 3D 파트 위에 뜨는 GUI
+-- 💡 StudsOffset = 파트에서 얼마나 위에?
+-- ========================================
+
+-- 💡 이 스크립트가 붙은 파트
+local part = [b1]
+
+-- 💡 1. BillboardGui 생성!
+local billboard = Instance.new([b2])
+-- 💡 GUI 크기 (가로 200px, 세로 50px)
+billboard.Size = [b3]
+-- 💡 파트 위로 3칸 띄우기!
+billboard.StudsOffset = [b4]
+-- 💡 이 파트에 붙이기
+billboard.Adornee = part
+billboard.Parent = part
+
+-- 💡 2. 글자 추가!
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+-- 💡 배경 투명 (글자만 보이게!)
+label.BackgroundTransparency = 1
+label.Text = "Hello!"
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+-- 💡 글자 크기 자동 맞춤
+label.TextScaled = true
+label.Parent = billboard
+
+print("이름표 생성!")`;
+const billboardFullCode = `-- 🏷️ BillboardGui 이름표
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+local billboard = Instance.new("BillboardGui")
+billboard.Size = UDim2.new(0, 200, 0, 50)
+billboard.StudsOffset = Vector3.new(0, 3, 0)
+billboard.Adornee = part
+billboard.Parent = part
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.BackgroundTransparency = 1
+label.Text = "Hello!"
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.TextScaled = true
+label.Parent = billboard`;
+
+// 퀴즈 6: 버튼 클릭시 크기 트윈 (심화)
+const tweenScaleBlanks = JSON.stringify([
+    { id: "b1", correct: "game:GetService(\"TweenService\")", options: ["game.TweenService", "game:GetService(\"TweenService\")", "require(\"TweenService\")", "TweenService.new()"] },
+    { id: "b2", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b3", correct: "UDim2.new(0.4, 0, 0.12, 0)", options: ["UDim2.new(0.2, 0, 0.06, 0)", "UDim2.new(0.4, 0, 0.12, 0)", "UDim2.new(1, 0, 1, 0)", "UDim2.new(0, 0, 0, 0)"] },
+    { id: "b4", correct: "UDim2.new(0.3, 0, 0.08, 0)", options: ["UDim2.new(0.2, 0, 0.06, 0)", "UDim2.new(0.3, 0, 0.08, 0)", "UDim2.new(0.5, 0, 0.15, 0)", "UDim2.new(0, 0, 0, 0)"] }
+]);
+const tweenScaleTemplate = `-- ========================================
+-- 🎯 클릭하면 커졌다 돌아오는 버튼!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 트윈 2개: 커지기 → 원래대로!
+-- 💡 tween.Completed:Wait() = 끝날 때까지 기다림
+-- ========================================
+
+local TweenService = [b1]
+local button = [b2]
+
+-- 💡 원래 크기 기억!
+local originalSize = button.Size
+
+button.MouseButton1Click:Connect(function()
+    -- 💡 1단계: 커지기! (0.1초)
+    local growTween = TweenService:Create(
+        button,
+        TweenInfo.new(0.1, Enum.EasingStyle.Quad),
+        {Size = [b3]}
+    )
+    growTween:Play()
+    -- 💡 커지는 트윈이 끝날 때까지 기다리기!
+    growTween.Completed:Wait()
+
+    -- 💡 2단계: 원래대로! (0.2초)
+    local shrinkTween = TweenService:Create(
+        button,
+        TweenInfo.new(0.2, Enum.EasingStyle.Bounce),
+        {Size = [b4]}
+    )
+    shrinkTween:Play()
+end)`;
+const tweenScaleFullCode = `-- 🎯 클릭하면 커졌다 돌아오는 버튼
+-- 📦 StarterGui → ScreenGui → TextButton → LocalScript
+local TweenService = game:GetService("TweenService")
+local button = script.Parent
+
+button.MouseButton1Click:Connect(function()
+    -- 커지기
+    local growTween = TweenService:Create(
+        button,
+        TweenInfo.new(0.1, Enum.EasingStyle.Quad),
+        {Size = UDim2.new(0.4, 0, 0.12, 0)}
+    )
+    growTween:Play()
+    growTween.Completed:Wait()
+
+    -- 원래대로 (Bounce = 통통 튀기!)
+    local shrinkTween = TweenService:Create(
+        button,
+        TweenInfo.new(0.2, Enum.EasingStyle.Bounce),
+        {Size = UDim2.new(0.3, 0, 0.08, 0)}
+    )
+    shrinkTween:Play()
+end)`;
+
+// 퀴즈 7: SurfaceGui 표지판 만들기
+const surfaceGuiBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "\"SurfaceGui\"", options: ["\"ScreenGui\"", "\"BillboardGui\"", "\"SurfaceGui\"", "\"Frame\""] },
+    { id: "b3", correct: "Enum.NormalId.Front", options: ["Enum.NormalId.Front", "Enum.NormalId.Top", "\"Front\"", "0"] },
+    { id: "b4", correct: "\"상점\"", options: ["\"상점\"", "상점", "nil", "true"] }
+]);
+const surfaceGuiTemplate = `-- ========================================
+-- 🪧 파트에 표지판 붙이기!
+-- ========================================
+-- 📦 준비: Part 1개 (Anchored ✓) + Script
+-- 💡 SurfaceGui = 파트 표면에 붙는 GUI!
+-- 💡 Face = 어느 면에 표시할지 정해요
+-- 💡 Front = 앞면, Top = 윗면
+-- ========================================
+
+-- 💡 이 스크립트가 붙은 파트
+local part = [b1]
+
+-- 💡 1. SurfaceGui 생성!
+local surfaceGui = Instance.new([b2])
+-- 💡 파트의 앞면에 표시!
+surfaceGui.Face = [b3]
+-- 💡 파트에 붙이기!
+surfaceGui.Parent = part
+
+-- 💡 2. 표지판 글자 추가!
+local label = Instance.new("TextLabel")
+-- 💡 표면 전체를 채우기!
+label.Size = UDim2.new(1, 0, 1, 0)
+-- 💡 표시할 텍스트
+label.Text = [b4]
+-- 💡 글자 크기 자동 맞춤
+label.TextScaled = true
+-- 💡 하얀 글자 + 어두운 배경
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+label.Font = Enum.Font.GothamBold
+label.Parent = surfaceGui
+
+print("표지판 완성!")`;
+const surfaceGuiFullCode = `-- 🪧 SurfaceGui 표지판
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+local surfaceGui = Instance.new("SurfaceGui")
+surfaceGui.Face = Enum.NormalId.Front
+surfaceGui.Parent = part
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.Text = "상점"
+label.TextScaled = true
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+label.Font = Enum.Font.GothamBold
+label.Parent = surfaceGui`;
+
+// 퀴즈 4번째 (SurfaceGui)
+const quiz4Options = JSON.stringify(["SurfaceGui", "BillboardGui", "ScreenGui", "ProximityPrompt"]);
+---
+
+<LessonLayout title="GUI 활용" lessonNumber={7} totalSlides={14}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">7주차 B</span>
+                <h1 class="title-display mb-4">
+                    GUI <span class="text-neon-mint">활용</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    UI를 예쁘게 꾸미고<br>
+                    애니메이션까지 넣어요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⭕ UICorner</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🖊️ UIStroke</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🎬 TweenService</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🏷️ BillboardGui</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ UICorner, UIStroke로 UI 꾸미기</li>
+                        <li>✓ TweenService로 부드러운 애니메이션</li>
+                        <li>✓ BillboardGui로 3D 이름표 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: UICorner & UIStroke 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">UI 꾸미기 도구</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">✨</span>
+                            UI를 예쁘게 만드는 3가지 도구
+                        </h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl text-center">
+                                <div class="text-3xl mb-2">⭕</div>
+                                <div class="font-bold text-lg">UICorner</div>
+                                <div class="text-sm text-ink-light mt-1">모서리를 둥글게!</div>
+                                <div class="mt-2 text-xs bg-white rounded-lg p-2 font-mono">
+                                    CornerRadius = UDim.new(0, 12)
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl text-center">
+                                <div class="text-3xl mb-2">🖊️</div>
+                                <div class="font-bold text-lg">UIStroke</div>
+                                <div class="text-sm text-ink-light mt-1">테두리/외곽선!</div>
+                                <div class="mt-2 text-xs bg-white rounded-lg p-2 font-mono">
+                                    Thickness = 3, Color = ...
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl text-center">
+                                <div class="text-3xl mb-2">📐</div>
+                                <div class="font-bold text-lg">AnchorPoint</div>
+                                <div class="text-sm text-ink-light mt-1">기준점 설정!</div>
+                                <div class="mt-2 text-xs bg-white rounded-lg p-2 font-mono">
+                                    Vector2.new(0.5, 0.5)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">사용법: Frame/Button에 자식으로 추가!</h3>
+                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4">
+                            <div class="font-mono text-sm space-y-1">
+                                <div>📁 <strong>ScreenGui</strong></div>
+                                <div class="ml-4">📦 <strong>Frame</strong> (네모난 박스)</div>
+                                <div class="ml-8">├ ⭕ <strong class="text-blue-600">UICorner</strong> ← 둥근 모서리!</div>
+                                <div class="ml-8">├ 🖊️ <strong class="text-amber-600">UIStroke</strong> ← 테두리!</div>
+                                <div class="ml-8">├ 📝 TextLabel</div>
+                                <div class="ml-8">└ 🔘 TextButton</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="스튜디오에서 추가하는 법">
+                    Frame 우클릭 → Insert Object → <strong>UICorner</strong> / <strong>UIStroke</strong> 검색!<br>
+                    코드 없이 Properties에서 직접 값을 조정할 수도 있어요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: UICorner + UIStroke 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⭕ UI 꾸미기 (UICorner + UIStroke)"
+                setup="StarterGui → ScreenGui → Frame → LocalScript"
+                concepts='["UICorner", "UIStroke", "Instance.new", "Color3.fromRGB"]'
+                blanks={uiDecorateBlanks}
+                template={uiDecorateTemplate}
+                full-code={uiDecorateFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 버튼 스타일링 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🎨 코드로 버튼 스타일링"
+                setup="StarterGui → ScreenGui → TextButton → LocalScript"
+                concepts='["TextButton", "UDim2", "UICorner", "Color3.fromRGB"]'
+                blanks={buttonStyleBlanks}
+                template={buttonStyleTemplate}
+                full-code={buttonStyleFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: TweenService 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">TweenService</span>
+                <h2 class="title-section mb-6">부드러운 애니메이션</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🎬</span>
+                            TweenService = 애니메이션 감독!
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            위치, 크기, 투명도, 색상 등을 <strong>부드럽게</strong> 변화시켜요!<br>
+                            뚝뚝 끊기지 않고 자연스럽게 움직여요.
+                        </p>
+
+                        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4 mb-4">
+                            <div class="font-mono text-sm mb-2">
+                                <strong>3단계로 만들기:</strong>
+                            </div>
+                            <ol class="text-sm space-y-2 ml-4">
+                                <li><strong>1.</strong> <code>TweenInfo.new(시간, 스타일)</code> → 얼마나 걸릴지?</li>
+                                <li><strong>2.</strong> <code>{'{'}속성 = 목표값{'}'}</code> → 어디까지 변할지?</li>
+                                <li><strong>3.</strong> <code>TweenService:Create(대상, 정보, 목표):Play()</code> → 실행!</li>
+                            </ol>
+                        </div>
+
+                        <lua-code-block title="TweenService 기본 패턴" show-line-numbers>
+-- TweenService 가져오기
+local TweenService = game:GetService("TweenService")
+
+-- 1. 얼마나 걸릴지? (1초, 부드럽게)
+local info = TweenInfo.new(1, Enum.EasingStyle.Quad)
+
+-- 2. 어디까지 변할지? (투명도 → 0)
+local goal = {'{'}BackgroundTransparency = 0{'}'}
+
+-- 3. 만들고 재생!
+local tween = TweenService:Create(frame, info, goal)
+tween:Play()
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">EasingStyle 종류</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="p-3 bg-sky-50 rounded-xl text-center">
+                                <div class="font-bold text-sm">Quad</div>
+                                <div class="text-xs text-ink-light">부드러운 가감속</div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl text-center">
+                                <div class="font-bold text-sm">Linear</div>
+                                <div class="text-xs text-ink-light">일정한 속도</div>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl text-center">
+                                <div class="font-bold text-sm">Bounce</div>
+                                <div class="text-xs text-ink-light">통통 튀기!</div>
+                            </div>
+                            <div class="p-3 bg-violet-50 rounded-xl text-center">
+                                <div class="font-bold text-sm">Elastic</div>
+                                <div class="text-xs text-ink-light">탄성 효과!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="트윈으로 바꿀 수 있는 것들">
+                    <strong>Position</strong> (위치), <strong>Size</strong> (크기), <strong>BackgroundTransparency</strong> (투명도),<br>
+                    <strong>BackgroundColor3</strong> (배경색), <strong>TextTransparency</strong> (글자 투명도) 등!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: TweenService 페이드인 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🎬 GUI 페이드인 애니메이션"
+                setup="StarterGui → ScreenGui → Frame → LocalScript"
+                concepts='["TweenService", "TweenInfo", "BackgroundTransparency"]'
+                blanks={tweenFadeBlanks}
+                template={tweenFadeTemplate}
+                full-code={tweenFadeFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 패널 슬라이드 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="📦 버튼 클릭시 패널 슬라이드!"
+                setup="StarterGui → ScreenGui → Frame(Panel) + TextButton → LocalScript"
+                concepts='["TweenService", "TweenInfo", "UDim2", ":WaitForChild()", "MouseButton1Click"]'
+                blanks={tweenSlideBlanks}
+                template={tweenSlideTemplate}
+                full-code={tweenSlideFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 버튼 크기 트윈 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🎯 클릭하면 커졌다 돌아오는 버튼"
+                setup="StarterGui → ScreenGui → TextButton(Size: 0.3, 0, 0.08, 0) → LocalScript"
+                concepts='["TweenService", "TweenInfo", "UDim2", "MouseButton1Click"]'
+                blanks={tweenScaleBlanks}
+                template={tweenScaleTemplate}
+                full-code={tweenScaleFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: BillboardGui 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🏷️ 3D GUI</span>
+                <h2 class="title-section mb-6">파트 위에 뜨는 GUI</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">3가지 GUI 타입 비교</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl text-center border-2 border-sky-200">
+                                <div class="text-2xl mb-2">🖥️</div>
+                                <div class="font-bold">ScreenGui</div>
+                                <div class="text-xs text-ink-light mt-1">화면에 고정된 UI</div>
+                                <div class="text-xs text-sky-600 mt-1">7A에서 배움!</div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-center border-2 border-green-200">
+                                <div class="text-2xl mb-2">🏷️</div>
+                                <div class="font-bold text-green-700">BillboardGui</div>
+                                <div class="text-xs text-ink-light mt-1">파트 위에 뜨는 UI</div>
+                                <div class="text-xs text-green-600 mt-1">이름표, 체력바!</div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">📺</div>
+                                <div class="font-bold">SurfaceGui</div>
+                                <div class="text-xs text-ink-light mt-1">파트 표면에 붙는 UI</div>
+                                <div class="text-xs text-ink-light mt-1">표지판, 모니터!</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">BillboardGui 주요 속성</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">📏 Size</div>
+                                <div class="text-xs text-ink-light">GUI 크기 (UDim2)</div>
+                                <div class="font-mono text-xs mt-1">UDim2.new(0, 200, 0, 50)</div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">⬆️ StudsOffset</div>
+                                <div class="text-xs text-ink-light">파트에서 얼마나 위에?</div>
+                                <div class="font-mono text-xs mt-1">Vector3.new(0, 3, 0)</div>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">🎯 Adornee</div>
+                                <div class="text-xs text-ink-light">어떤 파트에 붙일지?</div>
+                                <div class="font-mono text-xs mt-1">billboard.Adornee = part</div>
+                            </div>
+                            <div class="p-3 bg-violet-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">📍 AlwaysOnTop</div>
+                                <div class="text-xs text-ink-light">벽 뒤에서도 보일지?</div>
+                                <div class="font-mono text-xs mt-1">AlwaysOnTop = true</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="BillboardGui vs SurfaceGui">
+                    <strong>BillboardGui</strong>: 항상 카메라를 바라봐요! (이름표, 거리 표시)<br>
+                    <strong>SurfaceGui</strong>: 파트 표면에 고정! (모니터, 간판, 안내판)
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: BillboardGui 이름표 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🏷️ 파트 위에 뜨는 이름표"
+                setup="Part 1개 (Anchored ✓) + Script (서버 스크립트도 OK!)"
+                concepts='["BillboardGui", "Instance.new", "UDim2", "Vector3", "TextScaled"]'
+                blanks={billboardBlanks}
+                template={billboardTemplate}
+                full-code={billboardFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: SurfaceGui 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🪧 표면 GUI</span>
+                <h2 class="title-section mb-6">SurfaceGui - 파트에 붙는 표지판</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🪧</span>
+                            SurfaceGui = 파트 표면에 붙는 GUI!
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            간판, 안내판, TV 화면, 점수판 등을 만들 때 사용해요!<br>
+                            BillboardGui와 달리 <strong>파트 표면에 고정</strong>되어 파트와 함께 회전해요.
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-4 mb-4">
+                            <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                                <div class="text-2xl mb-1">🏷️</div>
+                                <div class="font-bold text-sm">BillboardGui</div>
+                                <div class="text-xs text-ink-light">항상 카메라를 바라봄</div>
+                                <div class="text-xs text-ink-light">→ 이름표, 체력바</div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border-2 border-amber-300">
+                                <div class="text-2xl mb-1">🪧</div>
+                                <div class="font-bold text-sm">SurfaceGui</div>
+                                <div class="text-xs text-ink-light">파트 표면에 고정!</div>
+                                <div class="text-xs text-ink-light">→ 간판, TV, 표지판</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">Face 속성 - 어느 면에 표시?</h3>
+                        <div class="grid grid-cols-3 md:grid-cols-6 gap-2">
+                            <div class="p-2 bg-sky-50 rounded-lg text-center">
+                                <div class="font-mono text-xs font-bold">Front</div>
+                                <div class="text-xs text-ink-light">앞</div>
+                            </div>
+                            <div class="p-2 bg-sky-50 rounded-lg text-center">
+                                <div class="font-mono text-xs font-bold">Back</div>
+                                <div class="text-xs text-ink-light">뒤</div>
+                            </div>
+                            <div class="p-2 bg-green-50 rounded-lg text-center">
+                                <div class="font-mono text-xs font-bold">Top</div>
+                                <div class="text-xs text-ink-light">위</div>
+                            </div>
+                            <div class="p-2 bg-green-50 rounded-lg text-center">
+                                <div class="font-mono text-xs font-bold">Bottom</div>
+                                <div class="text-xs text-ink-light">아래</div>
+                            </div>
+                            <div class="p-2 bg-amber-50 rounded-lg text-center">
+                                <div class="font-mono text-xs font-bold">Left</div>
+                                <div class="text-xs text-ink-light">왼쪽</div>
+                            </div>
+                            <div class="p-2 bg-amber-50 rounded-lg text-center">
+                                <div class="font-mono text-xs font-bold">Right</div>
+                                <div class="text-xs text-ink-light">오른쪽</div>
+                            </div>
+                        </div>
+                        <div class="mt-3 p-3 bg-violet-50 rounded-xl">
+                            <div class="font-mono text-xs">
+                                <strong>스튜디오에서:</strong> Part 우클릭 → Insert Object → <strong>SurfaceGui</strong><br>
+                                SurfaceGui 안에 <strong>TextLabel</strong> 추가 → Properties에서 <strong>Face</strong> 변경!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="표지판 만들기 팁">
+                    파트를 <strong>얇고 넓게</strong> 만들면 진짜 표지판처럼 보여요!<br>
+                    예: Part Size = <strong>(8, 4, 0.3)</strong> → 가로 8, 세로 4, 두께 0.3
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: SurfaceGui 표지판 만들기 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🪧 파트에 표지판 붙이기!"
+                setup="Part 1개 (Anchored ✓, Size: 8,4,0.3) + Script"
+                concepts='["SurfaceGui", "Instance.new", "TextScaled", "Enum.NormalId"]'
+                blanks={surfaceGuiBlanks}
+                template={surfaceGuiTemplate}
+                full-code={surfaceGuiFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 스튜디오 가이드 + 복붙 예제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">📋 종합</span>
+                <h2 class="title-section mb-6">복사해서 바로 테스트!</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        GUI 활용 예제 모음
+                    </h4>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">🎬 페이드인 효과</div>
+                            <lua-code-block title="FadeIn.lua">
+-- 🎬 GUI 페이드인
+-- 📦 Frame → LocalScript
+local TweenService = game:GetService("TweenService")
+local frame = script.Parent
+
+frame.BackgroundTransparency = 1
+local tween = TweenService:Create(
+    frame,
+    TweenInfo.new(1, Enum.EasingStyle.Quad),
+    {"{"} BackgroundTransparency = 0 {"}"}
+)
+tween:Play()
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">📦 패널 슬라이드</div>
+                            <lua-code-block title="SlidePanel.lua">
+-- 📦 패널 슬라이드
+-- 📦 TextButton → LocalScript
+local TweenService = game:GetService("TweenService")
+local button = script.Parent
+local panel = button.Parent:WaitForChild("Panel")
+local isOpen = false
+panel.Position = UDim2.new(0.5, 0, -0.5, 0)
+panel.AnchorPoint = Vector2.new(0.5, 0.5)
+
+button.MouseButton1Click:Connect(function()
+    isOpen = not isOpen
+    local pos = isOpen
+        and UDim2.new(0.5, 0, 0.5, 0)
+        or UDim2.new(0.5, 0, -0.5, 0)
+    TweenService:Create(panel,
+        TweenInfo.new(0.3), {"{"} Position = pos {"}"}
+    ):Play()
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">🏷️ BillboardGui 이름표</div>
+                            <lua-code-block title="NameTag.lua">
+-- 🏷️ 파트 위 이름표
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+local bb = Instance.new("BillboardGui")
+bb.Size = UDim2.new(0, 200, 0, 50)
+bb.StudsOffset = Vector3.new(0, 3, 0)
+bb.Adornee = part
+bb.Parent = part
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.BackgroundTransparency = 1
+label.Text = "NPC 상점"
+label.TextColor3 = Color3.fromRGB(255, 255, 0)
+label.TextScaled = true
+label.Font = Enum.Font.GothamBold
+label.Parent = bb
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">🪧 표지판 (SurfaceGui)</div>
+                            <lua-code-block title="SignBoard.lua">
+-- 🪧 파트에 표지판 붙이기
+-- 📦 Part (Anchored ✓) + Script
+local part = script.Parent
+
+local sg = Instance.new("SurfaceGui")
+sg.Face = Enum.NormalId.Front
+sg.Parent = part
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.Text = "상점"
+label.TextScaled = true
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+label.Font = Enum.Font.GothamBold
+label.Parent = sg
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="Frame이나 Button의 모서리를 둥글게 만드는 UI 요소는?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! UICorner를 Frame/Button의 자식으로 넣으면 모서리가 둥글어져요!"
+                        wrong-explanation="UICorner가 정답이에요. CornerRadius 속성으로 얼마나 둥글게 할지 정합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="GUI의 위치, 크기, 투명도 등을 부드럽게 변화시키는 서비스는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! TweenService:Create()로 애니메이션을 만들고 :Play()로 재생합니다!"
+                        wrong-explanation="TweenService가 정답이에요. game:GetService('TweenService')로 가져와서 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="3D 파트 위에 떠다니며 항상 카메라를 바라보는 GUI는?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! BillboardGui는 파트 위에 떠서 항상 카메라를 바라봐요. 이름표, 체력바에 사용합니다!"
+                        wrong-explanation="BillboardGui가 정답이에요. SurfaceGui는 파트 '표면'에 붙고, ScreenGui는 '화면'에 고정됩니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트의 표면에 고정되어 간판이나 모니터를 만들 수 있는 GUI는?"
+                        correct="A"
+                        options={quiz4Options}
+                        correct-explanation="정답! SurfaceGui는 파트 표면에 붙어서 간판, TV 화면, 안내판을 만들 수 있어요! Face 속성으로 어느 면에 표시할지 정합니다."
+                        wrong-explanation="SurfaceGui가 정답이에요. BillboardGui는 카메라를 바라보고, SurfaceGui는 파트 표면에 고정됩니다."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8">
+                <div class="bg-gradient-to-r from-neon-mint/20 via-neon-sky/20 to-neon-gold/20 rounded-2xl p-6 text-center">
+                    <div class="text-3xl mb-3">🎉</div>
+                    <h3 class="font-bold text-xl mb-2">7주차 완료!</h3>
+                    <p class="text-ink-light mb-4">
+                        GUI 기초부터 꾸미기, 애니메이션, 3D GUI까지!<br>
+                        이제 멋진 인터페이스를 만들 수 있어요.
+                    </p>
+                    <div class="flex flex-wrap justify-center gap-2">
+                        <span class="badge badge-success">ScreenGui</span>
+                        <span class="badge badge-success">TextButton</span>
+                        <span class="badge badge-success">UICorner</span>
+                        <span class="badge badge-success">TweenService</span>
+                        <span class="badge badge-success">BillboardGui</span>
+                    </div>
+                    <p class="text-ink-light text-sm mt-4">
+                        다음 시간: <strong>8주차 - Leaderstats &amp; 점수 시스템</strong><br>
+                        플레이어 점수를 저장하고 화면에 표시해요!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

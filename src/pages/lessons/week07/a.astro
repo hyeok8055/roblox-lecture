@@ -1,0 +1,823 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["ScreenGui", "Frame", "StarterGui", "Workspace"]);
+const quiz2Options = JSON.stringify(["LocalScript", "Script", "ModuleScript", "CommandBar"]);
+const quiz3Options = JSON.stringify(["MouseButton1Click", "Touched", "Changed", "Activated"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (6개)
+// =========================================
+
+// 퀴즈 1: 버튼 클릭시 텍스트 변경 (기초)
+const clickBasicBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "MouseButton1Click", options: ["Touched", "MouseButton1Click", "Changed", "Activated"] },
+    { id: "b3", correct: "\"클릭됨!\"", options: ["\"클릭됨!\"", "클릭됨!", "true", "1"] }
+]);
+const clickBasicTemplate = `-- ========================================
+-- 🔘 버튼을 클릭하면 글자가 바뀌어요!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 TextButton = 클릭할 수 있는 버튼
+-- 💡 LocalScript = GUI를 다루는 스크립트
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = TextButton
+local button = [b1]
+
+-- 💡 버튼을 클릭하면 실행!
+-- 💡 Touched 대신 MouseButton1Click 사용!
+button.[b2]:Connect(function()
+    -- 💡 버튼의 글자를 바꿔요
+    button.Text = [b3]
+    print("버튼이 눌렸어!")
+end)`;
+const clickBasicFullCode = `-- 🔘 버튼 클릭시 텍스트 변경
+-- 📦 StarterGui → ScreenGui → TextButton → LocalScript
+local button = script.Parent
+
+button.MouseButton1Click:Connect(function()
+    button.Text = "클릭됨!"
+    print("버튼이 눌렸어!")
+end)`;
+
+// 퀴즈 2: 클릭 카운터
+const counterBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "0", options: ["0", "1", "10", "\"0\""] },
+    { id: "b3", correct: "count + 1", options: ["count + 1", "count - 1", "count * 2", "1"] },
+    { id: "b4", correct: "\"클릭: \" .. count", options: ["count", "\"클릭: \" .. count", "\"클릭: \"", "tostring(count)"] }
+]);
+const counterTemplate = `-- ========================================
+-- 🔢 클릭할 때마다 숫자가 올라가요!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 변수로 클릭 횟수를 세고
+-- 💡 .. 으로 글자와 숫자를 합쳐요!
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = TextButton
+local button = [b1]
+-- 💡 클릭 횟수를 저장하는 변수
+local count = [b2]
+
+-- 💡 버튼을 클릭할 때마다!
+button.MouseButton1Click:Connect(function()
+    -- 💡 횟수 +1 증가!
+    count = [b3]
+    -- 💡 "클릭: 3" 처럼 표시
+    -- 💡 .. = 글자 합치기 (3주차 복습!)
+    button.Text = [b4]
+end)`;
+const counterFullCode = `-- 🔢 클릭 카운터
+-- 📦 StarterGui → ScreenGui → TextButton → LocalScript
+local button = script.Parent
+local count = 0
+
+button.MouseButton1Click:Connect(function()
+    count = count + 1
+    button.Text = "클릭: " .. count
+end)`;
+
+// 퀴즈 3: 버튼으로 TextLabel 변경
+const labelChangeBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":WaitForChild(\"TextLabel\")", options: [".TextLabel", ":WaitForChild(\"TextLabel\")", ":FindFirstChild(\"TextLabel\")", "[\"TextLabel\"]"] },
+    { id: "b3", correct: "\"버튼이 눌렸어!\"", options: ["\"버튼이 눌렸어!\"", "\"안녕\"", "nil", "true"] },
+    { id: "b4", correct: "Color3.fromRGB(0, 255, 0)", options: ["Color3.fromRGB(0, 255, 0)", "Color3.fromRGB(255, 0, 0)", "\"Green\"", "BrickColor.new(\"Green\")"] }
+]);
+const labelChangeTemplate = `-- ========================================
+-- 📝 버튼을 누르면 글자가 바뀌어요!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui 안에
+--         TextLabel 1개 + TextButton 1개
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 button.Parent = ScreenGui (버튼의 부모)
+-- 💡 ScreenGui에서 TextLabel을 찾아요!
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = TextButton
+local button = [b1]
+-- 💡 버튼의 부모(ScreenGui)에서 TextLabel 찾기
+local label = button.Parent[b2]
+
+-- 💡 버튼 클릭!
+button.MouseButton1Click:Connect(function()
+    -- 💡 TextLabel의 글자를 변경!
+    label.Text = [b3]
+    -- 💡 글자 색을 초록색으로!
+    label.TextColor3 = [b4]
+end)`;
+const labelChangeFullCode = `-- 📝 버튼으로 TextLabel 변경
+-- 📦 StarterGui → ScreenGui → TextLabel + TextButton → LocalScript
+local button = script.Parent
+local label = button.Parent:WaitForChild("TextLabel")
+
+button.MouseButton1Click:Connect(function()
+    label.Text = "버튼이 눌렸어!"
+    label.TextColor3 = Color3.fromRGB(0, 255, 0)
+end)`;
+
+// 퀴즈 4: ON/OFF 토글 버튼
+const toggleBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "false", options: ["true", "false", "nil", "0"] },
+    { id: "b3", correct: "not isOn", options: ["true", "false", "not isOn", "isOn"] },
+    { id: "b4", correct: "Color3.fromRGB(0, 200, 0)", options: ["Color3.fromRGB(0, 200, 0)", "Color3.fromRGB(200, 0, 0)", "Color3.fromRGB(0, 0, 200)", "Color3.fromRGB(255, 255, 255)"] }
+]);
+const toggleTemplate = `-- ========================================
+-- 🔄 ON/OFF 토글 버튼!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 not = 반대로! (true↔false)
+-- 💡 if-else로 ON/OFF 다르게 처리
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = TextButton
+local button = [b1]
+-- 💡 지금 켜져있는지 꺼져있는지 기억!
+local isOn = [b2]
+
+button.MouseButton1Click:Connect(function()
+    -- 💡 not = 반대로! (false → true, true → false)
+    isOn = [b3]
+
+    if isOn then
+        -- 💡 켜졌을 때: 초록색 + "ON" 표시
+        button.Text = "ON"
+        button.BackgroundColor3 = [b4]
+    else
+        -- 💡 꺼졌을 때: 빨간색 + "OFF" 표시
+        button.Text = "OFF"
+        button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    end
+end)`;
+const toggleFullCode = `-- 🔄 ON/OFF 토글 버튼
+-- 📦 StarterGui → ScreenGui → TextButton → LocalScript
+local button = script.Parent
+local isOn = false
+
+button.MouseButton1Click:Connect(function()
+    isOn = not isOn
+    if isOn then
+        button.Text = "ON"
+        button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    else
+        button.Text = "OFF"
+        button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    end
+end)`;
+
+// 퀴즈 5: Frame 보이기/숨기기
+const frameVisibleBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":WaitForChild(\"InfoFrame\")", options: [".InfoFrame", ":WaitForChild(\"InfoFrame\")", ":FindFirstChild(\"InfoFrame\")", "[\"InfoFrame\"]"] },
+    { id: "b3", correct: "not frame.Visible", options: ["true", "false", "not frame.Visible", "frame.Visible"] }
+]);
+const frameVisibleTemplate = `-- ========================================
+-- 👁️ 버튼으로 패널 열기/닫기!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui 안에
+--         Frame (이름: InfoFrame) + TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 Visible = 보이기/숨기기
+-- 💡 not으로 토글! (true↔false)
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = TextButton
+local button = [b1]
+-- 💡 ScreenGui에서 InfoFrame을 찾아요
+local frame = button.Parent[b2]
+
+button.MouseButton1Click:Connect(function()
+    -- 💡 not = 반대로!
+    -- 💡 보이면 → 숨기고, 숨겨져 있으면 → 보여줘!
+    frame.Visible = [b3]
+end)`;
+const frameVisibleFullCode = `-- 👁️ Frame 보이기/숨기기
+-- 📦 StarterGui → ScreenGui → Frame(InfoFrame) + TextButton → LocalScript
+local button = script.Parent
+local frame = button.Parent:WaitForChild("InfoFrame")
+
+button.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)`;
+
+// 퀴즈 6: 색상 변경 버튼 (심화)
+const colorChangeBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":WaitForChild(\"ColorFrame\")", options: [".ColorFrame", ":WaitForChild(\"ColorFrame\")", ":FindFirstChild(\"ColorFrame\")", "[\"ColorFrame\"]"] },
+    { id: "b3", correct: "colorIndex + 1", options: ["colorIndex + 1", "colorIndex - 1", "colorIndex * 2", "1"] },
+    { id: "b4", correct: "#colors", options: ["3", "#colors", "colors", "0"] }
+]);
+const colorChangeTemplate = `-- ========================================
+-- 🎨 클릭할 때마다 색이 바뀌는 버튼!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui 안에
+--         Frame (이름: ColorFrame) + TextButton
+--         TextButton 안에 LocalScript 넣기!
+-- 💡 테이블(배열)에 색을 여러 개 저장!
+-- 💡 #테이블 = 테이블의 길이
+-- ========================================
+
+local button = [b1]
+local frame = button.Parent[b2]
+
+-- 💡 색상 목록 (빨강 → 초록 → 파랑 순환!)
+local colors = {
+    Color3.fromRGB(255, 100, 100),  -- 빨강
+    Color3.fromRGB(100, 255, 100),  -- 초록
+    Color3.fromRGB(100, 100, 255),  -- 파랑
+}
+local colorIndex = 1
+
+button.MouseButton1Click:Connect(function()
+    -- 💡 Frame의 배경색을 변경!
+    frame.BackgroundColor3 = colors[colorIndex]
+    -- 💡 다음 색으로! (1→2→3→1→...)
+    colorIndex = [b3]
+    -- 💡 #colors = 색 개수 (3)
+    -- 💡 3보다 크면 다시 1로!
+    if colorIndex > [b4] then
+        colorIndex = 1
+    end
+end)`;
+const colorChangeFullCode = `-- 🎨 색상 변경 버튼
+-- 📦 StarterGui → ScreenGui → Frame(ColorFrame) + TextButton → LocalScript
+local button = script.Parent
+local frame = button.Parent:WaitForChild("ColorFrame")
+
+local colors = {
+    Color3.fromRGB(255, 100, 100),  -- 빨강
+    Color3.fromRGB(100, 255, 100),  -- 초록
+    Color3.fromRGB(100, 100, 255),  -- 파랑
+}
+local colorIndex = 1
+
+button.MouseButton1Click:Connect(function()
+    frame.BackgroundColor3 = colors[colorIndex]
+    colorIndex = colorIndex + 1
+    if colorIndex > #colors then
+        colorIndex = 1
+    end
+end)`;
+
+// 퀴즈 7: 코드로 TextLabel 만들기
+const createLabelBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "\"TextLabel\"", options: ["\"TextLabel\"", "\"TextButton\"", "\"Frame\"", "\"TextBox\""] },
+    { id: "b3", correct: "\"환영합니다!\"", options: ["\"환영합니다!\"", "환영합니다!", "nil", "\"\""] },
+    { id: "b4", correct: "true", options: ["true", "false", "1", "\"true\""] }
+]);
+const createLabelTemplate = `-- ========================================
+-- 📝 코드로 TextLabel 만들기!
+-- ========================================
+-- 📦 준비: StarterGui → ScreenGui → Frame
+--         Frame 안에 LocalScript 넣기!
+-- 💡 Instance.new() = 새로운 객체 만들기
+-- 💡 TextScaled = 글자 크기 자동 맞춤
+-- ========================================
+
+-- 💡 이 스크립트의 부모 = Frame
+local frame = [b1]
+
+-- 💡 새 TextLabel 만들기!
+local label = Instance.new([b2])
+-- 💡 크기: Frame을 가득 채우기!
+label.Size = UDim2.new(1, 0, 1, 0)
+-- 💡 표시할 글자
+label.Text = [b3]
+-- 💡 글자 크기를 자동으로 맞춤!
+label.TextScaled = [b4]
+-- 💡 하얀색 글자 + 배경 투명
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.BackgroundTransparency = 1
+label.Font = Enum.Font.GothamBold
+-- 💡 Frame 안에 넣기!
+label.Parent = frame
+
+print("TextLabel 완성!")`;
+const createLabelFullCode = `-- 📝 코드로 TextLabel 만들기
+-- 📦 StarterGui → ScreenGui → Frame → LocalScript
+local frame = script.Parent
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.Text = "환영합니다!"
+label.TextScaled = true
+label.TextColor3 = Color3.fromRGB(255, 255, 255)
+label.BackgroundTransparency = 1
+label.Font = Enum.Font.GothamBold
+label.Parent = frame`;
+---
+
+<LessonLayout title="GUI 기초" lessonNumber={7} totalSlides={13}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">7주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-sky">GUI</span> 기초
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    화면에 버튼과 글자를 표시하고<br>
+                    클릭 이벤트를 만들어요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🖥️ ScreenGui</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📝 TextLabel</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔘 TextButton</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🖱️ 클릭 이벤트</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-sky-50 to-blue-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ GUI란 무엇인지 이해하기</li>
+                        <li>✓ ScreenGui에 TextLabel, TextButton 만들기</li>
+                        <li>✓ 버튼 클릭 이벤트 (MouseButton1Click)</li>
+                        <li>✓ LocalScript 사용법 알기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: GUI란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">GUI란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🖥️</span>
+                            화면에 보이는 인터페이스
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            <strong>GUI</strong> = <strong>G</strong>raphical <strong>U</strong>ser <strong>I</strong>nterface<br>
+                            게임 화면에 보이는 <strong>버튼, 글자, 이미지, 체력바</strong> 등이 모두 GUI예요!
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-3">
+                            <div class="p-3 bg-gradient-to-br from-sky-50 to-blue-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">📝</div>
+                                <div class="font-bold">TextLabel</div>
+                                <div class="text-xs text-ink-light">글자 표시</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">🔘</div>
+                                <div class="font-bold">TextButton</div>
+                                <div class="text-xs text-ink-light">클릭 가능한 버튼</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">📦</div>
+                                <div class="font-bold">Frame</div>
+                                <div class="text-xs text-ink-light">UI를 묶는 상자</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">GUI 구조 (Explorer에서 보이는 모습)</h3>
+                        <div class="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-4">
+                            <div class="font-mono text-sm space-y-1">
+                                <div>📁 <strong>StarterGui</strong> ← GUI를 넣어두는 곳!</div>
+                                <div class="ml-4">📁 <strong class="text-violet-600">ScreenGui</strong> ← 화면 전체를 덮는 캔버스</div>
+                                <div class="ml-8">├ 📝 <strong>TextLabel</strong> (글자 표시)</div>
+                                <div class="ml-8">├ 🔘 <strong>TextButton</strong> (클릭 버튼)</div>
+                                <div class="ml-8">│   └ 💻 <strong class="text-blue-600">LocalScript</strong> ← 여기!</div>
+                                <div class="ml-8">└ 📦 <strong>Frame</strong> (그룹 상자)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="warning" title="중요! Script vs LocalScript">
+                    지금까지는 <strong>Script</strong>를 사용했지만, GUI를 다루려면 <strong>LocalScript</strong>를 써야 해요!<br>
+                    <strong>Script</strong> = 서버에서 실행 (파트, Touched 등)<br>
+                    <strong>LocalScript</strong> = 내 화면에서 실행 (GUI 버튼, 텍스트 등)
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: UDim2 & 크기/위치 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">UDim2</span>
+                <h2 class="title-section mb-6">UI 크기와 위치 설정</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">UDim2 = UI의 크기/위치를 정하는 값</h3>
+                        <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4 mb-4">
+                            <div class="font-mono text-sm mb-2">
+                                <strong>UDim2.new(<span class="text-blue-600">scaleX</span>, <span class="text-orange-600">offsetX</span>, <span class="text-blue-600">scaleY</span>, <span class="text-orange-600">offsetY</span>)</strong>
+                            </div>
+                            <div class="text-sm space-y-1">
+                                <div><span class="text-blue-600 font-bold">Scale(비율)</span> = 화면 크기의 %  →  <code>0.5</code> = 화면의 50%</div>
+                                <div><span class="text-orange-600 font-bold">Offset(픽셀)</span> = 고정 크기  →  <code>100</code> = 100픽셀</div>
+                            </div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">📐 Size (크기) 예시</div>
+                                <div class="font-mono text-xs space-y-1">
+                                    <div><code>UDim2.new(0.3, 0, 0.1, 0)</code></div>
+                                    <div class="text-ink-light">→ 가로 30%, 세로 10%</div>
+                                    <div class="mt-2"><code>UDim2.new(0, 200, 0, 50)</code></div>
+                                    <div class="text-ink-light">→ 가로 200px, 세로 50px</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">📍 Position (위치) 예시</div>
+                                <div class="font-mono text-xs space-y-1">
+                                    <div><code>UDim2.new(0.5, 0, 0.5, 0)</code></div>
+                                    <div class="text-ink-light">→ 화면 정중앙</div>
+                                    <div class="mt-2"><code>UDim2.new(0, 10, 0, 10)</code></div>
+                                    <div class="text-ink-light">→ 왼쪽 위에서 10px</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="Scale vs Offset 팁">
+                    <strong>Scale(비율)</strong>을 쓰면 화면 크기가 달라져도 자동으로 맞춰져요! (추천)<br>
+                    <strong>Offset(픽셀)</strong>은 정확한 크기가 필요할 때 사용해요.<br>
+                    보통 Size는 Scale, 미세 조정은 Offset을 섞어 써요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: TextLabel/TextButton 속성 정리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">속성 정리</span>
+                <h2 class="title-section mb-6">TextLabel & TextButton 주요 속성</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🎨 자주 쓰는 속성들</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="space-y-3">
+                                <div class="font-bold text-sm text-neon-sky mb-2">📝 글자 관련</div>
+                                <div class="p-2 bg-sky-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>Text</strong> = "안녕!"</div>
+                                    <div class="text-xs text-ink-light">표시할 글자</div>
+                                </div>
+                                <div class="p-2 bg-sky-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>TextSize</strong> = 24</div>
+                                    <div class="text-xs text-ink-light">글자 크기 (px)</div>
+                                </div>
+                                <div class="p-2 bg-sky-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>TextScaled</strong> = true</div>
+                                    <div class="text-xs text-ink-light">크기 자동 맞춤 (추천!)</div>
+                                </div>
+                                <div class="p-2 bg-sky-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>TextColor3</strong> = Color3.fromRGB(255,255,255)</div>
+                                    <div class="text-xs text-ink-light">글자 색</div>
+                                </div>
+                                <div class="p-2 bg-sky-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>Font</strong> = Enum.Font.GothamBold</div>
+                                    <div class="text-xs text-ink-light">글씨체</div>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="font-bold text-sm text-neon-mint mb-2">📦 박스 관련</div>
+                                <div class="p-2 bg-green-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>BackgroundColor3</strong> = Color3.fromRGB(0,0,0)</div>
+                                    <div class="text-xs text-ink-light">배경색</div>
+                                </div>
+                                <div class="p-2 bg-green-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>BackgroundTransparency</strong> = 0.5</div>
+                                    <div class="text-xs text-ink-light">배경 투명도 (0=불투명, 1=투명)</div>
+                                </div>
+                                <div class="p-2 bg-green-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>Size</strong> = UDim2.new(0.3, 0, 0.1, 0)</div>
+                                    <div class="text-xs text-ink-light">크기 (7A에서 배움!)</div>
+                                </div>
+                                <div class="p-2 bg-green-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>Position</strong> = UDim2.new(0.5, 0, 0.5, 0)</div>
+                                    <div class="text-xs text-ink-light">위치</div>
+                                </div>
+                                <div class="p-2 bg-green-50 rounded-lg">
+                                    <div class="font-mono text-xs"><strong>Visible</strong> = true / false</div>
+                                    <div class="text-xs text-ink-light">보이기 / 숨기기</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="TextButton만의 특별한 점">
+                    TextButton은 TextLabel의 모든 속성 + <strong>클릭 이벤트</strong>가 있어요!<br>
+                    <code>button.MouseButton1Click:Connect(function() ... end)</code>
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 스튜디오 가이드 + 복붙 예제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
+                <h2 class="title-section mb-6">GUI 만드는 방법</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🛠️</span>
+                        스튜디오에서 GUI 추가하기
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div>Explorer에서 <strong>StarterGui</strong> 찾기 → 우클릭 → Insert Object → <strong>ScreenGui</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div>ScreenGui 우클릭 → Insert Object → <strong>TextLabel</strong> 또는 <strong>TextButton</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-sky text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div>Properties에서 <strong>Text, Size, Position, BackgroundColor3</strong> 등 설정</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div>TextButton 우클릭 → Insert Object → <strong>LocalScript</strong> (⚠️ Script 아님!)</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <div><strong>F5</strong>로 플레이 → 화면의 버튼을 클릭해보세요!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <!-- 복붙 예제 -->
+                <div class="lesson-card border-2 border-neon-mint/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트!
+                    </h4>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-sky font-bold mb-2">🔘 버튼 클릭</div>
+                            <lua-code-block title="ClickButton.lua">
+-- 🔘 버튼 클릭시 텍스트 변경
+-- 📦 TextButton → LocalScript
+local button = script.Parent
+
+button.MouseButton1Click:Connect(function()
+    button.Text = "클릭됨!"
+end)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">🔢 클릭 카운터</div>
+                            <lua-code-block title="Counter.lua">
+-- 🔢 클릭할 때마다 +1
+-- 📦 TextButton → LocalScript
+local button = script.Parent
+local count = 0
+
+button.MouseButton1Click:Connect(function()
+    count = count + 1
+    button.Text = "클릭: " .. count
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">🔄 ON/OFF 토글</div>
+                            <lua-code-block title="Toggle.lua">
+-- 🔄 ON/OFF 토글 버튼
+-- 📦 TextButton → LocalScript
+local button = script.Parent
+local isOn = false
+
+button.MouseButton1Click:Connect(function()
+    isOn = not isOn
+    if isOn then
+        button.Text = "ON"
+        button.BackgroundColor3 = Color3.fromRGB(0, 200, 0)
+    else
+        button.Text = "OFF"
+        button.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+    end
+end)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-coral font-bold mb-2">👁️ 패널 열기/닫기</div>
+                            <lua-code-block title="TogglePanel.lua">
+-- 👁️ Frame 보이기/숨기기
+-- 📦 TextButton → LocalScript
+-- 📦 ScreenGui에 Frame(InfoFrame) 필요!
+local button = script.Parent
+local frame = button.Parent:WaitForChild("InfoFrame")
+
+button.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 버튼 클릭 기초 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔘 버튼 클릭시 텍스트 변경"
+                setup="StarterGui → ScreenGui → TextButton → LocalScript"
+                concepts='["TextButton", "MouseButton1Click", "LocalScript"]'
+                blanks={clickBasicBlanks}
+                template={clickBasicTemplate}
+                full-code={clickBasicFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 클릭 카운터 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔢 클릭 카운터"
+                setup="StarterGui → ScreenGui → TextButton → LocalScript"
+                concepts='["TextButton", "MouseButton1Click", "LocalScript"]'
+                blanks={counterBlanks}
+                template={counterTemplate}
+                full-code={counterFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 버튼으로 TextLabel 변경 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="📝 버튼으로 TextLabel 변경"
+                setup="StarterGui → ScreenGui → TextLabel + TextButton → LocalScript"
+                concepts='["TextButton", "TextLabel", "MouseButton1Click", ":WaitForChild()", "Color3.fromRGB"]'
+                blanks={labelChangeBlanks}
+                template={labelChangeTemplate}
+                full-code={labelChangeFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: ON/OFF 토글 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔄 ON/OFF 토글 버튼"
+                setup="StarterGui → ScreenGui → TextButton → LocalScript"
+                concepts='["TextButton", "MouseButton1Click", "Color3.fromRGB"]'
+                blanks={toggleBlanks}
+                template={toggleTemplate}
+                full-code={toggleFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: Frame 보이기/숨기기 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="👁️ 버튼으로 패널 열기/닫기"
+                setup="StarterGui → ScreenGui → Frame(InfoFrame) + TextButton → LocalScript"
+                concepts='["TextButton", "Frame", "Visible", ":WaitForChild()", "MouseButton1Click"]'
+                blanks={frameVisibleBlanks}
+                template={frameVisibleTemplate}
+                full-code={frameVisibleFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 색상 변경 버튼 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🎨 클릭할 때마다 색이 바뀌는 버튼"
+                setup="StarterGui → ScreenGui → Frame(ColorFrame) + TextButton → LocalScript"
+                concepts='["TextButton", "Frame", "Color3.fromRGB", ":WaitForChild()", "MouseButton1Click"]'
+                blanks={colorChangeBlanks}
+                template={colorChangeTemplate}
+                full-code={colorChangeFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 코드로 TextLabel 만들기 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="📝 코드로 TextLabel 만들기"
+                setup="StarterGui → ScreenGui → Frame → LocalScript"
+                concepts='["TextLabel", "Instance.new", "TextScaled", "UDim2"]'
+                blanks={createLabelBlanks}
+                template={createLabelTemplate}
+                full-code={createLabelFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="GUI를 화면에 표시하기 위해 StarterGui에 넣어야 하는 것은?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! ScreenGui는 화면 전체를 덮는 캔버스예요. 이 안에 TextLabel, TextButton 등을 넣습니다."
+                        wrong-explanation="ScreenGui가 정답이에요. StarterGui → ScreenGui → UI 요소 순서로 넣어야 합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="GUI 버튼의 클릭을 처리하려면 어떤 스크립트를 사용해야 할까요?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! LocalScript는 클라이언트(내 컴퓨터)에서 실행돼요. GUI를 다루려면 반드시 LocalScript를 써야 합니다."
+                        wrong-explanation="LocalScript가 정답이에요. 일반 Script는 서버에서 실행되어 GUI를 직접 다룰 수 없습니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="TextButton을 마우스로 클릭했을 때 발생하는 이벤트는?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! MouseButton1Click은 마우스 왼쪽 버튼 클릭 이벤트예요. Touched는 3D 파트용이었죠!"
+                        wrong-explanation="MouseButton1Click이 정답이에요. button.MouseButton1Click:Connect(function() ... end) 형태로 사용합니다."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-sky/20 to-neon-mint/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">7주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 GUI를 더 예쁘게 꾸미고<br>
+                        애니메이션까지 넣어봐요! ✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
