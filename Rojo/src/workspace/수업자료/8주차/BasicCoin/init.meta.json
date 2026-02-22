@@ -1,0 +1,12 @@
+{
+  "className": "Part",
+  "properties": {
+    "Anchored": true,
+    "CanCollide": false,
+    "Shape": "Cylinder",
+    "Size": [0.5, 2, 2],
+    "Position": [5, 3, 15],
+    "Color": [1, 0.84, 0],
+    "Material": "Neon"
+  }
+}

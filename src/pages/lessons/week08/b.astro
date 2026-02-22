@@ -1,0 +1,1076 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify([":GetPlayerFromCharacter()", ":FindFirstChild()", ":WaitForChild()", ".LocalPlayer"]);
+const quiz2Options = JSON.stringify(["part:Destroy()", "part:Remove()", "part.Parent = nil", "part.Visible = false"]);
+const quiz3Options = JSON.stringify(["debounce 변수", "wait(1)", "Touched:Once()", "CanCollide = false"]);
+const quiz4Options = JSON.stringify(["Transparency = 1, CanCollide = false", "Destroy() 후 Clone()", "Position 변경", "Parent = nil"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (7개)
+// =========================================
+
+// 퀴즈 1: 기본 코인 줍기
+const basicCoinBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":GetPlayerFromCharacter(hit.Parent)", options: [":GetPlayerFromCharacter(hit.Parent)", ".LocalPlayer", ":FindFirstChild(hit)", ":GetPlayerFromCharacter(hit)"] },
+    { id: "b3", correct: "coins.Value + 1", options: ["coins.Value + 1", "coins + 1", "1", "coins.Value"] },
+    { id: "b4", correct: "part:Destroy()", options: ["part:Destroy()", "part:Remove()", "part.Parent = nil", "part = nil"] }
+]);
+const basicCoinTemplate = `-- ========================================
+-- 🪙 코인 줍기 기본!
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, Cylinder, 금색, Neon)
+--         Part 안에 Script 넣기!
+-- ⚠️ 8A의 Leaderstats 스크립트 필수!
+-- 💡 밟으면 → 플레이어 찾기 → 코인+1 → 삭제!
+-- ========================================
+
+local part = [b1]
+
+-- 💡 누군가 코인을 밟으면!
+part.Touched:Connect(function(hit)
+    -- 💡 캐릭터에서 플레이어 찾기
+    local player = game.Players[b2]
+    if player then
+        -- 💡 코인 +1!
+        local coins = player.leaderstats.Coins
+        coins.Value = [b3]
+        -- 💡 코인 파트 삭제!
+        [b4]
+    end
+end)`;
+const basicCoinFullCode = `-- 🪙 코인 줍기
+-- 📦 Part (금색, Neon) → Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        player.leaderstats.Coins.Value += 1
+        part:Destroy()
+    end
+end)`;
+
+// 퀴즈 2: debounce로 중복 방지
+const debounceCoinBlanks = JSON.stringify([
+    { id: "b1", correct: "false", options: ["true", "false", "nil", "0"] },
+    { id: "b2", correct: "not collected", options: ["not collected", "collected", "true", "collected == false"] },
+    { id: "b3", correct: "true", options: ["true", "false", "nil", "1"] },
+    { id: "b4", correct: "part:Destroy()", options: ["part:Destroy()", "part:Remove()", "collected = false", "part.Parent = nil"] }
+]);
+const debounceCoinTemplate = `-- ========================================
+-- 🛡️ 중복 수집 방지 코인!
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, 금색) + Script
+-- ⚠️ 8A의 Leaderstats 스크립트 필수!
+-- 💡 문제: 여러 번 밟으면 코인이 여러 번 올라감!
+-- 💡 해결: collected 변수로 1번만 수집!
+-- 💡 not = 반대! (false → true, true → false)
+-- ========================================
+
+local part = script.Parent
+-- 💡 이미 수집했는지 기억하는 변수
+local collected = [b1]
+
+part.Touched:Connect(function(hit)
+    -- 💡 아직 수집 안 했을 때만!
+    if [b2] then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            -- 💡 수집 완료 표시!
+            collected = [b3]
+            player.leaderstats.Coins.Value += 1
+            -- 💡 코인 삭제!
+            [b4]
+        end
+    end
+end)`;
+const debounceCoinFullCode = `-- 🛡️ 중복 방지 코인
+-- 📦 Part (금색) → Script
+local part = script.Parent
+local collected = false
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            part:Destroy()
+        end
+    end
+end)`;
+
+// 퀴즈 3: 코인 재생성 (사라졌다 다시 나타나기)
+const respawnCoinBlanks = JSON.stringify([
+    { id: "b1", correct: "1", options: ["0", "0.5", "1", "true"] },
+    { id: "b2", correct: "false", options: ["true", "false", "nil", "0"] },
+    { id: "b3", correct: "5", options: ["1", "3", "5", "10"] },
+    { id: "b4", correct: "0", options: ["0", "0.5", "1", "false"] }
+]);
+const respawnCoinTemplate = `-- ========================================
+-- 🔄 사라졌다 다시 나타나는 코인!
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, 금색, Neon) + Script
+-- ⚠️ 8A의 Leaderstats 스크립트 필수!
+-- 💡 Destroy 대신 투명하게 숨기기!
+-- 💡 Transparency = 1 (투명) → 0 (보임)
+-- 💡 CanCollide = false → 통과 가능!
+-- ========================================
+
+local part = script.Parent
+local collected = false
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+
+            -- 💡 코인 숨기기! (투명 + 통과)
+            part.Transparency = [b1]
+            part.CanCollide = [b2]
+
+            -- 💡 N초 후 다시 나타나기!
+            task.wait([b3])
+
+            -- 💡 코인 다시 보이기!
+            part.Transparency = [b4]
+            part.CanCollide = false
+            collected = false
+        end
+    end
+end)`;
+const respawnCoinFullCode = `-- 🔄 재생성 코인
+-- 📦 Part (금색, Neon) → Script
+local part = script.Parent
+local collected = false
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            -- 숨기기
+            part.Transparency = 1
+            part.CanCollide = false
+            -- 5초 후 복구
+            task.wait(5)
+            part.Transparency = 0
+            part.CanCollide = false
+            collected = false
+        end
+    end
+end)`;
+
+// 퀴즈 4: 금/은/동 코인 (점수 다르게)
+const multiCoinBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "part.Name", options: ["part.Name", "part.Color", "part.BrickColor", "part.Value"] },
+    { id: "b3", correct: "5", options: ["1", "3", "5", "10"] },
+    { id: "b4", correct: "1", options: ["1", "2", "3", "5"] }
+]);
+const multiCoinTemplate = `-- ========================================
+-- 🥇 금/은/동 코인! (점수 다르게)
+-- ========================================
+-- 📦 준비: Part 3개 (이름을 다르게!)
+--    Gold (금색, Neon) → 5점
+--    Silver (은색, Neon) → 3점
+--    Bronze (주황색, Neon) → 1점
+-- 💡 파트 이름(Name)으로 점수를 결정!
+-- ========================================
+
+local part = [b1]
+local collected = false
+
+-- 💡 파트 이름에 따라 점수 결정!
+local function getScore()
+    if [b2] == "Gold" then
+        return [b3]        -- 💡 금 코인 = 5점!
+    elseif part.Name == "Silver" then
+        return 3             -- 💡 은 코인 = 3점!
+    else
+        return [b4]        -- 💡 동 코인 = 1점!
+    end
+end
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            -- 💡 이름에 맞는 점수 추가!
+            player.leaderstats.Coins.Value += getScore()
+            part:Destroy()
+        end
+    end
+end)`;
+const multiCoinFullCode = `-- 🥇 금/은/동 코인
+-- 📦 Part (이름: Gold/Silver/Bronze) → Script
+local part = script.Parent
+local collected = false
+
+local function getScore()
+    if part.Name == "Gold" then return 5
+    elseif part.Name == "Silver" then return 3
+    else return 1 end
+end
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += getScore()
+            part:Destroy()
+        end
+    end
+end)`;
+
+// 퀴즈 5: 코인 줍기 효과음
+const coinSoundBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Sound\"", options: ["\"Sound\"", "\"Part\"", "\"Audio\"", "\"Music\""] },
+    { id: "b2", correct: "\"rbxassetid://9125402735\"", options: ["\"rbxassetid://9125402735\"", "\"coin_sound\"", "9125402735", "\"Sound\""] },
+    { id: "b3", correct: "sound:Play()", options: ["sound:Play()", "sound.Playing = true", "sound:Start()", "Sound.Play()"] },
+    { id: "b4", correct: "part:Destroy()", options: ["part:Destroy()", "sound:Destroy()", "part:Remove()", "sound:Stop()"] }
+]);
+const coinSoundTemplate = `-- ========================================
+-- 🔊 효과음이 나는 코인!
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, 금색) + Script
+-- ⚠️ 8A의 Leaderstats 스크립트 필수!
+-- 💡 Instance.new("Sound") = 소리 만들기
+-- 💡 SoundId = "rbxassetid://숫자" 형식
+-- 💡 sound:Play() = 소리 재생!
+-- ========================================
+
+local part = script.Parent
+local collected = false
+
+-- 💡 효과음 미리 만들어두기!
+local sound = Instance.new([b1])
+-- 💡 오디오 ID (효과음)
+sound.SoundId = [b2]
+sound.Volume = 1
+sound.Parent = part
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+
+            -- 💡 효과음 재생!
+            [b3]
+
+            -- 💡 소리 끝나면 삭제
+            task.wait(0.5)
+            [b4]
+        end
+    end
+end)`;
+const coinSoundFullCode = `-- 🔊 효과음 코인
+-- 📦 Part (금색) → Script
+local part = script.Parent
+local collected = false
+
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://9125402735"
+sound.Volume = 1
+sound.Parent = part
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            sound:Play()
+            task.wait(0.5)
+            part:Destroy()
+        end
+    end
+end)`;
+
+// 퀴즈 6: N개 모으면 문 열리기
+const coinDoorBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: ":GetPlayerFromCharacter(hit.Parent)", options: [":GetPlayerFromCharacter(hit.Parent)", ".LocalPlayer", ":FindFirstChild(hit.Parent)", ":GetPlayerFromCharacter(hit)"] },
+    { id: "b3", correct: ">= 10", options: [">= 10", "> 10", "== 10", "<= 10"] },
+    { id: "b4", correct: "true", options: ["true", "false", "1", "nil"] }
+]);
+const coinDoorTemplate = `-- ========================================
+-- 🚪 10코인 모으면 문이 열려요!
+-- ========================================
+-- 📦 준비: Part (문 역할, Anchored ✓, 빨간색)
+--         Part 안에 Script 넣기!
+-- ⚠️ 8A의 Leaderstats 스크립트 필수!
+-- 💡 코인 수를 확인해서 문을 열어요!
+-- 💡 CanCollide = false → 통과 가능!
+-- 💡 >= 10 = "10 이상"이라는 뜻
+-- ========================================
+
+local door = [b1]
+
+door.Touched:Connect(function(hit)
+    local player = game.Players[b2]
+    if player then
+        local coins = player.leaderstats.Coins
+
+        -- 💡 10코인 이상이면 문 열기!
+        if coins.Value [b3] then
+            -- 💡 문을 반투명 + 통과 가능!
+            door.Transparency = 0.8
+            door.CanCollide = false
+
+            -- 💡 3초 후 문 다시 닫기
+            task.wait(3)
+            door.Transparency = 0
+            door.CanCollide = [b4]
+        end
+    end
+end)`;
+const coinDoorFullCode = `-- 🚪 10코인 모으면 문 열기
+-- 📦 Part (문, Anchored ✓) → Script
+local door = script.Parent
+
+door.Touched:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        local coins = player.leaderstats.Coins
+        if coins.Value >= 10 then
+            door.Transparency = 0.8
+            door.CanCollide = false
+            task.wait(3)
+            door.Transparency = 0
+            door.CanCollide = true
+        end
+    end
+end)`;
+
+// 퀴즈 7: 회전하는 코인 (시각 효과)
+const spinCoinBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script", "script.Parent", "game", "workspace"] },
+    { id: "b2", correct: "while true do", options: ["for i = 1, 10 do", "while true do", "repeat", "if true then"] },
+    { id: "b3", correct: "CFrame.Angles(0, math.rad(5), 0)", options: ["CFrame.Angles(0, math.rad(5), 0)", "CFrame.new(0, 5, 0)", "Vector3.new(0, 5, 0)", "CFrame.Angles(5, 0, 0)"] },
+    { id: "b4", correct: "task.wait()", options: ["wait(1)", "task.wait()", "task.wait(1)", "task.delay(1)"] }
+]);
+const spinCoinTemplate = `-- ========================================
+-- 💫 빙글빙글 회전하는 코인!
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, 금색, Neon)
+--         Part 안에 Script 넣기!
+-- 💡 5B에서 배운 while + CFrame.Angles 복습!
+-- 💡 코인이 제자리에서 빙글빙글 돌아요
+-- ========================================
+
+local part = [b1]
+local collected = false
+
+-- 💡 코인 수집 기능
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            part:Destroy()
+        end
+    end
+end)
+
+-- 💡 회전 애니메이션! (5B 복습)
+[b2]
+    part.CFrame = part.CFrame * [b3]
+    [b4]
+end`;
+const spinCoinFullCode = `-- 💫 회전하는 코인
+-- 📦 Part (금색, Neon, Anchored) → Script
+local part = script.Parent
+local collected = false
+
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            part:Destroy()
+        end
+    end
+end)
+
+while true do
+    part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(5), 0)
+    task.wait()
+end`;
+---
+
+<LessonLayout title="코인 수집 게임" lessonNumber={8} totalSlides={15}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">8주차 B</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-gold">코인 수집</span><br>
+                    게임 만들기
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    맵에 코인을 배치하고<br>
+                    주우면 점수가 올라가는 게임을 만들어요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🪙 코인 파트</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🛡️ Debounce</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔄 재생성</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔊 효과음</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🚪 코인 문</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ 코인 줍기 시스템 만들기</li>
+                        <li>✓ debounce로 중복 수집 방지</li>
+                        <li>✓ 코인 재생성 + 회전 코인</li>
+                        <li>✓ 금/은/동 코인 + 효과음</li>
+                        <li>✓ N코인 모으면 문 열리기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 핵심 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">코인 수집의 원리</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🪙</span>
+                            코인 수집 = 4단계!
+                        </h3>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="p-3 bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">1️⃣</div>
+                                <div class="font-bold text-sm">밟기 감지</div>
+                                <div class="text-xs text-ink-light">Touched 이벤트</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">2️⃣</div>
+                                <div class="font-bold text-sm">플레이어 찾기</div>
+                                <div class="text-xs text-ink-light">GetPlayerFromCharacter</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">3️⃣</div>
+                                <div class="font-bold text-sm">점수 추가</div>
+                                <div class="text-xs text-ink-light">coins.Value += 1</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-red-50 to-rose-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">4️⃣</div>
+                                <div class="font-bold text-sm">코인 제거</div>
+                                <div class="text-xs text-ink-light">Destroy() or 숨기기</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 공식 이미지: 코인 배치 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">공식 튜토리얼의 코인 수집 예시</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/script-game-behavior/Single-Coin-In-Viewport.jpg" alt="코인 배치" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">맵에 코인을 배치한 모습</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/script-game-behavior/Multiple-Coins-In-Level.jpg" alt="여러 코인" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">여러 코인을 맵 곳곳에 배치!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 새로운 개념 정리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">오늘의 새로운 개념들</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">👤 GetPlayerFromCharacter</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>캐릭터 모델 → 플레이어</strong> 찾기</div>
+                                    <div>hit.Parent = 캐릭터 모델</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded text-[11px]">game.Players:GetPlayerFromCharacter(hit.Parent)</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-red-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">💥 Destroy()</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>파트를 <strong>완전히 삭제</strong>! 되돌릴 수 없음</div>
+                                    <div>코인을 다시 나타나게 하려면 숨기기 사용!</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">part:Destroy()</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">🛡️ Debounce (디바운스)</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>중복 실행 방지</strong> 패턴</div>
+                                    <div>Touched는 밟는 동안 여러 번 발생!</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">local collected = false</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">🔊 Sound (효과음)</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>Instance.new("Sound")로 <strong>소리 생성</strong></div>
+                                    <div>SoundId = "rbxassetid://숫자"</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">sound:Play()</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="warning" title="왜 중복 방지가 필요할까?">
+                    Touched 이벤트는 파트에 닿는 동안 <strong>매 프레임마다</strong> 여러 번 발생해요!<br>
+                    코인을 한 번 밟았는데 <strong>10번 수집</strong>되는 버그가 생길 수 있어요.<br>
+                    <code>collected</code> 변수로 <strong>딱 1번만</strong> 수집되도록 해야 해요!
+                </HintBox>
+
+                <!-- Destroy vs 숨기기 비교 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">코인 제거: Destroy vs 숨기기</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-red-50 rounded-xl border-2 border-red-200">
+                                <div class="text-center mb-2 font-bold text-red-600">💥 Destroy() — 완전 삭제</div>
+                                <lua-code-block title="Destroy">
+part:Destroy()
+-- 영원히 사라짐!
+-- 다시 안 나타남
+                                </lua-code-block>
+                                <div class="text-xs text-ink-light mt-2">✅ 한 번만 줍는 코인에 적합</div>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-xl border-2 border-green-200">
+                                <div class="text-center mb-2 font-bold text-green-600">👻 숨기기 — 재생성 가능</div>
+                                <lua-code-block title="숨기기">
+part.Transparency = 1
+part.CanCollide = false
+task.wait(5) -- 5초 후
+part.Transparency = 0
+                                </lua-code-block>
+                                <div class="text-xs text-ink-light mt-2">✅ 계속 나타나는 코인에 적합</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 스튜디오 가이드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
+                <h2 class="title-section mb-6">코인 파트 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🪙</span>
+                        예쁜 코인 파트 설정
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <ol class="space-y-3 text-sm">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                                <div>Part 추가 → Shape: <strong>Cylinder</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                                <div>Size: <strong>0.5, 2, 2</strong> (납작한 동전)</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                                <div>Orientation: <strong>0, 0, 90</strong> (세로로!)</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                                <div>Material: <strong>Neon</strong>, Color: <strong>금색</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                                <div>Anchored: <strong>✓</strong>, CanCollide: <strong>✗</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">6</span>
+                                <div>Part 안에 <strong>Script</strong> 넣기!</div>
+                            </li>
+                        </ol>
+                        <div class="space-y-3">
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/script-game-behavior/New-Single-Coin.png" alt="코인 Explorer" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">Explorer에서 코인 + 스크립트 구조</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/script-game-behavior/Duplicated-Coins.png" alt="코인 복제" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">Ctrl+D로 코인 복제!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <HintBox type="tip" title="코인 복사 팁!">
+                        코인 하나 만든 후 <strong>Ctrl+D</strong>로 복제!<br>
+                        Script도 함께 복사돼요.
+                    </HintBox>
+                    <HintBox type="info" title="⚠️ 8A 스크립트 필수!">
+                        <strong>ServerScriptService</strong>에<br>
+                        Leaderstats 스크립트가 있어야 해요!
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 기본 코인 줍기 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🪙 기본 코인 줍기"
+                setup="Part (Anchored ✓, Cylinder, 금색, Neon) → Script"
+                concepts='["Touched", "GetPlayerFromCharacter", "leaderstats", "Destroy"]'
+                blanks={basicCoinBlanks}
+                template={basicCoinTemplate}
+                full-code={basicCoinFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: debounce 중복 방지 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🛡️ 중복 수집 방지 코인"
+                setup="Part (Anchored ✓, 금색) → Script"
+                concepts='["debounce", "collected", "not", "Destroy"]'
+                blanks={debounceCoinBlanks}
+                template={debounceCoinTemplate}
+                full-code={debounceCoinFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 코인 재생성 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔄 사라졌다 다시 나타나는 코인"
+                setup="Part (Anchored ✓, 금색, Neon) → Script"
+                concepts='["Transparency", "CanCollide", "task.wait", "재생성"]'
+                blanks={respawnCoinBlanks}
+                template={respawnCoinTemplate}
+                full-code={respawnCoinFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 금/은/동 코인 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🥇 금/은/동 코인 (점수 다르게)"
+                setup="Part (이름: Gold / Silver / Bronze) → Script"
+                concepts='["part.Name", "함수(function)", "if-elseif-else", "return"]'
+                blanks={multiCoinBlanks}
+                template={multiCoinTemplate}
+                full-code={multiCoinFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 효과음 코인 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔊 효과음이 나는 코인"
+                setup="Part (Anchored ✓, 금색) → Script"
+                concepts='["Sound", "SoundId", "Play()", "Instance.new"]'
+                blanks={coinSoundBlanks}
+                template={coinSoundTemplate}
+                full-code={coinSoundFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 코인 문 열기 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🚪 10코인 모으면 문 열기"
+                setup="Part (문 역할, Anchored ✓, 빨간색) → Script"
+                concepts='["leaderstats", "Value", ">=", "CanCollide"]'
+                blanks={coinDoorBlanks}
+                template={coinDoorTemplate}
+                full-code={coinDoorFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 회전 코인 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💫 빙글빙글 회전하는 코인"
+                setup="Part (Anchored ✓, 금색, Neon) → Script"
+                concepts='["while true do", "CFrame.Angles", "math.rad", "task.wait"]'
+                blanks={spinCoinBlanks}
+                template={spinCoinTemplate}
+                full-code={spinCoinFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 복붙 코드 모음 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">📋 코드 모음</span>
+                <h2 class="title-section mb-6">오늘의 코드 총정리</h2>
+            </div>
+
+            <div class="flex flex-col gap-4 animate-in">
+                <div class="lesson-card border-2 border-neon-gold/30">
+                    <h4 class="font-bold mb-3">⚠️ 먼저! ServerScriptService에 Leaderstats (8A)</h4>
+                    <lua-code-block title="Leaderstats.lua">
+local Players = game:GetService("Players")
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+end)
+                    </lua-code-block>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="lesson-card">
+                        <div class="text-sm text-neon-gold font-bold mb-2">🪙 기본 코인 (debounce)</div>
+                        <lua-code-block title="Coin.lua">
+local part = script.Parent
+local collected = false
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players
+            :GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            part:Destroy()
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="text-sm text-neon-mint font-bold mb-2">🔄 재생성 코인</div>
+                        <lua-code-block title="RespawnCoin.lua">
+local part = script.Parent
+local collected = false
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players
+            :GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            part.Transparency = 1
+            part.CanCollide = false
+            task.wait(5)
+            part.Transparency = 0
+            collected = false
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="lesson-card">
+                        <div class="text-sm text-neon-sky font-bold mb-2">🔊 효과음 코인</div>
+                        <lua-code-block title="SoundCoin.lua">
+local part = script.Parent
+local collected = false
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://9125402735"
+sound.Parent = part
+part.Touched:Connect(function(hit)
+    if not collected then
+        local player = game.Players
+            :GetPlayerFromCharacter(hit.Parent)
+        if player then
+            collected = true
+            player.leaderstats.Coins.Value += 1
+            sound:Play()
+            task.wait(0.5)
+            part:Destroy()
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+
+                    <div class="lesson-card">
+                        <div class="text-sm text-neon-coral font-bold mb-2">🚪 코인 문</div>
+                        <lua-code-block title="CoinDoor.lua">
+local door = script.Parent
+door.Touched:Connect(function(hit)
+    local player = game.Players
+        :GetPlayerFromCharacter(hit.Parent)
+    if player then
+        if player.leaderstats.Coins
+            .Value >= 10 then
+            door.Transparency = 0.8
+            door.CanCollide = false
+            task.wait(3)
+            door.Transparency = 0
+            door.CanCollide = true
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 도전 과제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">🏆 도전!</span>
+                <h2 class="title-section mb-6">나만의 코인 게임 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card bg-gradient-to-r from-amber-50 to-yellow-50">
+                    <h3 class="font-bold text-lg mb-4">오늘 배운 것들을 조합해서 만들어보세요!</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded-xl">
+                                <div class="font-bold text-sm">⭐ 기본 미션</div>
+                                <ul class="text-xs text-ink-light mt-1 space-y-1">
+                                    <li>✓ 코인 5개 이상 배치</li>
+                                    <li>✓ debounce 적용</li>
+                                    <li>✓ Leaderstats 점수 표시</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-white rounded-xl">
+                                <div class="font-bold text-sm">🌟 도전 미션</div>
+                                <ul class="text-xs text-ink-light mt-1 space-y-1">
+                                    <li>✓ 금/은/동 코인 섞어 배치</li>
+                                    <li>✓ 효과음 추가</li>
+                                    <li>✓ 회전하는 코인 만들기</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="p-3 bg-white rounded-xl">
+                                <div class="font-bold text-sm">🔥 하드 미션</div>
+                                <ul class="text-xs text-ink-light mt-1 space-y-1">
+                                    <li>✓ 코인 문 + 킬 파트 배치</li>
+                                    <li>✓ 코인 재생성 구현</li>
+                                    <li>✓ 여러 방으로 나눠 맵 구성</li>
+                                </ul>
+                            </div>
+                            <div class="p-3 bg-white rounded-xl border-2 border-neon-gold">
+                                <div class="font-bold text-sm text-neon-gold">💡 게임 아이디어</div>
+                                <div class="text-xs text-ink-light mt-1">
+                                    6B의 킬파트 + 텔레포트 +<br>
+                                    오늘의 코인 + 코인 문 =<br>
+                                    <strong>미니 오비+코인 게임!</strong> 🎮
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 완성 예시 이미지 -->
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-3">완성 예시: 코인 수집 맵</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-a-health-pickup/healthPickupGame.jpg" alt="수집 게임 예시" class="rounded-xl w-full" loading="lazy" />
+                            <p class="text-xs text-ink-light mt-2">맵에 아이템을 배치한 수집 게임</p>
+                        </div>
+                        <div class="text-center">
+                            <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/script-game-behavior/Output-Collect-Coin.png" alt="코인 수집 출력" class="rounded-xl w-full" loading="lazy" />
+                            <p class="text-xs text-ink-light mt-2">Output에서 코인 수집 확인!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 14: Sound 속성 참고 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">📝 참고</span>
+                <h2 class="title-section mb-6">Sound 속성 정리 (10주차 미리보기!)</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">🔊 Sound 주요 속성</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <div class="p-2 bg-sky-50 rounded-lg">
+                                <div class="font-mono text-xs"><strong>SoundId</strong> = "rbxassetid://숫자"</div>
+                                <div class="text-xs text-ink-light">오디오 에셋 ID</div>
+                            </div>
+                            <div class="p-2 bg-sky-50 rounded-lg">
+                                <div class="font-mono text-xs"><strong>Volume</strong> = 0.5</div>
+                                <div class="text-xs text-ink-light">음량 (0~10, 보통 0~1)</div>
+                            </div>
+                            <div class="p-2 bg-sky-50 rounded-lg">
+                                <div class="font-mono text-xs"><strong>Looped</strong> = true / false</div>
+                                <div class="text-xs text-ink-light">반복 재생 여부</div>
+                            </div>
+                            <div class="p-2 bg-sky-50 rounded-lg">
+                                <div class="font-mono text-xs"><strong>PlaybackSpeed</strong> = 1.0</div>
+                                <div class="text-xs text-ink-light">재생 속도 (2 = 2배속)</div>
+                            </div>
+                        </div>
+                        <div>
+                            <img src="https://prod.docsiteassets.roblox.com/assets/studio/properties/Sound-SoundId.png" alt="Sound SoundId" class="rounded-xl w-full" loading="lazy" />
+                            <p class="text-xs text-ink-light mt-2">Properties에서 SoundId 설정하는 모습</p>
+                            <div class="mt-3 p-2 bg-amber-50 rounded-lg">
+                                <div class="font-bold text-xs mb-1">🎵 추천 효과음 ID</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>코인:</strong> 9125402735</div>
+                                    <div><strong>레벨업:</strong> 9125468737</div>
+                                    <div><strong>문 열림:</strong> 1937484899</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 15: 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="Touched 이벤트에서 밟은 캐릭터의 플레이어를 찾으려면?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! GetPlayerFromCharacter(hit.Parent)는 캐릭터 모델에서 플레이어를 찾아줘요."
+                        wrong-explanation="GetPlayerFromCharacter(hit.Parent)가 정답! hit.Parent = 캐릭터 모델이에요."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="코인 파트를 완전히 삭제하는 코드는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! Destroy()는 인스턴스를 완전히 제거해요. 다시 나타나게 하려면 투명하게 숨기기!"
+                        wrong-explanation="part:Destroy()가 정답이에요. 파트를 게임에서 완전히 삭제합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="Touched가 여러 번 발생해서 코인이 중복 수집되는 걸 막으려면?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! debounce 변수(예: collected = false)로 이미 수집했는지 확인하면 1번만 수집돼요."
+                        wrong-explanation="debounce 변수가 정답! local collected = false로 선언하고 수집 시 true로 변경!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="코인을 숨겼다가 5초 후 다시 나타나게 하려면?"
+                        correct="A"
+                        options={quiz4Options}
+                        correct-explanation="정답! Transparency = 1로 투명하게, CanCollide = false로 통과 가능하게 만들어 숨겨요."
+                        wrong-explanation="Transparency = 1 + CanCollide = false가 정답! 투명+통과로 숨겼다가 다시 보이게 해요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-gold/20 to-neon-mint/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">8주차 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        Leaderstats + 코인 수집 게임을 만들었어요!<br>
+                        다음 시간에는 장착할 수 있는 <strong>도구(Tool)</strong>를 만들어봐요! ⚔️
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

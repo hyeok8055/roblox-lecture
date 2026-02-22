@@ -1,0 +1,21 @@
+{
+  "name": "Week8_CoinGame",
+  "tree": {
+    "$className": "DataModel",
+
+    "ServerScriptService": {
+      "LeaderstatsScript": {
+        "$path": "src/server"
+      }
+    },
+
+    "Workspace": {
+      "수업자료": {
+        "$className": "Folder",
+        "8주차": {
+          "$path": "src/workspace/수업자료/8주차"
+        }
+      }
+    }
+  }
+}

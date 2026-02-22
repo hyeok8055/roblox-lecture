@@ -1,0 +1,50 @@
+{
+  "ClassName": "BillboardGui",
+  "Properties": {
+    "Size": { "UDim2": [[0, 80], [0, 40]] },
+    "StudsOffset": { "Vector3": [0, 3, 0] },
+    "AlwaysOnTop": true,
+    "LightInfluence": 0
+  },
+  "Children": [
+    {
+      "Name": "Badge",
+      "ClassName": "Frame",
+      "Properties": {
+        "Size": { "UDim2": [[1, 0], [1, 0]] },
+        "BackgroundColor3": { "Color3": [0.12, 0.08, 0.0] },
+        "BackgroundTransparency": 0.15
+      },
+      "Children": [
+        {
+          "Name": "Corner",
+          "ClassName": "UICorner",
+          "Properties": {
+            "CornerRadius": { "UDim": [0.3, 0] }
+          }
+        },
+        {
+          "Name": "Stroke",
+          "ClassName": "UIStroke",
+          "Properties": {
+            "Color": { "Color3": [1, 0.6, 0.0] },
+            "Thickness": 2,
+            "Transparency": 0.3
+          }
+        },
+        {
+          "Name": "Label",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "Size": { "UDim2": [[1, 0], [1, 0]] },
+            "BackgroundTransparency": 1,
+            "Text": "+1 🔊",
+            "TextScaled": true,
+            "TextColor3": { "Color3": [1, 0.65, 0.1] },
+            "Font": "GothamBold"
+          }
+        }
+      ]
+    }
+  ]
+}

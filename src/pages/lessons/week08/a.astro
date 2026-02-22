@@ -1,0 +1,976 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 퀴즈 옵션
+const quiz1Options = JSON.stringify(["leaderstats", "Leaderstats", "LeaderStats", "LEADERSTATS"]);
+const quiz2Options = JSON.stringify(["IntValue", "StringValue", "NumberValue", "BoolValue"]);
+const quiz3Options = JSON.stringify(["PlayerAdded", "Touched", "Changed", "ChildAdded"]);
+const quiz4Options = JSON.stringify(["ServerScriptService", "StarterGui", "Workspace", "ReplicatedStorage"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (7개)
+// =========================================
+
+// 퀴즈 1: 기본 Leaderstats 폴더 만들기
+const basicLeaderstatsBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Players\"", options: ["\"Players\"", "\"Workspace\"", "\"Lighting\"", "\"Teams\""] },
+    { id: "b2", correct: "PlayerAdded", options: ["PlayerAdded", "Touched", "Changed", "ChildAdded"] },
+    { id: "b3", correct: "\"Folder\"", options: ["\"Folder\"", "\"Part\"", "\"IntValue\"", "\"Frame\""] },
+    { id: "b4", correct: "player", options: ["player", "workspace", "game", "script"] }
+]);
+const basicLeaderstatsTemplate = `-- ========================================
+-- 📊 점수판(Leaderstats) 만들기!
+-- ========================================
+-- 📦 준비: ServerScriptService에 Script 넣기!
+-- 💡 Players.PlayerAdded = 플레이어 입장 시 실행
+-- 💡 "leaderstats" = 반드시 전부 소문자!
+-- ========================================
+
+-- 💡 Players 서비스 가져오기
+local Players = game:GetService([b1])
+
+-- 💡 플레이어가 게임에 들어오면!
+Players.[b2]:Connect(function(player)
+    -- 💡 점수판 폴더 만들기
+    local leaderstats = Instance.new([b3])
+    -- 💡 이름을 정확히 "leaderstats"로!
+    leaderstats.Name = "leaderstats"
+    -- 💡 플레이어 안에 넣기!
+    leaderstats.Parent = [b4]
+end)`;
+const basicLeaderstatsFullCode = `-- 📊 기본 Leaderstats
+-- 📦 ServerScriptService → Script
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+end)`;
+
+// 퀴즈 2: IntValue로 코인 추가
+const addCoinValueBlanks = JSON.stringify([
+    { id: "b1", correct: "\"IntValue\"", options: ["\"IntValue\"", "\"StringValue\"", "\"BoolValue\"", "\"NumberValue\""] },
+    { id: "b2", correct: "\"Coins\"", options: ["\"Coins\"", "\"coins\"", "\"Money\"", "\"leaderstats\""] },
+    { id: "b3", correct: "100", options: ["0", "50", "100", "\"100\""] },
+    { id: "b4", correct: "leaderstats", options: ["leaderstats", "player", "workspace", "game"] }
+]);
+const addCoinValueTemplate = `-- ========================================
+-- 💰 점수판에 코인 추가하기!
+-- ========================================
+-- 📦 준비: ServerScriptService에 Script 넣기!
+-- 💡 IntValue = 정수(숫자)를 저장하는 객체
+-- 💡 Value = 초기 값 설정
+-- 💡 Name = 리더보드에 표시될 이름!
+-- ========================================
+
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    -- 💡 코인 값 만들기!
+    local coins = Instance.new([b1])
+    -- 💡 리더보드에 표시될 이름
+    coins.Name = [b2]
+    -- 💡 시작 코인 = 100
+    coins.Value = [b3]
+    -- 💡 leaderstats 폴더 안에 넣기!
+    coins.Parent = [b4]
+end)`;
+const addCoinValueFullCode = `-- 💰 코인 Leaderstats
+-- 📦 ServerScriptService → Script
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 100
+    coins.Parent = leaderstats
+end)`;
+
+// 퀴즈 3: 코인 + 레벨 두 개 값
+const twoValuesBlanks = JSON.stringify([
+    { id: "b1", correct: "\"IntValue\"", options: ["\"IntValue\"", "\"StringValue\"", "\"BoolValue\"", "\"Folder\""] },
+    { id: "b2", correct: "\"Level\"", options: ["\"Level\"", "\"level\"", "\"Lv\"", "\"Stage\""] },
+    { id: "b3", correct: "1", options: ["0", "1", "10", "100"] },
+    { id: "b4", correct: "leaderstats", options: ["leaderstats", "player", "coins", "workspace"] }
+]);
+const twoValuesTemplate = `-- ========================================
+-- 📊 코인 + 레벨 점수판!
+-- ========================================
+-- 📦 준비: ServerScriptService에 Script 넣기!
+-- 💡 IntValue를 여러 개 만들 수 있어요!
+-- 💡 각각 이름을 다르게 하면 리더보드에 모두 표시!
+-- ========================================
+
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    -- 💡 코인
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+
+    -- 💡 레벨도 추가!
+    local level = Instance.new([b1])
+    level.Name = [b2]
+    -- 💡 레벨은 1부터 시작!
+    level.Value = [b3]
+    level.Parent = [b4]
+end)`;
+const twoValuesFullCode = `-- 📊 코인 + 레벨 점수판
+-- 📦 ServerScriptService → Script
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+
+    local level = Instance.new("IntValue")
+    level.Name = "Level"
+    level.Value = 1
+    level.Parent = leaderstats
+end)`;
+
+// 퀴즈 4: GetPlayerFromCharacter 소개 + 밟으면 코인 +10
+const coinGivePartBlanks = JSON.stringify([
+    { id: "b1", correct: ":GetPlayerFromCharacter(hit.Parent)", options: [":GetPlayerFromCharacter(hit.Parent)", ".LocalPlayer", ":FindFirstChild(hit)", ":GetPlayerFromCharacter(hit)"] },
+    { id: "b2", correct: ".leaderstats.Coins", options: [".leaderstats.Coins", ".Coins", ":FindFirstChild(\"Coins\")", ".leaderstats"] },
+    { id: "b3", correct: "coins.Value + 10", options: ["coins.Value + 10", "coins.Value + 1", "coins + 10", "10"] }
+]);
+const coinGivePartTemplate = `-- ========================================
+-- 💰 밟으면 코인 +10 파트!
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, 초록색) + Script
+-- ⚠️ Leaderstats 스크립트가 먼저 있어야 해요!
+-- 💡 GetPlayerFromCharacter = 캐릭터 → 플레이어
+-- 💡 player.leaderstats.Coins = 점수판의 코인!
+-- ========================================
+
+local part = script.Parent
+
+-- 💡 누군가 밟으면!
+part.Touched:Connect(function(hit)
+    -- 💡 캐릭터에서 플레이어 찾기!
+    -- 💡 hit.Parent = 캐릭터 모델
+    local player = game.Players[b1]
+    if player then
+        -- 💡 점수판에서 코인 찾기
+        local coins = player[b2]
+        -- 💡 코인 +10!
+        coins.Value = [b3]
+        print(player.Name .. "에게 10코인!")
+    end
+end)`;
+const coinGivePartFullCode = `-- 💰 밟으면 코인 +10
+-- 📦 Part (Anchored ✓) → Script
+local part = script.Parent
+
+part.Touched:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        local coins = player.leaderstats.Coins
+        coins.Value = coins.Value + 10
+        print(player.Name .. "에게 10코인!")
+    end
+end)`;
+
+// 퀴즈 5: 밟으면 코인 +10 (debounce 포함)
+const coinGiveDebounceBlanks = JSON.stringify([
+    { id: "b1", correct: "false", options: ["true", "false", "nil", "0"] },
+    { id: "b2", correct: "not giving", options: ["not giving", "giving", "true", "giving == false"] },
+    { id: "b3", correct: "true", options: ["true", "false", "nil", "1"] },
+    { id: "b4", correct: "false", options: ["true", "false", "nil", "0"] }
+]);
+const coinGiveDebounceTemplate = `-- ========================================
+-- 💰 밟으면 코인 +10 (1번만!)
+-- ========================================
+-- 📦 준비: Part (Anchored ✓, 초록색) + Script
+-- ⚠️ Leaderstats 스크립트 필수!
+-- 💡 문제: 서있으면 계속 코인이 올라감!
+-- 💡 해결: debounce로 쿨다운 추가!
+-- ========================================
+
+local part = script.Parent
+-- 💡 쿨다운 변수 (지금 주는 중인지?)
+local giving = [b1]
+
+part.Touched:Connect(function(hit)
+    -- 💡 지금 안 주고 있을 때만!
+    if [b2] then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            -- 💡 주는 중으로 표시!
+            giving = [b3]
+            player.leaderstats.Coins.Value += 10
+            print("+10 코인!")
+
+            -- 💡 2초 쿨다운!
+            task.wait(2)
+            -- 💡 다시 받을 수 있게!
+            giving = [b4]
+        end
+    end
+end)`;
+const coinGiveDebounceFullCode = `-- 💰 밟으면 코인 +10 (쿨다운)
+-- 📦 Part (Anchored ✓) → Script
+local part = script.Parent
+local giving = false
+
+part.Touched:Connect(function(hit)
+    if not giving then
+        local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+        if player then
+            giving = true
+            player.leaderstats.Coins.Value += 10
+            task.wait(2)
+            giving = false
+        end
+    end
+end)`;
+
+// 퀴즈 6: 죽으면 코인 -5
+const deathPenaltyBlanks = JSON.stringify([
+    { id: "b1", correct: "CharacterAdded", options: ["CharacterAdded", "PlayerAdded", "Touched", "Changed"] },
+    { id: "b2", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"HumanoidRootPart\"", "\"Head\"", "\"Character\""] },
+    { id: "b3", correct: "Died", options: ["Died", "Touched", "Changed", "HealthChanged"] },
+    { id: "b4", correct: "5", options: ["1", "5", "10", "50"] }
+]);
+const deathPenaltyTemplate = `-- ========================================
+-- ☠️ 죽으면 코인이 줄어요!
+-- ========================================
+-- 📦 준비: ServerScriptService에 Script 넣기!
+-- 💡 CharacterAdded = 캐릭터 생성(리스폰) 시
+-- 💡 Humanoid.Died = 캐릭터 사망 이벤트
+-- 💡 math.max(a, 0) = 0 미만이 되지 않게!
+-- ========================================
+
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 50
+    coins.Parent = leaderstats
+
+    -- 💡 캐릭터가 생성될 때마다!
+    player.[b1]:Connect(function(character)
+        -- 💡 Humanoid 찾기
+        local humanoid = character:WaitForChild([b2])
+        -- 💡 죽으면!
+        humanoid.[b3]:Connect(function()
+            -- 💡 코인 -5 (0 미만이면 0)
+            coins.Value = math.max(coins.Value - [b4], 0)
+            print("사망! 코인 -5")
+        end)
+    end)
+end)`;
+const deathPenaltyFullCode = `-- ☠️ 죽으면 코인 -5
+-- 📦 ServerScriptService → Script
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 50
+    coins.Parent = leaderstats
+
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.Died:Connect(function()
+            coins.Value = math.max(coins.Value - 5, 0)
+        end)
+    end)
+end)`;
+
+// 퀴즈 7: 레벨업! (코인 100개 = 레벨 +1)
+const levelUpBlanks = JSON.stringify([
+    { id: "b1", correct: ":GetPropertyChangedSignal(\"Value\")", options: [":GetPropertyChangedSignal(\"Value\")", ".Changed", ".Touched", ":Connect()"] },
+    { id: "b2", correct: ">= 100", options: [">= 100", "> 100", "== 100", "<= 100"] },
+    { id: "b3", correct: "level.Value + 1", options: ["level.Value + 1", "level + 1", "1", "level.Value"] },
+    { id: "b4", correct: "coins.Value - 100", options: ["coins.Value - 100", "0", "coins.Value", "100"] }
+]);
+const levelUpTemplate = `-- ========================================
+-- ⭐ 코인 100개 = 레벨업!
+-- ========================================
+-- 📦 준비: ServerScriptService에 Script 넣기!
+-- 💡 GetPropertyChangedSignal = 값이 바뀔 때 감지
+-- 💡 코인이 100 이상이면 레벨업!
+-- 💡 레벨업하면 코인 -100 (사용!)
+-- ========================================
+
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+
+    local level = Instance.new("IntValue")
+    level.Name = "Level"
+    level.Value = 1
+    level.Parent = leaderstats
+
+    -- 💡 코인 값이 바뀔 때마다 체크!
+    coins[b1]:Connect(function()
+        -- 💡 100코인 이상이면?
+        if coins.Value [b2] then
+            -- 💡 레벨 +1!
+            level.Value = [b3]
+            -- 💡 코인 100개 사용!
+            coins.Value = [b4]
+            print(player.Name .. " 레벨업! Lv." .. level.Value)
+        end
+    end)
+end)`;
+const levelUpFullCode = `-- ⭐ 레벨업 시스템
+-- 📦 ServerScriptService → Script
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+
+    local level = Instance.new("IntValue")
+    level.Name = "Level"
+    level.Value = 1
+    level.Parent = leaderstats
+
+    coins:GetPropertyChangedSignal("Value"):Connect(function()
+        if coins.Value >= 100 then
+            level.Value = level.Value + 1
+            coins.Value = coins.Value - 100
+            print(player.Name .. " 레벨업!")
+        end
+    end)
+end)`;
+---
+
+<LessonLayout title="Leaderstats 만들기" lessonNumber={8} totalSlides={14}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">8주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-gold">Leaderstats</span><br>
+                    점수판 만들기
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    플레이어 머리 위에 점수를 표시하고<br>
+                    코인, 레벨 시스템을 만들어요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📊 Leaderstats</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">👤 PlayerAdded</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">📁 Folder</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🔢 IntValue</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ Leaderstats(리더보드) 이해하기</li>
+                        <li>✓ PlayerAdded 이벤트 사용법</li>
+                        <li>✓ Folder + IntValue로 점수판 만들기</li>
+                        <li>✓ 밟으면 코인 주는 파트 만들기</li>
+                        <li>✓ 레벨업 시스템 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Leaderstats란? -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Leaderstats란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-8">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">📊</span>
+                            게임 속 점수판!
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            로블록스 게임에서 <strong>Tab 키</strong>를 누르면 보이는 점수판이 바로 <strong>Leaderstats</strong>예요!<br>
+                            코인, 레벨, 킬 수 등 원하는 값을 표시할 수 있어요.
+                        </p>
+                        <div class="grid md:grid-cols-3 gap-3">
+                            <div class="p-3 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">💰</div>
+                                <div class="font-bold">Coins</div>
+                                <div class="text-xs text-ink-light">코인 / 돈</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">⭐</div>
+                                <div class="font-bold">Level</div>
+                                <div class="text-xs text-ink-light">레벨</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-red-50 to-rose-50 rounded-xl text-center">
+                                <div class="text-2xl mb-2">⚔️</div>
+                                <div class="font-bold">Kills</div>
+                                <div class="text-xs text-ink-light">킬 수</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 공식 리더보드 스크린샷 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">실제 리더보드 화면</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/players/leaderboard/Leaderboard-On-Screen.jpg" alt="리더보드 화면" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">Tab 키를 누르면 보이는 리더보드</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/players/leaderboard/Leaderboards-Multiple-Players.png" alt="여러 플레이어 리더보드" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">여러 플레이어의 점수가 함께 표시!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="warning" title="이름 주의!">
+                    폴더 이름은 반드시 <strong>"leaderstats"</strong> (전부 소문자!)로 해야 리더보드에 표시돼요.<br>
+                    "LeaderStats", "Leaderstats", "LEADERSTATS" 등은 <strong>작동하지 않습니다!</strong>
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: 구조 + ServerScriptService -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">Leaderstats 구조</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">Explorer에서 보이는 모습</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4">
+                                <div class="font-mono text-sm space-y-1">
+                                    <div>📁 <strong>ServerScriptService</strong></div>
+                                    <div class="ml-4">💻 <strong class="text-blue-600">LeaderstatsScript</strong></div>
+                                    <div class="mt-3">👤 <strong>Player</strong> (입장 후 자동 생성)</div>
+                                    <div class="ml-4">📁 <strong class="text-amber-600">leaderstats</strong> ← 소문자!</div>
+                                    <div class="ml-8">├ 🔢 <strong>Coins</strong> = 0</div>
+                                    <div class="ml-8">└ 🔢 <strong>Level</strong> = 1</div>
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/players/leaderboard/Leaderboard-Stat-Name.png" alt="Leaderstats 이름" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">IntValue의 이름이 리더보드 열 이름이 됩니다</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">💡 새로운 개념 4가지</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">👤 PlayerAdded 이벤트</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>플레이어가 <strong>게임에 입장</strong>할 때 실행</div>
+                                    <div>Touched는 파트용, PlayerAdded는 플레이어용!</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">Players.PlayerAdded:Connect(function(player))</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">📁 Folder (폴더)</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>다른 것들을 <strong>담아두는 상자</strong></div>
+                                    <div>"leaderstats" 이름으로 만들면 리더보드 표시!</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">Instance.new("Folder")</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">🔢 IntValue (정수 값)</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>정수(숫자)</strong>를 저장하는 객체</div>
+                                    <div>.Value로 값을 읽거나 변경!</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">coins.Value = coins.Value + 10</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-violet-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">🖥️ ServerScriptService</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>서버 스크립트</strong>를 넣는 특별한 곳</div>
+                                    <div>모든 플레이어에게 적용되는 코드!</div>
+                                    <div>지금까지 쓰던 Workspace Script와 다른 위치</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: Script 위치 비교 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">중요 개념</span>
+                <h2 class="title-section mb-6">스크립트를 어디에 넣을까?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">스크립트 위치 3곳 비교</h3>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl border-2 border-blue-200">
+                                <div class="text-center mb-2">
+                                    <div class="text-2xl">📦</div>
+                                    <div class="font-bold">Workspace의 Part 안</div>
+                                </div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>✅ 파트에 붙은 Script</div>
+                                    <div>✅ Touched, 색 변경 등</div>
+                                    <div>📍 <strong>지금까지 사용한 방식!</strong></div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-xl border-2 border-amber-400">
+                                <div class="text-center mb-2">
+                                    <div class="text-2xl">🖥️</div>
+                                    <div class="font-bold text-amber-700">ServerScriptService</div>
+                                </div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>✅ 서버 전체를 관리하는 Script</div>
+                                    <div>✅ 점수판, 데이터 등</div>
+                                    <div>📍 <strong>오늘 새로 배우는 위치!</strong></div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl border-2 border-violet-200">
+                                <div class="text-center mb-2">
+                                    <div class="text-2xl">🖱️</div>
+                                    <div class="font-bold">StarterGui</div>
+                                </div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>✅ GUI 안의 LocalScript</div>
+                                    <div>✅ 버튼, 텍스트 등</div>
+                                    <div>📍 <strong>7주차에서 배운 방식!</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 공식 이미지: 스크립트 삽입 -->
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">ServerScriptService에 스크립트 넣기</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/players/leaderboard/Leaderboards-Insert-Script.png" alt="스크립트 삽입" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">ServerScriptService → 우클릭 → Insert Object → Script</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/intro-to-saving-data/ServerScriptService-GoldManager.png" alt="ServerScriptService에 스크립트" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">스크립트가 들어간 모습</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="왜 ServerScriptService인가요?">
+                    Leaderstats는 <strong>모든 플레이어에게 공통으로</strong> 적용되어야 해요!<br>
+                    Part 안의 Script는 그 파트만 관리하지만, ServerScriptService의 Script는 <strong>게임 전체를 관리</strong>합니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 스튜디오 가이드 + 복붙 예제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
+                <h2 class="title-section mb-6">따라하기: Leaderstats 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🛠️</span>
+                        스튜디오 설정 순서
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <ol class="space-y-3 text-sm">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                                <div>Explorer에서 <strong>ServerScriptService</strong> 찾기</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                                <div>우클릭 → Insert Object → <strong>Script</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                                <div>Script 이름을 <strong>"LeaderstatsScript"</strong>로 변경</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                                <div>더블클릭해서 열고 <strong>코드 입력</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                                <div><strong>F5</strong>로 플레이 → <strong>Tab</strong> 눌러 확인!</div>
+                            </li>
+                        </ol>
+                        <div class="text-center">
+                            <img src="https://prod.docsiteassets.roblox.com/assets/studio/explorer/Workspace-Add-Object.png" alt="Insert Object" class="rounded-xl w-full" style="max-height:200px;object-fit:contain" loading="lazy" />
+                            <p class="text-xs text-ink-light mt-2">⊕ 버튼 또는 우클릭 → Insert Object</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 복붙 예제 -->
+                <div class="lesson-card border-2 border-neon-gold/30">
+                    <h4 class="font-bold mb-3 flex items-center gap-2">
+                        <span class="text-xl">📋</span>
+                        복사해서 바로 테스트!
+                    </h4>
+
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-neon-gold font-bold mb-2">📊 기본 점수판</div>
+                            <lua-code-block title="Leaderstats.lua">
+-- 📊 기본 Leaderstats
+-- 📦 ServerScriptService → Script
+local Players = game:GetService("Players")
+
+Players.PlayerAdded:Connect(function(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+end)
+                            </lua-code-block>
+                        </div>
+
+                        <div>
+                            <div class="text-sm text-neon-mint font-bold mb-2">💰 밟으면 코인 +10</div>
+                            <lua-code-block title="CoinGivePart.lua">
+-- 💰 밟으면 코인 +10
+-- 📦 Part (Anchored ✓) → Script
+local part = script.Parent
+local giving = false
+
+part.Touched:Connect(function(hit)
+    if not giving then
+        local player = game.Players
+            :GetPlayerFromCharacter(
+                hit.Parent)
+        if player then
+            giving = true
+            player.leaderstats
+                .Coins.Value += 10
+            task.wait(2)
+            giving = false
+        end
+    end
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 기본 Leaderstats (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="📊 기본 Leaderstats 만들기"
+                setup="ServerScriptService → Script"
+                concepts='["Players", "PlayerAdded", "Instance.new", "Folder"]'
+                blanks={basicLeaderstatsBlanks}
+                template={basicLeaderstatsTemplate}
+                full-code={basicLeaderstatsFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: IntValue 추가 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💰 점수판에 코인 추가하기"
+                setup="ServerScriptService → Script"
+                concepts='["IntValue", "Name", "Value", "Parent"]'
+                blanks={addCoinValueBlanks}
+                template={addCoinValueTemplate}
+                full-code={addCoinValueFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 코인 + 레벨 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="📊 코인 + 레벨 점수판"
+                setup="ServerScriptService → Script"
+                concepts='["IntValue", "여러 개 만들기", "Value 초기값"]'
+                blanks={twoValuesBlanks}
+                template={twoValuesTemplate}
+                full-code={twoValuesFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 밟으면 코인 +10 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💰 밟으면 코인 +10 파트"
+                setup="Part (Anchored ✓, 초록색) → Script"
+                concepts='["Touched", "GetPlayerFromCharacter", "leaderstats", "Value"]'
+                blanks={coinGivePartBlanks}
+                template={coinGivePartTemplate}
+                full-code={coinGivePartFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 밟으면 코인 +10 debounce (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💰 밟으면 코인 +10 (쿨다운!)"
+                setup="Part (Anchored ✓, 초록색) → Script"
+                concepts='["debounce", "not", "task.wait", "쿨다운"]'
+                blanks={coinGiveDebounceBlanks}
+                template={coinGiveDebounceTemplate}
+                full-code={coinGiveDebounceFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 죽으면 코인 -5 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="☠️ 죽으면 코인 -5"
+                setup="ServerScriptService → Script"
+                concepts='["CharacterAdded", "Humanoid", "Died", "math.max"]'
+                blanks={deathPenaltyBlanks}
+                template={deathPenaltyTemplate}
+                full-code={deathPenaltyFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 레벨업 시스템 (드롭다운) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⭐ 코인 100개 = 레벨업!"
+                setup="ServerScriptService → Script"
+                concepts='["GetPropertyChangedSignal", "Value", ">=", "레벨업"]'
+                blanks={levelUpBlanks}
+                template={levelUpTemplate}
+                full-code={levelUpFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 코드 흐름 정리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">📝 정리</span>
+                <h2 class="title-section mb-6">오늘 배운 코드 흐름</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">🔄 Leaderstats 동작 순서</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 shrink-0">1</div>
+                            <div class="flex-1 p-3 bg-blue-50 rounded-xl text-sm">
+                                <strong>게임 시작</strong> → ServerScriptService의 Script가 실행됨
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-600 shrink-0">2</div>
+                            <div class="flex-1 p-3 bg-green-50 rounded-xl text-sm">
+                                <strong>플레이어 입장</strong> → PlayerAdded 이벤트 발생!
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-600 shrink-0">3</div>
+                            <div class="flex-1 p-3 bg-amber-50 rounded-xl text-sm">
+                                <strong>leaderstats 폴더</strong> + IntValue(Coins, Level) 생성 → 리더보드에 표시!
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center font-bold text-violet-600 shrink-0">4</div>
+                            <div class="flex-1 p-3 bg-violet-50 rounded-xl text-sm">
+                                <strong>게임 플레이 중</strong> → Part Touched, 킬 등으로 <code>coins.Value</code> 변경!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">📌 핵심 코드 패턴</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm font-bold text-neon-gold mb-2">값 올리기</div>
+                            <lua-code-block title="값 증가">
+coins.Value = coins.Value + 10
+-- 또는 줄여서
+coins.Value += 10
+                            </lua-code-block>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-neon-coral mb-2">값 내리기 (0 이상)</div>
+                            <lua-code-block title="값 감소">
+coins.Value = math.max(
+    coins.Value - 5, 0
+)
+-- 0 미만이 안 되게!
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 14: 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="리더보드에 점수를 표시하려면 폴더 이름을 어떻게 해야 할까요?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! 반드시 전부 소문자 'leaderstats'로 해야 리더보드에 표시됩니다."
+                        wrong-explanation="'leaderstats' (전부 소문자)가 정답이에요. 대소문자를 틀리면 작동하지 않아요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="점수판에 정수(코인, 레벨)를 저장하려면 어떤 타입을 사용해야 할까요?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! IntValue는 정수(Integer)를 저장해요. 코인, 레벨, 킬 수 등에 딱!"
+                        wrong-explanation="IntValue가 정답이에요. Int = Integer = 정수. 숫자 데이터를 저장할 때 사용합니다."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="플레이어가 게임에 입장할 때 발생하는 이벤트는?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! PlayerAdded는 플레이어가 서버에 접속할 때 발생하는 이벤트예요."
+                        wrong-explanation="PlayerAdded가 정답이에요. Touched는 파트용, PlayerAdded는 플레이어 입장용!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="Leaderstats 스크립트를 넣는 올바른 위치는?"
+                        correct="A"
+                        options={quiz4Options}
+                        correct-explanation="정답! ServerScriptService는 서버 전체를 관리하는 스크립트를 넣는 곳이에요."
+                        wrong-explanation="ServerScriptService가 정답! 모든 플레이어에게 적용되는 코드는 이곳에 넣어요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-neon-gold/20 to-neon-mint/20 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">8주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 코인 파트를 만들어서<br>
+                        진짜 코인 수집 게임을 완성해요! 🪙
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
