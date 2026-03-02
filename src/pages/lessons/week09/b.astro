@@ -1,0 +1,1187 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 확인 퀴즈 옵션
+const quiz1Options = JSON.stringify(["LookVector", "RightVector", "UpVector", "Position"]);
+const quiz2Options = JSON.stringify(["BodyVelocity", "BodyForce", "LinearVelocity", "Velocity"]);
+const quiz3Options = JSON.stringify(["Debris", "Workspace", "Players", "ServerStorage"]);
+const quiz4Options = JSON.stringify(["ParticleEmitter", "Smoke", "Fire", "Sparkles"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (9개)
+// =========================================
+
+// 퀴즈 1: 구체 만들기
+const createOrbBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Part\"", options: ["\"Part\"", "\"Ball\"", "\"Sphere\"", "\"Model\""] },
+    { id: "b2", correct: "Enum.PartType.Ball", options: ["Enum.PartType.Ball", "Enum.PartType.Cylinder", "\"Ball\"", "\"Sphere\""] },
+    { id: "b3", correct: "workspace", options: ["workspace", "game", "tool", "script"] }
+]);
+const createOrbTemplate = `-- ========================================
+-- 🔮 구체(Ball) 파트 만들기!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 Instance.new("Part")로 파트 생성
+-- 💡 Shape = Enum.PartType.Ball 로 공 모양!
+-- 💡 workspace에 넣어야 화면에 보임
+-- ========================================
+
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    -- 💡 새 파트 만들기!
+    local orb = Instance.new([b1])
+    -- 💡 공 모양으로!
+    orb.Shape = [b2]
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    -- 💡 화면에 등장!
+    orb.Parent = [b3]
+    print("구체 생성! 🔮")
+end)`;
+const createOrbFullCode = `-- 🔮 구체 만들기
+-- 📦 Tool → Script
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Parent = workspace
+end)`;
+
+// 퀴즈 2: 발사 위치 (LookVector)
+const lookVectorBlanks = JSON.stringify([
+    { id: "b1", correct: "tool.Parent", options: ["tool.Parent", "tool", "script.Parent", "game"] },
+    { id: "b2", correct: "\"HumanoidRootPart\"", options: ["\"HumanoidRootPart\"", "\"Head\"", "\"Torso\"", "\"Humanoid\""] },
+    { id: "b3", correct: "LookVector", options: ["LookVector", "RightVector", "UpVector", "Position"] }
+]);
+const lookVectorTemplate = `-- ========================================
+-- 🧭 바라보는 방향으로 발사!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 tool.Parent = Tool을 들고 있는 캐릭터
+-- 💡 HumanoidRootPart = 캐릭터의 중심 파트
+-- 💡 CFrame.LookVector = 바라보는 방향!
+-- ========================================
+
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    -- 💡 내 캐릭터!
+    local character = [b1]
+    -- 💡 중심 파트!
+    local rootPart = character:WaitForChild([b2])
+    -- 💡 바라보는 방향 벡터!
+    local direction = rootPart.CFrame.[b3]
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    -- 💡 3칸 앞에서 생성!
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+end)`;
+const lookVectorFullCode = `-- 🧭 발사 위치 설정
+-- 📦 Tool → Script
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+end)`;
+
+// 퀴즈 3: BodyVelocity로 날리기
+const bodyVelocityBlanks = JSON.stringify([
+    { id: "b1", correct: "\"BodyVelocity\"", options: ["\"BodyVelocity\"", "\"BodyForce\"", "\"Velocity\"", "\"Speed\""] },
+    { id: "b2", correct: "direction * 100", options: ["direction * 100", "direction", "direction * 10", "direction + 100"] },
+    { id: "b3", correct: "orb", options: ["orb", "tool", "workspace", "character"] }
+]);
+const bodyVelocityTemplate = `-- ========================================
+-- 🚀 BodyVelocity로 구체 날리기!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 BodyVelocity = 파트에 속도를 부여하는 힘!
+-- 💡 Velocity = 방향 × 속도 수치
+-- 💡 MaxForce = 힘의 한계 (math.huge = 무제한!)
+-- ========================================
+
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    -- 💡 속도 엔진 만들기!
+    local bv = Instance.new([b1])
+    -- 💡 방향 x 100 속도로!
+    bv.Velocity = [b2]
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    -- 💡 구체 안에 넣기!
+    bv.Parent = [b3]
+end)`;
+const bodyVelocityFullCode = `-- 🚀 BodyVelocity 날리기
+-- 📦 Tool → Script
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+end)`;
+
+// 퀴즈 4: Debris 자동 삭제 + 쿨다운
+const debrisBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Debris\"", options: ["\"Debris\"", "\"Players\"", "\"TweenService\"", "\"RunService\""] },
+    { id: "b2", correct: "AddItem", options: ["AddItem", "Remove", "Destroy", "Delete"] },
+    { id: "b3", correct: "1", options: ["1", "0.5", "2", "0"] }
+]);
+const debrisTemplate = `-- ========================================
+-- 🗑️ Debris로 자동 삭제 + 쿨다운!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 Debris:AddItem(파트, 초) = N초 후 자동 삭제!
+-- 💡 canFire 변수로 쿨다운 구현
+-- 💡 task.wait(1) = 1초 쿨다운
+-- ========================================
+
+-- 💡 자동 청소부 서비스!
+local Debris = game:GetService([b1])
+local tool = script.Parent
+local canFire = true
+
+tool.Activated:Connect(function()
+    if not canFire then return end
+    canFire = false
+
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    -- 💡 3초 후 자동 삭제!
+    Debris:[b2](orb, 3)
+    -- 💡 쿨다운!
+    task.wait([b3])
+    canFire = true
+end)`;
+const debrisFullCode = `-- 🗑️ Debris + 쿨다운
+-- 📦 Tool → Script
+local Debris = game:GetService("Debris")
+local tool = script.Parent
+local canFire = true
+
+tool.Activated:Connect(function()
+    if not canFire then return end
+    canFire = false
+
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    Debris:AddItem(orb, 3)
+    task.wait(1)
+    canFire = true
+end)`;
+
+// 퀴즈 5: ParticleEmitter 효과
+const particleBlanks = JSON.stringify([
+    { id: "b1", correct: "\"ParticleEmitter\"", options: ["\"ParticleEmitter\"", "\"Smoke\"", "\"Fire\"", "\"Sparkles\""] },
+    { id: "b2", correct: "50", options: ["50", "1", "100", "0"] },
+    { id: "b3", correct: "orb", options: ["orb", "workspace", "tool", "handle"] }
+]);
+const particleTemplate = `-- ========================================
+-- ✨ ParticleEmitter 반짝이 효과!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 ParticleEmitter = 파티클(입자) 효과 생성기
+-- 💡 Rate = 초당 입자 개수 (50 = 1초에 50개)
+-- 💡 구체 안에 넣으면 구체에서 입자 나옴!
+-- ========================================
+
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    -- 💡 반짝이 효과!
+    local particles = Instance.new([b1])
+    -- 💡 초당 입자 개수!
+    particles.Rate = [b2]
+    particles.Lifetime = NumberRange.new(0.3, 0.8)
+    -- 💡 구체 안에 넣기!
+    particles.Parent = [b3]
+end)`;
+const particleFullCode = `-- ✨ ParticleEmitter 효과
+-- 📦 Tool → Script
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local particles = Instance.new("ParticleEmitter")
+    particles.Rate = 50
+    particles.Lifetime = NumberRange.new(0.3, 0.8)
+    particles.Parent = orb
+end)`;
+
+// 퀴즈 6: PointLight 빛 효과
+const pointLightBlanks = JSON.stringify([
+    { id: "b1", correct: "\"PointLight\"", options: ["\"PointLight\"", "\"SpotLight\"", "\"SurfaceLight\"", "\"Neon\""] },
+    { id: "b2", correct: "5", options: ["5", "1", "10", "0"] },
+    { id: "b3", correct: "20", options: ["20", "5", "50", "100"] }
+]);
+const pointLightTemplate = `-- ========================================
+-- 💡 PointLight 빛나는 구체!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 PointLight = 한 점에서 사방으로 빛 발산!
+-- 💡 Brightness = 밝기 (1~10, 보통 5)
+-- 💡 Range = 빛이 닿는 범위 (기본 20)
+-- ========================================
+
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    -- 💡 빛 효과!
+    local light = Instance.new([b1])
+    -- 💡 밝기!
+    light.Brightness = [b2]
+    -- 💡 범위!
+    light.Range = [b3]
+    light.Parent = orb
+end)`;
+const pointLightFullCode = `-- 💡 PointLight 빛 효과
+-- 📦 Tool → Script
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local light = Instance.new("PointLight")
+    light.Brightness = 5
+    light.Range = 20
+    light.Parent = orb
+end)`;
+
+// 퀴즈 7: 구체 데미지
+const orbDamageBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"HumanoidRootPart\"", "\"Character\"", "\"Head\""] },
+    { id: "b2", correct: ":TakeDamage(30)", options: [":TakeDamage(30)", ":Destroy()", ".Health = 0", ":Kill()"] },
+    { id: "b3", correct: ":Destroy()", options: [":Destroy()", ":Remove()", ":Kill()", ".Parent = nil"] }
+]);
+const orbDamageTemplate = `-- ========================================
+-- 💥 구체가 맞으면 데미지!
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 orb.Touched = 구체가 무언가에 닿을 때!
+-- 💡 TakeDamage(30) = 체력 -30
+-- 💡 맞으면 구체 Destroy()로 없애기!
+-- ========================================
+
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    -- 💡 맞으면!
+    orb.Touched:Connect(function(hit)
+        if hit.Parent ~= character then
+            local humanoid = hit.Parent:FindFirstChild([b1])
+            if humanoid then
+                -- 💡 데미지 -30!
+                humanoid[b2]
+                -- 💡 맞으면 구체 사라짐!
+                orb[b3]
+            end
+        end
+    end)
+end)`;
+const orbDamageFullCode = `-- 💥 구체 데미지
+-- 📦 Tool → Script
+local tool = script.Parent
+
+tool.Activated:Connect(function()
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    orb.Touched:Connect(function(hit)
+        if hit.Parent ~= character then
+            local humanoid = hit.Parent:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid:TakeDamage(30)
+                orb:Destroy()
+            end
+        end
+    end)
+end)`;
+
+// 퀴즈 8: 완성 전반부
+const finalWandPart1Blanks = JSON.stringify([
+    { id: "b1", correct: "tool.Parent", options: ["tool.Parent", "tool", "game", "script.Parent"] },
+    { id: "b2", correct: "\"HumanoidRootPart\"", options: ["\"HumanoidRootPart\"", "\"Head\"", "\"Torso\"", "\"Humanoid\""] },
+    { id: "b3", correct: "LookVector", options: ["LookVector", "RightVector", "UpVector", "Position"] },
+    { id: "b4", correct: "direction", options: ["direction", "LookVector", "Vector3", "position"] }
+]);
+const finalWandPart1Template = `-- ========================================
+-- 🪄 완성 마법 지팡이 (전반부)
+-- ========================================
+-- 📦 준비: StarterPack → Tool → Handle + Script
+-- 💡 전반부: Debris 서비스 + 구체 생성!
+-- ========================================
+
+local Debris = game:GetService("Debris")
+local tool = script.Parent
+local canFire = true
+
+tool.Activated:Connect(function()
+    if not canFire then return end
+    canFire = false
+
+    -- 💡 캐릭터와 방향!
+    local character = [b1]
+    local rootPart = character:WaitForChild([b2])
+    local direction = rootPart.CFrame.[b3]
+
+    -- 💡 구체 생성!
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.CanCollide = false
+    -- 💡 3칸 앞에서!
+    orb.Position = rootPart.Position + [b4] * 3
+    orb.Parent = workspace`;
+const finalWandPart1FullCode = `-- 🪄 완성 지팡이 전반부
+local Debris = game:GetService("Debris")
+local tool = script.Parent
+local canFire = true
+
+tool.Activated:Connect(function()
+    if not canFire then return end
+    canFire = false
+
+    local character = tool.Parent
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.CanCollide = false
+    orb.Position = rootPart.Position + direction * 3
+    orb.Parent = workspace`;
+
+// 퀴즈 9: 완성 후반부
+const finalWandPart2Blanks = JSON.stringify([
+    { id: "b1", correct: "100", options: ["100", "10", "50", "1"] },
+    { id: "b2", correct: "\"ParticleEmitter\"", options: ["\"ParticleEmitter\"", "\"Smoke\"", "\"Fire\"", "\"Sparkles\""] },
+    { id: "b3", correct: "\"PointLight\"", options: ["\"PointLight\"", "\"SpotLight\"", "\"Neon\"", "\"SurfaceLight\""] },
+    { id: "b4", correct: "AddItem", options: ["AddItem", "Remove", "Destroy", "Delete"] }
+]);
+const finalWandPart2Template = `-- ========================================
+-- 🪄 완성 마법 지팡이 (후반부)
+-- ========================================
+-- 💡 후반부: 속도 + 파티클 + 빛 + 자동 삭제!
+-- (위에서 이어지는 코드예요)
+-- ========================================
+
+    -- 💡 속도 부여!
+    local bv = Instance.new("BodyVelocity")
+    -- 💡 방향 × 속도!
+    bv.Velocity = direction * [b1]
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    -- 💡 파티클 효과!
+    local particles = Instance.new([b2])
+    particles.Rate = 50
+    particles.Lifetime = NumberRange.new(0.3, 0.8)
+    particles.Parent = orb
+
+    -- 💡 빛 효과!
+    local light = Instance.new([b3])
+    light.Brightness = 5
+    light.Range = 20
+    light.Parent = orb
+
+    -- 💡 3초 후 자동 삭제!
+    Debris:[b4](orb, 3)
+    task.wait(1)
+    canFire = true
+end)`;
+const finalWandPart2FullCode = `-- 🪄 완성 지팡이 후반부
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    local particles = Instance.new("ParticleEmitter")
+    particles.Rate = 50
+    particles.Lifetime = NumberRange.new(0.3, 0.8)
+    particles.Parent = orb
+
+    local light = Instance.new("PointLight")
+    light.Brightness = 5
+    light.Range = 20
+    light.Parent = orb
+
+    Debris:AddItem(orb, 3)
+    task.wait(1)
+    canFire = true
+end)`;
+---
+
+<LessonLayout title="Tool 활용: 마법 지팡이" lessonNumber={9} totalSlides={16}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">9주차 B</span>
+                <h1 class="title-display mb-4">
+                    마법 지팡이:<br>
+                    <span class="text-neon-mint">🪄 구체 발사!</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    Tool로 빛나는 구체를 발사하는<br>
+                    마법 지팡이를 만들어봐요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🚀 BodyVelocity</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🧭 LookVector</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">✨ ParticleEmitter</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">💡 PointLight</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🗑️ Debris</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">💢 TakeDamage</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ LookVector로 바라보는 방향 파악</li>
+                        <li>✓ BodyVelocity로 파트에 속도 부여</li>
+                        <li>✓ ParticleEmitter, PointLight 효과</li>
+                        <li>✓ Debris 서비스로 자동 삭제</li>
+                        <li>✓ 구체 데미지 + 완성 지팡이 만들기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: 구체 발사의 원리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">구체 발사의 원리</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🔄 5단계 흐름</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
+                                <div class="text-sm"><strong>클릭</strong> → tool.Activated 발동!</div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-purple-400 text-white flex items-center justify-center text-sm font-bold shrink-0">2</div>
+                                <div class="text-sm"><strong>방향 계산</strong> → HumanoidRootPart.CFrame.LookVector</div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-green-400 text-white flex items-center justify-center text-sm font-bold shrink-0">3</div>
+                                <div class="text-sm"><strong>구체 생성</strong> → Instance.new("Part") + 효과</div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-bold shrink-0">4</div>
+                                <div class="text-sm"><strong>속도 부여</strong> → BodyVelocity로 날리기</div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
+                                <div class="w-8 h-8 rounded-full bg-red-400 text-white flex items-center justify-center text-sm font-bold shrink-0">5</div>
+                                <div class="text-sm"><strong>자동 삭제</strong> → Debris:AddItem(orb, 3)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">💡 새로운 개념 4가지</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">🚀 BodyVelocity</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div>파트에 <strong>속도를 부여</strong>하는 힘</div>
+                                    <div>Velocity로 방향+속도 설정</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">bv.Velocity = direction * 100</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">🗑️ Debris</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>N초 후 자동 삭제</strong> 서비스</div>
+                                    <div>game:GetService("Debris")로 가져옴</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">Debris:AddItem(orb, 3)</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-violet-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">✨ ParticleEmitter</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>파티클(입자) 효과</strong> 생성기</div>
+                                    <div>Rate로 초당 입자 수 설정</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">particles.Rate = 50</div>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-yellow-50 rounded-xl">
+                                <div class="font-bold text-sm mb-2">💡 PointLight</div>
+                                <div class="text-xs text-ink-light space-y-1">
+                                    <div><strong>점 광원</strong> - 주변을 밝혀요</div>
+                                    <div>Brightness, Range로 조절</div>
+                                    <div class="font-mono mt-1 bg-white p-1 rounded">light.Brightness = 5</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: LookVector 설명 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">바라보는 방향으로 발사!</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🧭 LookVector란?</h3>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-ink-light mb-4 text-sm">
+                                    <strong>CFrame.LookVector</strong>는 캐릭터가 <strong>바라보는 방향의 단위 벡터</strong>예요!<br>
+                                    이 방향에 속도를 곱하면 바라보는 방향으로 날아가요.
+                                </p>
+                                <div class="space-y-2 text-sm">
+                                    <div class="p-2 bg-blue-50 rounded-lg">
+                                        <div class="font-bold text-blue-700 mb-1">🔵 LookVector (앞 방향)</div>
+                                        <div class="text-xs text-ink-light">캐릭터가 정면으로 바라보는 방향</div>
+                                        <div class="font-mono text-xs mt-1">rootPart.CFrame.LookVector</div>
+                                    </div>
+                                    <div class="p-2 bg-green-50 rounded-lg">
+                                        <div class="font-bold text-green-700 mb-1">🟢 RightVector (오른쪽)</div>
+                                        <div class="text-xs text-ink-light">캐릭터 오른쪽 방향</div>
+                                    </div>
+                                    <div class="p-2 bg-amber-50 rounded-lg">
+                                        <div class="font-bold text-amber-700 mb-1">🟡 UpVector (위쪽)</div>
+                                        <div class="text-xs text-ink-light">캐릭터 위쪽 방향</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="bg-ink-pale rounded-xl p-4">
+                                    <div class="text-sm font-bold mb-3">🔢 계산 방식</div>
+                                    <div class="space-y-2 text-xs font-mono">
+                                        <div class="p-2 bg-white rounded">
+                                            <div class="text-ink-light">-- 방향 벡터 (크기=1)</div>
+                                            <div>local dir = rootPart.CFrame.LookVector</div>
+                                        </div>
+                                        <div class="p-2 bg-white rounded">
+                                            <div class="text-ink-light">-- 3칸 앞에 생성</div>
+                                            <div>orb.Position = rootPart.Position + dir * 3</div>
+                                        </div>
+                                        <div class="p-2 bg-white rounded">
+                                            <div class="text-ink-light">-- 속도 100으로 날리기</div>
+                                            <div>bv.Velocity = dir * 100</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="BodyVelocity vs 직접 이동">
+                    Position을 직접 바꾸면 순간이동이에요. BodyVelocity는 <strong>물리적으로 날아가는</strong> 효과예요!<br>
+                    공중에서 중력을 받지 않으려면 <code>MaxForce = Vector3.new(math.huge, math.huge, math.huge)</code>로 설정해요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: 스튜디오 따라하기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
+                <h2 class="title-section mb-6">따라하기: 마법 지팡이 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🛠️</span>
+                        스튜디오 설정 순서
+                    </h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div>Explorer → <strong>StarterPack</strong> 우클릭 → Insert Object → <strong>Tool</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div>Tool 이름을 <strong>"MagicWand"</strong>로 변경</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div>MagicWand 우클릭 → Insert Object → <strong>Part</strong>, 이름을 <strong>"Handle"</strong>로</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div>Handle: Size <strong>(0.2, 2.5, 0.2)</strong>, BrickColor <strong>"Dark purple"</strong>, Material <strong>Neon</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                            <div>MagicWand 우클릭 → Insert Object → <strong>Script</strong></div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">6</span>
+                            <div>Script에 코드 작성</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">7</span>
+                            <div><strong>F5</strong>로 플레이 → 지팡이 장착 → 클릭해서 구체 발사!</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/studio/explorer/MeshPart-ParticleEmitter.png" alt="ParticleEmitter" class="rounded-xl w-full" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">ParticleEmitter는 이렇게 Explorer에 보여요</p>
+                    </div>
+                    <div class="text-center">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/lighting-and-effects/particle-emitter/Color-Examples.jpg" alt="파티클 색상 예시" class="rounded-xl w-full" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">파티클 색상을 바꾸면 다양한 효과!</p>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="구체 색 바꾸기">
+                    <code>orb.BrickColor = BrickColor.new("Magenta")</code>로 색을 바꿔요!<br>
+                    또는 <code>orb.Color = Color3.fromRGB(255, 100, 255)</code>로 정확한 색을 지정할 수도 있어요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 퀴즈1 - 구체 만들기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔮 구체(Ball) 파트 만들기"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Instance.new", "Enum.PartType.Ball", "Parent"]'
+                blanks={createOrbBlanks}
+                template={createOrbTemplate}
+                full-code={createOrbFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: 퀴즈2 - LookVector -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🧭 바라보는 방향으로 발사 위치 설정"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["tool.Parent", "HumanoidRootPart", "LookVector"]'
+                blanks={lookVectorBlanks}
+                template={lookVectorTemplate}
+                full-code={lookVectorFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 퀴즈3 - BodyVelocity -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🚀 BodyVelocity로 구체 날리기"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["BodyVelocity", "Velocity", "MaxForce"]'
+                blanks={bodyVelocityBlanks}
+                template={bodyVelocityTemplate}
+                full-code={bodyVelocityFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 퀴즈4 - Debris + 쿨다운 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🗑️ Debris 자동 삭제 + 쿨다운"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Debris", "AddItem", "canFire", "task.wait"]'
+                blanks={debrisBlanks}
+                template={debrisTemplate}
+                full-code={debrisFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈5 - ParticleEmitter -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="✨ ParticleEmitter 반짝이 효과"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["ParticleEmitter", "Rate", "Lifetime"]'
+                blanks={particleBlanks}
+                template={particleTemplate}
+                full-code={particleFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 퀴즈6 - PointLight -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💡 PointLight 빛나는 구체"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["PointLight", "Brightness", "Range"]'
+                blanks={pointLightBlanks}
+                template={pointLightTemplate}
+                full-code={pointLightFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 퀴즈7 - 구체 데미지 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💥 구체가 맞으면 데미지!"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Touched", "Humanoid", "TakeDamage", "Destroy"]'
+                blanks={orbDamageBlanks}
+                template={orbDamageTemplate}
+                full-code={orbDamageFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 퀴즈8 - 완성 전반부 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🪄 완성 마법 지팡이 (전반부)"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["tool.Parent", "HumanoidRootPart", "LookVector", "direction"]'
+                blanks={finalWandPart1Blanks}
+                template={finalWandPart1Template}
+                full-code={finalWandPart1FullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 퀴즈9 - 완성 후반부 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🪄 완성 마법 지팡이 (후반부)"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["BodyVelocity", "ParticleEmitter", "PointLight", "Debris"]'
+                blanks={finalWandPart2Blanks}
+                template={finalWandPart2Template}
+                full-code={finalWandPart2FullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 14: 코드 총정리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">📝 코드 정리</span>
+                <h2 class="title-section mb-6">오늘의 코드 총정리</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">🔄 마법 지팡이 동작 순서</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center font-bold text-purple-600 shrink-0">1</div>
+                            <div class="flex-1 p-3 bg-purple-50 rounded-xl text-sm">
+                                <strong>클릭</strong> → canFire 체크 → false로 잠금
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 shrink-0">2</div>
+                            <div class="flex-1 p-3 bg-blue-50 rounded-xl text-sm">
+                                <strong>방향 계산</strong> → HumanoidRootPart.CFrame.LookVector
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-600 shrink-0">3</div>
+                            <div class="flex-1 p-3 bg-green-50 rounded-xl text-sm">
+                                <strong>구체 생성</strong> → Part(Ball) + ParticleEmitter + PointLight
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-600 shrink-0">4</div>
+                            <div class="flex-1 p-3 bg-amber-50 rounded-xl text-sm">
+                                <strong>발사</strong> → BodyVelocity(direction * 100)
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center font-bold text-red-600 shrink-0">5</div>
+                            <div class="flex-1 p-3 bg-red-50 rounded-xl text-sm">
+                                <strong>자동 삭제</strong> → Debris:AddItem(orb, 3) + task.wait(1) + canFire 해제
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm font-bold text-neon-gold mb-2">🪄 완성된 마법 지팡이</div>
+                        <lua-code-block title="MagicWand.lua">
+local Debris = game:GetService("Debris")
+local tool = script.Parent
+local canFire = true
+
+tool.Activated:Connect(function()
+    if not canFire then return end
+    canFire = false
+
+    local character = tool.Parent
+    local rootPart =
+        character:WaitForChild("HumanoidRootPart")
+    local direction = rootPart.CFrame.LookVector
+
+    local orb = Instance.new("Part")
+    orb.Shape = Enum.PartType.Ball
+    orb.Size = Vector3.new(2, 2, 2)
+    orb.BrickColor = BrickColor.new("Cyan")
+    orb.CanCollide = false
+    orb.Position =
+        rootPart.Position + direction * 3
+    orb.Parent = workspace
+
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = direction * 100
+    bv.MaxForce =
+        Vector3.new(math.huge, math.huge, math.huge)
+    bv.Parent = orb
+
+    local particles =
+        Instance.new("ParticleEmitter")
+    particles.Rate = 50
+    particles.Parent = orb
+
+    local light = Instance.new("PointLight")
+    light.Brightness = 5
+    light.Range = 20
+    light.Parent = orb
+
+    Debris:AddItem(orb, 3)
+    task.wait(1)
+    canFire = true
+end)
+                        </lua-code-block>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-neon-mint mb-2">💡 핵심 패턴 요약</div>
+                        <lua-code-block title="patterns.lua">
+-- ① 방향 계산
+local character = tool.Parent
+local rootPart =
+    character:WaitForChild("HumanoidRootPart")
+local direction =
+    rootPart.CFrame.LookVector
+
+-- ② BodyVelocity로 날리기
+local bv = Instance.new("BodyVelocity")
+bv.Velocity = direction * 100
+bv.MaxForce = Vector3.new(
+    math.huge, math.huge, math.huge)
+bv.Parent = orb
+
+-- ③ 3초 후 자동 삭제
+local Debris = game:GetService("Debris")
+Debris:AddItem(orb, 3)
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 15: 도전 과제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🏆 도전 과제</span>
+                <h2 class="title-section mb-6">나만의 마법 만들기!</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="lesson-card border-2 border-green-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐</div>
+                            <div class="font-bold text-green-700">기초 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>✅ 마법 지팡이 만들고 발사</li>
+                            <li>✅ 구체 색 변경해보기</li>
+                            <li>✅ 속도(100) 바꿔보기</li>
+                        </ul>
+                    </div>
+                    <div class="lesson-card border-2 border-amber-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐⭐</div>
+                            <div class="font-bold text-amber-700">도전 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>🎯 TakeDamage 추가</li>
+                            <li>🎯 맞으면 구체 Destroy()</li>
+                            <li>🎯 자기 자신 제외</li>
+                        </ul>
+                    </div>
+                    <div class="lesson-card border-2 border-purple-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐⭐⭐</div>
+                            <div class="font-bold text-purple-700">하드 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>🔥 구체 3개 동시 발사</li>
+                            <li>🔥 맞으면 불 효과(Fire)</li>
+                            <li>🔥 맞은 사람도 빛나게!</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="더 다양한 마법 아이디어">
+                    <strong>치유 마법:</strong> TakeDamage 대신 humanoid.Health += 30 으로 체력 회복!<br>
+                    <strong>얼음 마법:</strong> 구체 색 = Cyan, 맞으면 WalkSpeed = 0으로 둔화<br>
+                    <strong>폭발 마법:</strong> 맞으면 주변 파트들에게도 데미지 (거리 계산 필요)
+                </HintBox>
+
+                <HintBox type="info" title="BodyVelocity 참고">
+                    BodyVelocity는 구버전 API예요. 새 프로젝트에서는 <strong>LinearVelocity</strong>를 사용하는 걸 권장하지만,<br>
+                    초보자에게는 BodyVelocity가 더 이해하기 쉬워요. 나중에 LinearVelocity도 배워봐요!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 16: 확인 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="캐릭터가 바라보는 방향 벡터를 얻으려면?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! LookVector는 CFrame에서 앞을 바라보는 방향의 단위 벡터예요. 발사 방향으로 사용해요!"
+                        wrong-explanation="LookVector가 정답이에요! rootPart.CFrame.LookVector로 캐릭터가 바라보는 방향을 얻어요."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트에 속도를 부여해서 날아가게 하는 오브젝트는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! BodyVelocity를 파트 안에 넣으면 속도를 부여할 수 있어요. Velocity로 방향과 속도를 설정해요!"
+                        wrong-explanation="BodyVelocity가 정답이에요! Velocity 속성으로 날아가는 방향과 속도를 정해요."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트를 N초 후에 자동으로 삭제하는 서비스는?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! Debris:AddItem(파트, 초)로 파트를 지정된 시간 후에 자동으로 삭제해요."
+                        wrong-explanation="Debris 서비스가 정답이에요! game:GetService('Debris')로 가져온 뒤 AddItem()을 사용해요."
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="파트에서 입자가 뿜어져 나오는 반짝이 효과를 만드는 오브젝트는?"
+                        correct="A"
+                        options={quiz4Options}
+                        correct-explanation="정답! ParticleEmitter를 파트 안에 넣으면 입자 효과가 생겨요. Rate로 개수, Lifetime으로 수명을 설정해요!"
+                        wrong-explanation="ParticleEmitter가 정답이에요! Smoke(연기), Fire(불), Sparkles(반짝임)도 있지만 가장 자유도 높은 건 ParticleEmitter예요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-purple-100/50 to-blue-100/50 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">🎉</div>
+                    <h3 class="font-bold text-lg mb-2">9주차 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        검과 마법 지팡이까지 만들었어요!<br>
+                        다음 시간에는 사운드 시스템을 배워요 🎵
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

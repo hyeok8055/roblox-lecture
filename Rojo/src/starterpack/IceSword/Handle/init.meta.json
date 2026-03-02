@@ -1,0 +1,10 @@
+{
+  "className": "Part",
+  "properties": {
+    "Anchored": false,
+    "CanCollide": false,
+    "Size": [0.1, 4, 0.6],
+    "Color": [0.6, 0.9, 1.0],
+    "Material": "Ice"
+  }
+}

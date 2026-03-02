@@ -1,17 +1,12 @@
 {
-  "name": "RobloxLesson",
+  "name": "9주차_Swords",
   "tree": {
     "$className": "DataModel",
-
     "ServerScriptService": {
-      "LeaderstatsScript": {
-        "$path": "src/server"
-      },
       "DummySpawner": {
         "$path": "src/server-dummy"
       }
     },
-
     "StarterPack": {
       "$ignoreUnknownInstances": true,
       "FireSword":   { "$path": "src/starterpack/FireSword" },

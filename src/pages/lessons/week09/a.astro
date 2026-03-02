@@ -1,0 +1,1515 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// 확인 퀴즈 옵션
+const quiz1Options = JSON.stringify(["Handle", "Part", "Tool", "Grip"]);
+const quiz2Options = JSON.stringify(["Activated", "Touched", "Equipped", "MouseButton1Click"]);
+const quiz3Options = JSON.stringify(["canDamage = false", "canDamage = true", "return", "break"]);
+const quiz4Options = JSON.stringify(["StarterPack", "Workspace", "ReplicatedStorage", "ServerStorage"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (8개)
+// =========================================
+
+// 퀴즈 1: 기본 Tool 구조
+const basicToolBlanks = JSON.stringify([
+    { id: "b1", correct: "script.Parent", options: ["script.Parent", "game", "workspace", "script"] },
+    { id: "b2", correct: "\"Handle\"", options: ["\"Handle\"", "\"Part\"", "\"Tool\"", "\"Grip\""] },
+    { id: "b3", correct: "Activated", options: ["Activated", "Touched", "Equipped", "Unequipped"] }
+]);
+const basicToolTemplate = `-- ========================================
+-- ⚔️ Tool 기본 구조
+-- ========================================
+-- 📦 준비: Tool + Handle(Part) + Script
+-- 💡 Tool의 Script에서 tool = script.Parent
+-- 💡 Handle = 손에 쥐는 파트 (이름 정확히!)
+-- 💡 Activated = 클릭했을 때 이벤트
+-- ========================================
+
+-- 💡 Tool 자체를 가리킴!
+local tool = [b1]
+-- 💡 손잡이 파트 찾기!
+local handle = tool:WaitForChild([b2])
+
+-- 💡 클릭하면 실행!
+tool.[b3]:Connect(function()
+    print("검을 휘둘렀어요! ⚔️")
+end)`;
+const basicToolFullCode = `-- ⚔️ Tool 기본 구조
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+tool.Activated:Connect(function()
+    print("검을 휘둘렀어요! ⚔️")
+end)`;
+
+// 퀴즈 2: 장착/해제 감지
+const equipEventsBlanks = JSON.stringify([
+    { id: "b1", correct: "Equipped", options: ["Equipped", "Activated", "Touched", "ChildAdded"] },
+    { id: "b2", correct: "Unequipped", options: ["Unequipped", "Equipped", "Activated", "Changed"] },
+    { id: "b3", correct: "Activated", options: ["Activated", "Touched", "Equipped", "MouseButton1Click"] }
+]);
+const equipEventsTemplate = `-- ========================================
+-- 👊 장착/해제/클릭 이벤트
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 Equipped = 도구를 꺼낼 때 (1~9키)
+-- 💡 Unequipped = 도구를 집어넣을 때
+-- 💡 Activated = 클릭할 때
+-- ========================================
+
+local tool = script.Parent
+
+-- 💡 장착할 때!
+tool.[b1]:Connect(function()
+    print("검을 들었어요! 👊")
+end)
+
+-- 💡 해제할 때!
+tool.[b2]:Connect(function()
+    print("검을 내려놨어요! ✌️")
+end)
+
+-- 💡 클릭할 때!
+tool.[b3]:Connect(function()
+    print("검을 휘둘렀어요! ⚔️")
+end)`;
+const equipEventsFullCode = `-- 👊 장착/해제/클릭 이벤트
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+
+tool.Equipped:Connect(function()
+    print("검을 들었어요!")
+end)
+
+tool.Unequipped:Connect(function()
+    print("검을 내려놨어요!")
+end)
+
+tool.Activated:Connect(function()
+    print("검을 휘둘렀어요!")
+end)`;
+
+// 퀴즈 3: 검으로 적 감지
+const touchDetectBlanks = JSON.stringify([
+    { id: "b1", correct: "handle", options: ["handle", "tool", "script", "workspace"] },
+    { id: "b2", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"Character\"", "\"Head\"", "\"HumanoidRootPart\""] },
+    { id: "b3", correct: "humanoid", options: ["humanoid", "hit", "handle", "tool"] }
+]);
+const touchDetectTemplate = `-- ========================================
+-- 🔍 검으로 적 감지하기!
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 handle.Touched = 검(Handle)에 닿았을 때!
+-- 💡 hit.Parent = 닿은 것의 모델(캐릭터)
+-- 💡 FindFirstChild("Humanoid") = 사람인지 확인
+-- ========================================
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+-- 💡 Handle에 닿으면!
+[b1].Touched:Connect(function(hit)
+    -- 💡 Humanoid가 있는지 확인!
+    local humanoid = hit.Parent:FindFirstChild([b2])
+    -- 💡 사람이면!
+    if [b3] then
+        print(hit.Parent.Name .. "에게 닿았어요!")
+    end
+end)`;
+const touchDetectFullCode = `-- 🔍 검으로 적 감지
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+handle.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid then
+        print(hit.Parent.Name .. "에게 닿았어요!")
+    end
+end)`;
+
+// 퀴즈 4: canDamage 패턴
+const canDamageBlanks = JSON.stringify([
+    { id: "b1", correct: "false", options: ["false", "true", "nil", "0"] },
+    { id: "b2", correct: "true", options: ["true", "false", "nil", "1"] },
+    { id: "b3", correct: "false", options: ["false", "true", "nil", "0"] },
+    { id: "b4", correct: "canDamage", options: ["canDamage", "not canDamage", "hit", "true"] }
+]);
+const canDamageTemplate = `-- ========================================
+-- ⚡ 클릭할 때만 데미지! (canDamage 패턴)
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 문제: Handle에 항상 닿아있으면 데미지 무한!
+-- 💡 해결: canDamage 변수로 클릭 순간만 활성화!
+-- ========================================
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+-- 💡 데미지 가능한지 체크 (처음엔 안됨)
+local canDamage = [b1]
+
+tool.Activated:Connect(function()
+    -- 💡 클릭하면 켜기!
+    canDamage = [b2]
+    task.wait(0.5)
+    -- 💡 0.5초 후 끄기!
+    canDamage = [b3]
+end)
+
+handle.Touched:Connect(function(hit)
+    -- 💡 켜져있을 때만!
+    if [b4] then
+        print("데미지!")
+    end
+end)`;
+const canDamageFullCode = `-- ⚡ canDamage 패턴
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+tool.Activated:Connect(function()
+    canDamage = true
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    if canDamage then
+        print("데미지!")
+    end
+end)`;
+
+// 퀴즈 5: TakeDamage 적용
+const takeDamageBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"Head\"", "\"Character\"", "\"HumanoidRootPart\""] },
+    { id: "b2", correct: ":TakeDamage(25)", options: [":TakeDamage(25)", ":Destroy()", ".Health = 0", ":Kill()"] },
+    { id: "b3", correct: "false", options: ["false", "true", "nil", "0"] }
+]);
+const takeDamageTemplate = `-- ========================================
+-- 💢 TakeDamage로 데미지 주기!
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 TakeDamage(25) = 체력 -25!
+-- 💡 데미지 주고 나서 canDamage = false!
+-- 💡 한 번에 한 명에게만 데미지!
+-- ========================================
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+tool.Activated:Connect(function()
+    canDamage = true
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    if canDamage then
+        -- 💡 Humanoid 찾기!
+        local humanoid = hit.Parent:FindFirstChild([b1])
+        if humanoid then
+            -- 💡 체력 -25!
+            humanoid[b2]
+            -- 💡 한 번 데미지 후 끄기!
+            canDamage = [b3]
+        end
+    end
+end)`;
+const takeDamageFullCode = `-- 💢 TakeDamage 데미지
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+tool.Activated:Connect(function()
+    canDamage = true
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    if canDamage then
+        local humanoid = hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(25)
+            canDamage = false
+        end
+    end
+end)`;
+
+// 퀴즈 6: 자기 자신 제외
+const selfExcludeBlanks = JSON.stringify([
+    { id: "b1", correct: "tool.Parent", options: ["tool.Parent", "hit.Parent", "handle", "script.Parent"] },
+    { id: "b2", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"Character\"", "\"Head\"", "\"Human\""] },
+    { id: "b3", correct: "false", options: ["false", "true", "nil", "0"] }
+]);
+const selfExcludeTemplate = `-- ========================================
+-- 🚫 자기 자신 공격 방지!
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 tool.Parent = 이 Tool을 든 캐릭터!
+-- 💡 hit.Parent ~= tool.Parent = "나 아닌 누군가"
+-- 💡 자기 자신을 공격하지 않으려면 이게 필수!
+-- ========================================
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+tool.Activated:Connect(function()
+    canDamage = true
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    -- 💡 나를 제외하고 데미지!
+    if canDamage and hit.Parent ~= [b1] then
+        local humanoid = hit.Parent:FindFirstChild([b2])
+        if humanoid then
+            humanoid:TakeDamage(25)
+            canDamage = [b3]
+        end
+    end
+end)`;
+const selfExcludeFullCode = `-- 🚫 자기 자신 제외
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+tool.Activated:Connect(function()
+    canDamage = true
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    if canDamage and hit.Parent ~= tool.Parent then
+        local humanoid = hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(25)
+            canDamage = false
+        end
+    end
+end)`;
+
+// 퀴즈 7: 효과음 추가
+const soundEffectBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Sound\"", options: ["\"Sound\"", "\"Music\"", "\"Part\"", "\"Effect\""] },
+    { id: "b2", correct: "handle", options: ["handle", "tool", "workspace", "script"] },
+    { id: "b3", correct: ":Play()", options: [":Play()", ":Start()", ":Run()", ":Connect()"] }
+]);
+const soundEffectTemplate = `-- ========================================
+-- 🔊 검 효과음 추가!
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 Sound를 Handle 안에 넣으면 소리가 나요!
+-- 💡 SoundId = rbxassetid://숫자 형식!
+-- 💡 Activated 때 :Play()로 재생!
+-- ========================================
+
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+-- 💡 효과음 만들기!
+local swingSound = Instance.new([b1])
+swingSound.SoundId = "rbxassetid://9120386436"
+-- 💡 Handle 안에 넣기!
+swingSound.Parent = [b2]
+
+tool.Activated:Connect(function()
+    -- 💡 소리 재생!
+    swingSound[b3]
+    print("쉭! ⚔️")
+end)`;
+const soundEffectFullCode = `-- 🔊 검 효과음
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+local swingSound = Instance.new("Sound")
+swingSound.SoundId = "rbxassetid://9120386436"
+swingSound.Parent = handle
+
+tool.Activated:Connect(function()
+    swingSound:Play()
+    print("쉭!")
+end)`;
+
+// 퀴즈 8: 완성된 검 스크립트
+const finalSwordBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Handle\"", options: ["\"Handle\"", "\"Part\"", "\"Script\"", "\"Tool\""] },
+    { id: "b2", correct: "true", options: ["true", "false", "1", "nil"] },
+    { id: "b3", correct: "tool.Parent", options: ["tool.Parent", "hit.Parent", "handle", "nil"] },
+    { id: "b4", correct: ":TakeDamage(25)", options: [":TakeDamage(25)", ":Destroy()", ".Health = 0", ":Kill()"] }
+]);
+const finalSwordTemplate = `-- ========================================
+-- ⚔️ 완성된 검 스크립트!
+-- ========================================
+-- 📦 준비: Tool → Handle + Script
+-- 💡 모든 요소를 합친 완성형!
+-- 💡 효과음 + canDamage + 자기 자신 제외
+-- ========================================
+
+local tool = script.Parent
+-- 💡 손잡이 파트!
+local handle = tool:WaitForChild([b1])
+local canDamage = false
+
+-- 💡 효과음
+local swingSound = Instance.new("Sound")
+swingSound.SoundId = "rbxassetid://9120386436"
+swingSound.Parent = handle
+
+tool.Activated:Connect(function()
+    -- 💡 클릭 = 공격 ON!
+    canDamage = [b2]
+    swingSound:Play()
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    -- 💡 나 제외 + 공격 가능할 때!
+    if canDamage and hit.Parent ~= [b3] then
+        local humanoid = hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            -- 💡 데미지 -25!
+            humanoid[b4]
+            canDamage = false
+        end
+    end
+end)`;
+const finalSwordFullCode = `-- ⚔️ 완성된 검 스크립트
+-- 📦 Tool → Handle + Script
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+local swingSound = Instance.new("Sound")
+swingSound.SoundId = "rbxassetid://9120386436"
+swingSound.Parent = handle
+
+tool.Activated:Connect(function()
+    canDamage = true
+    swingSound:Play()
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    if canDamage and hit.Parent ~= tool.Parent then
+        local humanoid = hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(25)
+            canDamage = false
+        end
+    end
+end)`;
+---
+
+<LessonLayout title="Tool 기초: 검 만들기" lessonNumber={9} totalSlides={20}>
+    <!-- 슬라이드 1: 인트로 -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">9주차 A</span>
+                <h1 class="title-display mb-4">
+                    <span class="text-neon-gold">Tool</span>: 검 만들기<br>
+                    <span class="text-neon-mint">⚔️ 나만의 무기!</span>
+                </h1>
+                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
+                    캐릭터가 들고 휘두를 수 있는<br>
+                    진짜 검을 만들어봐요!
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⚔️ Tool</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">✋ Handle</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🎒 StarterPack</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">🖱️ Activated</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">💢 TakeDamage</span>
+                    </div>
+                </div>
+
+                <div class="mt-12 p-6 bg-gradient-to-r from-amber-50 to-red-50 rounded-2xl max-w-md mx-auto">
+                    <div class="text-3xl mb-2">🎯</div>
+                    <h3 class="font-bold mb-2">오늘의 목표</h3>
+                    <ul class="text-left text-sm text-ink-light space-y-1">
+                        <li>✓ Tool과 Handle의 구조 이해하기</li>
+                        <li>✓ StarterPack→Backpack→Character 여행 이해</li>
+                        <li>✓ Activated / Equipped / Unequipped 이벤트</li>
+                        <li>✓ canDamage 패턴으로 클릭할 때만 공격</li>
+                        <li>✓ 완성된 검 스크립트 작성하기</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 2: Tool이란? (확장) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">Tool이란?</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="text-2xl">🎮</span>
+                            알고 있는 게임에서 다 써봤어요!
+                        </h3>
+                        <p class="text-ink-light mb-4">
+                            로블록스에서 <strong>Tool</strong>은 캐릭터가 손에 들고 사용하는 모든 것이에요.<br>
+                            이미 알고 있는 인기 게임들에서 다 나와요!
+                        </p>
+                        <div class="grid md:grid-cols-4 gap-3 mb-4">
+                            <div class="p-3 bg-gradient-to-br from-red-50 to-rose-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">⚔️</div>
+                                <div class="font-bold text-sm">Murder Mystery 2</div>
+                                <div class="text-xs text-ink-light">칼, 총</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">🔫</div>
+                                <div class="font-bold text-sm">Arsenal</div>
+                                <div class="text-xs text-ink-light">총, 칼</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-pink-50 to-fuchsia-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">🐾</div>
+                                <div class="font-bold text-sm">Adopt Me!</div>
+                                <div class="text-xs text-ink-light">빗, 젖병</div>
+                            </div>
+                            <div class="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl text-center">
+                                <div class="text-2xl mb-1">🪛</div>
+                                <div class="font-bold text-sm">직접 만들기</div>
+                                <div class="text-xs text-ink-light">검, 지팡이, 도구</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🔢 키보드 슬롯으로 장착!</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="flex gap-1 mb-3 flex-wrap">
+                                    {["1","2","3","4","5","6","7","8","9"].map((n) => (
+                                        <div class="w-9 h-9 bg-gray-800 text-white rounded-lg flex items-center justify-center font-bold text-sm shadow-md">{n}</div>
+                                    ))}
+                                    <div class="px-3 h-9 bg-red-800 text-white rounded-lg flex items-center justify-center font-bold text-xs shadow-md">⌫</div>
+                                </div>
+                                <ul class="text-sm text-ink-light space-y-1">
+                                    <li>🔢 <strong>1~9키</strong>: 해당 슬롯의 Tool 장착</li>
+                                    <li>⌫ <strong>Backspace</strong>: Tool 버리기 (CanBeDropped = true일 때)</li>
+                                    <li>🖱️ <strong>마우스 클릭</strong>: Activated 이벤트 발생!</li>
+                                </ul>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/players/in-experience-tools/Tool-Inventory.jpg" alt="Tool 인벤토리" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">화면 하단 슬롯 = Backpack (인벤토리)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="text-center">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/title-image.jpg" alt="Tool을 장착한 캐릭터" class="rounded-xl max-h-48 mx-auto" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">Tool을 장착한 캐릭터 모습</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: Tool의 여행 (생명주기) - 신규 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-2">Tool의 여행 🚚</h2>
+                <p class="text-ink-light mb-6">검이 어디에서 어디로 이동하는지 알아봐요!</p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <!-- 택배 비유 -->
+                <div class="lesson-card bg-gradient-to-r from-amber-50 to-yellow-50">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">📦</span>
+                        택배로 이해하는 Tool 여행!
+                    </h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-white rounded-xl text-center border-2 border-amber-200">
+                            <div class="text-4xl mb-2">🏭</div>
+                            <div class="font-bold text-amber-700 mb-1">StarterPack</div>
+                            <div class="text-xs text-ink-light mb-2">택배 회사 창고</div>
+                            <div class="text-xs p-2 bg-amber-50 rounded-lg">
+                                게임 시작 전,<br>Tool을 보관하는 곳
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <div class="text-2xl">→</div>
+                            <div class="text-xs text-center text-ink-light bg-green-50 px-3 py-1 rounded-full">
+                                🎮 게임 시작!<br>자동 배달
+                            </div>
+                            <div class="text-2xl">→</div>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl text-center border-2 border-blue-200">
+                            <div class="text-4xl mb-2">🎒</div>
+                            <div class="font-bold text-blue-700 mb-1">Backpack</div>
+                            <div class="text-xs text-ink-light mb-2">내 가방 (인벤토리)</div>
+                            <div class="text-xs p-2 bg-blue-50 rounded-lg">
+                                화면 아래 슬롯,<br>1~9키로 꺼낼 수 있음
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col items-center">
+                                <div class="text-2xl">↓</div>
+                                <div class="text-xs text-center text-ink-light bg-purple-50 px-3 py-1 rounded-full">
+                                    🔢 1키 누르면 장착!
+                                </div>
+                                <div class="text-2xl">↓</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 p-4 bg-white rounded-xl text-center border-2 border-purple-200 max-w-xs mx-auto">
+                        <div class="text-4xl mb-2">✋</div>
+                        <div class="font-bold text-purple-700 mb-1">Character</div>
+                        <div class="text-xs text-ink-light mb-2">캐릭터 손</div>
+                        <div class="text-xs p-2 bg-purple-50 rounded-lg">
+                            장착 = Tool이 Character 안으로 이동,<br>해제 = 다시 Backpack으로!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 이미지 -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="text-center">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/explorer-starterpack.png" alt="StarterPack에 Tool 보관" class="rounded-xl w-full" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">① StarterPack에 Tool 넣기</p>
+                    </div>
+                    <div class="text-center">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/explorer-unequipped.png" alt="Backpack의 Tool" class="rounded-xl w-full" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">② 게임 시작 → Backpack으로</p>
+                    </div>
+                    <div class="text-center">
+                        <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/explorer-equipped-character.png" alt="장착된 Tool" class="rounded-xl w-full" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">③ 1키 누르면 Character 안으로</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: Tool 구조 + 3대 이벤트 (확장) -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-6">Tool의 구조 + 3대 이벤트</h2>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">Explorer에서 보이는 모습</h3>
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-xl p-4">
+                                <div class="font-mono text-sm space-y-1">
+                                    <div>🎒 <strong>StarterPack</strong></div>
+                                    <div class="ml-4">⚔️ <strong class="text-red-600">Sword</strong> (Tool)</div>
+                                    <div class="ml-8">✋ <strong class="text-amber-600">Handle</strong> ← 손잡이!</div>
+                                    <div class="ml-8">💻 <strong class="text-blue-600">Script</strong></div>
+                                </div>
+                                <div class="mt-4 p-2 bg-red-50 rounded-lg text-xs">
+                                    ⚠️ <strong>Handle</strong> 이름 정확히! 다른 이름이면 작동 안 해요
+                                </div>
+                                <div class="mt-2 p-2 bg-orange-50 rounded-lg text-xs">
+                                    ⚠️ Handle은 <strong>Anchored = false</strong>, <strong>CanCollide = false</strong> 해주세요!
+                                </div>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/explorer-starterpack.png" alt="StarterPack Explorer" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">StarterPack → Tool → Handle 구조</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-4">🎯 3대 이벤트 비교</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-ink-deep text-white">
+                                        <th class="p-3 rounded-tl-lg text-left">이벤트</th>
+                                        <th class="p-3 text-left">언제 발생?</th>
+                                        <th class="p-3 rounded-tr-lg text-left">코드</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-blue-50">
+                                        <td class="p-3 font-bold">👊 Equipped</td>
+                                        <td class="p-3">숫자키로 꺼낼 때</td>
+                                        <td class="p-3 font-mono text-xs">tool.Equipped:Connect(func)</td>
+                                    </tr>
+                                    <tr class="bg-green-50">
+                                        <td class="p-3 font-bold">🖱️ Activated</td>
+                                        <td class="p-3">들고 클릭할 때</td>
+                                        <td class="p-3 font-mono text-xs">tool.Activated:Connect(func)</td>
+                                    </tr>
+                                    <tr class="bg-purple-50">
+                                        <td class="p-3 rounded-bl-lg font-bold">✌️ Unequipped</td>
+                                        <td class="p-3">집어넣을 때</td>
+                                        <td class="p-3 rounded-br-lg font-mono text-xs">tool.Unequipped:Connect(func)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="animate-in">
+                    <div class="lesson-card">
+                        <h3 class="font-bold text-lg mb-3">💡 새로운 개념 6가지</h3>
+                        <div class="grid md:grid-cols-3 gap-3">
+                            <div class="p-3 bg-red-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">⚔️ Tool</div>
+                                <div class="text-xs text-ink-light">캐릭터가 장착할 수 있는 오브젝트</div>
+                            </div>
+                            <div class="p-3 bg-amber-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">✋ Handle</div>
+                                <div class="text-xs text-ink-light">Tool 안에 꼭 있어야 하는 파트</div>
+                            </div>
+                            <div class="p-3 bg-green-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">🎒 StarterPack</div>
+                                <div class="text-xs text-ink-light">시작할 때 자동으로 지급!</div>
+                            </div>
+                            <div class="p-3 bg-sky-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">🎽 Backpack</div>
+                                <div class="text-xs text-ink-light">플레이어 인벤토리 (1~9 슬롯)</div>
+                            </div>
+                            <div class="p-3 bg-blue-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">👊 Equipped</div>
+                                <div class="text-xs text-ink-light">Tool을 꺼낼 때 (장착)</div>
+                            </div>
+                            <div class="p-3 bg-violet-50 rounded-xl">
+                                <div class="font-bold text-sm mb-1">🖱️ Activated</div>
+                                <div class="text-xs text-ink-light">들고 클릭할 때</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 따라하기: 검 만들기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
+                <h2 class="title-section mb-6">따라하기: 검 Tool 만들기</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🛠️</span>
+                        스튜디오 설정 순서
+                    </h4>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <ol class="space-y-3 text-sm">
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                                <div>Explorer → <strong>StarterPack</strong> 우클릭 → Insert Object → <strong>Tool</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                                <div>Tool 이름을 <strong>"Sword"</strong>로 변경</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                                <div>Sword 우클릭 → Insert Object → <strong>Part</strong>, 이름을 <strong>"Handle"</strong>로</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                                <div>Handle: <strong>Size (0.2, 3, 0.2)</strong>, <strong>Anchored = false</strong>, <strong>CanCollide = false</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
+                                <div>Handle 색깔을 원하는 색으로 변경</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">6</span>
+                                <div>Sword 우클릭 → Insert Object → <strong>Script</strong></div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">7</span>
+                                <div>Script에 코드 작성</div>
+                            </li>
+                            <li class="flex gap-3">
+                                <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">8</span>
+                                <div><strong>F5</strong>로 플레이 → 화면 하단 슬롯에서 검 클릭 → 장착!</div>
+                            </li>
+                        </ol>
+                        <div>
+                            <div class="text-center mb-3">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/players/in-experience-tools/Tool-Handle-Example.jpg" alt="Tool Handle 예시" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">Handle이 있어야 캐릭터 손에 붙어요!</p>
+                            </div>
+                            <div class="text-center">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/explorer-handle.png" alt="Handle Explorer" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-2">Explorer에서 Handle 위치</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="warning" title="Handle 3가지 규칙!">
+                    <strong>1. 이름:</strong> 반드시 <strong>"Handle"</strong> (대소문자 정확히!)<br>
+                    <strong>2. Anchored:</strong> <strong>false</strong>로 해야 손에 붙어요 (true면 공중에 고정됨)<br>
+                    <strong>3. CanCollide:</strong> <strong>false</strong>로 해야 발에 안 걸려요
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 6: Tool 꾸미기 (속성) - 신규 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">📝 Properties</span>
+                <h2 class="title-section mb-6">Tool 꾸미기 (속성 설정)</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">Properties 창에서 설정하는 Tool 속성</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-blue-50 rounded-xl">
+                            <div class="font-bold text-sm mb-2">💬 ToolTip</div>
+                            <div class="text-xs text-ink-light space-y-1">
+                                <div>마우스를 올렸을 때 표시되는 설명</div>
+                                <div>"이건 뭐야?" 할 때 알려주는 말풍선!</div>
+                                <div class="font-mono mt-2 bg-white p-2 rounded border border-blue-100">ToolTip = "강력한 검"</div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-green-50 rounded-xl">
+                            <div class="font-bold text-sm mb-2">🎯 GripPos</div>
+                            <div class="text-xs text-ink-light space-y-1">
+                                <div>손에서 Handle이 어디에 잡히는지</div>
+                                <div>검이 삐뚤어지면 여기서 조정!</div>
+                                <div class="font-mono mt-2 bg-white p-2 rounded border border-green-100">GripPos = Vector3.new(0,-1,0)</div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-amber-50 rounded-xl">
+                            <div class="font-bold text-sm mb-2">🔒 CanBeDropped</div>
+                            <div class="text-xs text-ink-light space-y-1">
+                                <div>Backspace로 검을 버릴 수 있는지</div>
+                                <div>false = 실수로 눌러도 안 없어짐!</div>
+                                <div class="font-mono mt-2 bg-white p-2 rounded border border-amber-100">CanBeDropped = false</div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-purple-50 rounded-xl">
+                            <div class="font-bold text-sm mb-2">🖼️ TextureId</div>
+                            <div class="text-xs text-ink-light space-y-1">
+                                <div>핫바 슬롯에 표시되는 아이콘</div>
+                                <div>검 그림 아이콘으로 예쁘게!</div>
+                                <div class="font-mono mt-2 bg-white p-2 rounded border border-purple-100 break-all">TextureId = "rbxassetid://..."</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">Grip 위치 조정 예시</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div class="text-center">
+                                    <img src="https://prod.docsiteassets.roblox.com/assets/players/in-experience-tools/Tool-Grip-Correct.jpg" alt="올바른 Grip" class="rounded-xl w-full" loading="lazy" />
+                                    <p class="text-xs text-neon-mint mt-1 font-bold">✅ 올바른 Grip</p>
+                                </div>
+                                <div class="text-center">
+                                    <img src="https://prod.docsiteassets.roblox.com/assets/players/in-experience-tools/Tool-Grip-Incorrect.jpg" alt="잘못된 Grip" class="rounded-xl w-full" loading="lazy" />
+                                    <p class="text-xs text-neon-coral mt-1 font-bold">❌ 잘못된 Grip</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-center mb-2">
+                                <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/creating-player-tools/viewport-tooltip.png" alt="ToolTip 표시" class="rounded-xl w-full" loading="lazy" />
+                                <p class="text-xs text-ink-light mt-1">마우스 올리면 ToolTip 표시!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="처음엔 CanBeDropped = false 추천!">
+                    실수로 Backspace를 눌러서 검이 사라지면 당황스럽죠?<br>
+                    <strong>CanBeDropped = false</strong>로 설정하면 실수로 버려지지 않아요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: 먼저 해보자! (복붙 테스트) - 신규 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🚀 먼저 해보자!</span>
+                <h2 class="title-section mb-2">일단 돌려보기!</h2>
+                <p class="text-ink-light mb-6">퀴즈 전에 이 코드를 복붙해서 검이 작동하는지 확인해봐요!</p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm font-bold text-neon-gold mb-2">⚔️ 기본 검 스크립트 (복붙용)</div>
+                        <lua-code-block title="Sword > Script">
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+-- 장착할 때
+tool.Equipped:Connect(function()
+    print("검을 들었어요! 👊")
+end)
+
+-- 클릭할 때
+tool.Activated:Connect(function()
+    print("검을 휘둘렀어요! ⚔️")
+end)
+
+-- 집어넣을 때
+tool.Unequipped:Connect(function()
+    print("검을 내려놨어요! ✌️")
+end)
+                        </lua-code-block>
+                    </div>
+                    <div class="flex flex-col gap-4">
+                        <div class="p-4 bg-gradient-to-br from-blue-50 to-sky-50 rounded-xl">
+                            <h4 class="font-bold mb-3 flex items-center gap-2">
+                                <span>🧪</span> 테스트 더미 만들기
+                            </h4>
+                            <p class="text-xs text-ink-light mb-3">
+                                검을 테스트하려면 맞을 대상이 필요해요!<br>
+                                <strong>Avatar → Rig Builder</strong>로 NPC 더미를 만들어요.
+                            </p>
+                            <ol class="text-xs space-y-2">
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs shrink-0">1</span>
+                                    <div>상단 메뉴 → <strong>Avatar</strong> 탭</div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs shrink-0">2</span>
+                                    <div><strong>Rig Builder</strong> 클릭</div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs shrink-0">3</span>
+                                    <div><strong>R15</strong> 선택 → Insert</div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-xs shrink-0">4</span>
+                                    <div>Workspace에 더미 NPC 생성!</div>
+                                </li>
+                            </ol>
+                        </div>
+
+                        <div class="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
+                            <h4 class="font-bold mb-3 flex items-center gap-2">
+                                <span>▶️</span> 테스트 방법
+                            </h4>
+                            <ol class="text-xs space-y-2">
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs shrink-0">1</span>
+                                    <div><strong>F5</strong> 눌러서 플레이 시작</div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs shrink-0">2</span>
+                                    <div><strong>1키</strong>로 검 장착 → "검을 들었어요!" 확인</div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs shrink-0">3</span>
+                                    <div><strong>마우스 클릭</strong> → "검을 휘둘렀어요!" 확인</div>
+                                </li>
+                                <li class="flex gap-2">
+                                    <span class="w-5 h-5 rounded-full bg-green-500 text-white flex items-center justify-center text-xs shrink-0">4</span>
+                                    <div>Output 창에서 출력 확인!</div>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="Output 창이 안 보이면?">
+                    상단 메뉴 → <strong>View</strong> → <strong>Output</strong> 체크! print()한 내용이 여기에 나와요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: 퀴즈1 - 기본 Tool 구조 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⚔️ 기본 Tool 구조"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Tool", "Handle", "Activated"]'
+                blanks={basicToolBlanks}
+                template={basicToolTemplate}
+                full-code={basicToolFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: 퀴즈2 - 장착/해제 이벤트 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="👊 장착/해제/클릭 이벤트"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Equipped", "Unequipped", "Activated"]'
+                blanks={equipEventsBlanks}
+                template={equipEventsTemplate}
+                full-code={equipEventsFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 퀴즈3 - 검으로 적 감지 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔍 검으로 적 감지하기"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Touched", "Humanoid", "FindFirstChild"]'
+                blanks={touchDetectBlanks}
+                template={touchDetectTemplate}
+                full-code={touchDetectFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: canDamage 개념 (신호등 비유) - 신규 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-2">canDamage 패턴이 왜 필요할까? 🚦</h2>
+                <p class="text-ink-light mb-6">이걸 모르면 검이 계속 데미지를 줘버려요!</p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <!-- 문제 설명 -->
+                <div class="lesson-card border-2 border-red-200 bg-red-50/30">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">😱</span>
+                        문제: 검이 몸에 항상 붙어있어요!
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-white rounded-xl">
+                            <div class="text-sm font-bold mb-2 text-red-600">❌ canDamage 없이 하면?</div>
+                            <div class="text-xs space-y-2 text-ink-light">
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-red-500 shrink-0">1.</span>
+                                    <div>검을 들면 Handle이 내 팔 옆에 붙음</div>
+                                </div>
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-red-500 shrink-0">2.</span>
+                                    <div>NPC에게 다가가면 Handle이 NPC에 닿음</div>
+                                </div>
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-red-500 shrink-0">3.</span>
+                                    <div>Touched 이벤트가 매 프레임 발생!</div>
+                                </div>
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-red-500 shrink-0">4.</span>
+                                    <div class="font-bold text-red-600">→ 클릭 안 해도 무한 데미지!</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl">
+                            <div class="text-sm font-bold mb-2 text-green-600">✅ canDamage 있으면?</div>
+                            <div class="text-xs space-y-2 text-ink-light">
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-green-500 shrink-0">1.</span>
+                                    <div>평소엔 canDamage = false (잠금)</div>
+                                </div>
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-green-500 shrink-0">2.</span>
+                                    <div>클릭할 때만 canDamage = true (열림)</div>
+                                </div>
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-green-500 shrink-0">3.</span>
+                                    <div>0.5초 후 다시 false (잠금)</div>
+                                </div>
+                                <div class="flex gap-2 items-start">
+                                    <span class="text-green-500 shrink-0">4.</span>
+                                    <div class="font-bold text-green-600">→ 클릭할 때만 정확히 1번 데미지!</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 신호등 비유 -->
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">🚦</span>
+                        신호등처럼 이해해요!
+                    </h3>
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <div class="p-4 bg-red-100 rounded-xl text-center border-2 border-red-300">
+                            <div class="text-5xl mb-2">🔴</div>
+                            <div class="font-bold text-red-700 mb-1">빨간불</div>
+                            <div class="font-mono text-sm mb-2 bg-red-50 px-2 py-1 rounded">canDamage = false</div>
+                            <div class="text-xs text-red-600">평소 상태<br>데미지 안됨!</div>
+                        </div>
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <div class="text-xs text-center bg-amber-50 border border-amber-200 rounded-lg p-2">
+                                🖱️ 클릭!<br><span class="font-bold">Activated 발생</span>
+                            </div>
+                            <div class="text-2xl">→</div>
+                            <div class="text-xs text-center bg-gray-50 border border-gray-200 rounded-lg p-2">
+                                ⏱️ 0.5초 후<br><span class="font-bold">task.wait(0.5)</span>
+                            </div>
+                            <div class="text-2xl">←</div>
+                        </div>
+                        <div class="p-4 bg-green-100 rounded-xl text-center border-2 border-green-300">
+                            <div class="text-5xl mb-2">🟢</div>
+                            <div class="font-bold text-green-700 mb-1">초록불</div>
+                            <div class="font-mono text-sm mb-2 bg-green-50 px-2 py-1 rounded">canDamage = true</div>
+                            <div class="text-xs text-green-600">공격 중!<br>데미지 가능!</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 퀴즈4 - canDamage 패턴 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⚡ 클릭할 때만 데미지! (canDamage 패턴)"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["debounce", "Activated", "Touched", "task.wait"]'
+                blanks={canDamageBlanks}
+                template={canDamageTemplate}
+                full-code={canDamageFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 퀴즈5 - TakeDamage -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="💢 TakeDamage로 데미지 주기"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["TakeDamage", "Humanoid", "canDamage"]'
+                blanks={takeDamageBlanks}
+                template={takeDamageTemplate}
+                full-code={takeDamageFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 14: 자기 자신 제외 개념 - 신규 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">핵심 개념</span>
+                <h2 class="title-section mb-2">자기 자신을 왜 제외해야 할까? 🚫</h2>
+                <p class="text-ink-light mb-6">내 검이 나를 찌른다고요?!</p>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <!-- 문제 설명 -->
+                <div class="lesson-card border-2 border-orange-200 bg-orange-50/30">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">😨</span>
+                        문제: 검을 들면 내 몸에도 닿아요!
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-white rounded-xl">
+                            <div class="text-sm font-bold mb-3 text-orange-600">상황 설명</div>
+                            <div class="space-y-3 text-xs text-ink-light">
+                                <div class="flex gap-2 items-start p-2 bg-orange-50 rounded-lg">
+                                    <span class="text-orange-500 text-lg shrink-0">🧑</span>
+                                    <div>
+                                        <strong>캐릭터가 검을 들면</strong><br>
+                                        Handle이 캐릭터 손에 붙어요
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 items-start p-2 bg-red-50 rounded-lg">
+                                    <span class="text-red-500 text-lg shrink-0">⚔️</span>
+                                    <div>
+                                        <strong>Handle은 내 팔에 항상 닿아있음</strong><br>
+                                        → Touched 이벤트 계속 발생!<br>
+                                        → 나 자신의 Humanoid에 데미지!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-white rounded-xl">
+                            <div class="text-sm font-bold mb-3">변수가 뭘 가리키는지</div>
+                            <div class="space-y-3 text-xs">
+                                <div class="p-3 bg-blue-50 rounded-lg">
+                                    <div class="font-mono font-bold mb-1">tool.Parent</div>
+                                    <div class="text-ink-light">= 이 검을 장착한 <strong>나의 캐릭터</strong></div>
+                                </div>
+                                <div class="p-3 bg-purple-50 rounded-lg">
+                                    <div class="font-mono font-bold mb-1">hit.Parent</div>
+                                    <div class="text-ink-light">= Handle에 닿은 <strong>무언가의 모델</strong></div>
+                                </div>
+                                <div class="p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                                    <div class="font-mono font-bold mb-1">hit.Parent ~= tool.Parent</div>
+                                    <div class="text-ink-light">= <strong>"닿은 것이 나 자신이 아닐 때만!"</strong></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 해결책 시각화 -->
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                        <span class="text-2xl">✅</span>
+                        해결책: 조건에 나 제외 추가!
+                    </h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm font-bold text-red-600 mb-2">❌ 자기 자신 포함 (문제)</div>
+                            <lua-code-block title="문제 있는 코드">
+handle.Touched:Connect(function(hit)
+    -- 나 자신도 데미지!
+    if canDamage then
+        local humanoid =
+            hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(25)
+        end
+    end
+end)
+                            </lua-code-block>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-green-600 mb-2">✅ 자기 자신 제외 (해결)</div>
+                            <lua-code-block title="올바른 코드">
+handle.Touched:Connect(function(hit)
+    -- hit.Parent가 나(tool.Parent)가 아닐 때만!
+    if canDamage and
+        hit.Parent ~= tool.Parent then
+        local humanoid =
+            hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(25)
+        end
+    end
+end)
+                            </lua-code-block>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 15: 퀴즈6 - 자기 자신 제외 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🚫 자기 자신 공격 방지"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["tool.Parent", "Humanoid", "TakeDamage"]'
+                blanks={selfExcludeBlanks}
+                template={selfExcludeTemplate}
+                full-code={selfExcludeFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 16: 퀴즈7 - 효과음 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔊 검 효과음 추가"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Instance.new", "Sound", "Play"]'
+                blanks={soundEffectBlanks}
+                template={soundEffectTemplate}
+                full-code={soundEffectFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 17: 퀴즈8 - 완성된 검 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⚔️ 완성된 검 스크립트!"
+                setup="StarterPack → Tool → Handle + Script"
+                concepts='["Handle", "Activated", "tool.Parent", "TakeDamage"]'
+                blanks={finalSwordBlanks}
+                template={finalSwordTemplate}
+                full-code={finalSwordFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 18: 코드 총정리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lua mb-4">📝 코드 정리</span>
+                <h2 class="title-section mb-6">오늘의 코드 총정리</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">🔄 검 동작 순서</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center font-bold text-amber-600 shrink-0">1</div>
+                            <div class="flex-1 p-3 bg-amber-50 rounded-xl text-sm">
+                                <strong>게임 시작</strong> → StarterPack의 검이 Backpack으로 자동 이동
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600 shrink-0">2</div>
+                            <div class="flex-1 p-3 bg-blue-50 rounded-xl text-sm">
+                                <strong>숫자 키</strong>로 장착 → <code>tool.Equipped</code> 실행
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center font-bold text-red-600 shrink-0">3</div>
+                            <div class="flex-1 p-3 bg-red-50 rounded-xl text-sm">
+                                <strong>클릭</strong> → <code>tool.Activated</code> → <code>canDamage = true</code> + 효과음
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center font-bold text-green-600 shrink-0">4</div>
+                            <div class="flex-1 p-3 bg-green-50 rounded-xl text-sm">
+                                <strong>Handle이 닿음</strong> → <code>canDamage</code> 체크 + 나 제외 → <code>TakeDamage(25)</code>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center font-bold text-purple-600 shrink-0">5</div>
+                            <div class="flex-1 p-3 bg-purple-50 rounded-xl text-sm">
+                                <strong>0.5초 후</strong> → <code>canDamage = false</code> → 다시 대기 상태
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="text-sm font-bold text-neon-gold mb-2">⚔️ 완성된 검 스크립트</div>
+                        <lua-code-block title="Sword.lua">
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+local canDamage = false
+
+local swingSound = Instance.new("Sound")
+swingSound.SoundId = "rbxassetid://9120386436"
+swingSound.Parent = handle
+
+tool.Activated:Connect(function()
+    canDamage = true
+    swingSound:Play()
+    task.wait(0.5)
+    canDamage = false
+end)
+
+handle.Touched:Connect(function(hit)
+    if canDamage and
+        hit.Parent ~= tool.Parent then
+        local humanoid =
+            hit.Parent:FindFirstChild("Humanoid")
+        if humanoid then
+            humanoid:TakeDamage(25)
+            canDamage = false
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold text-neon-mint mb-2">💡 핵심 패턴 요약</div>
+                        <lua-code-block title="patterns.lua">
+-- ① Tool 접근
+local tool = script.Parent
+local handle = tool:WaitForChild("Handle")
+
+-- ② canDamage 패턴 (신호등!)
+local canDamage = false
+tool.Activated:Connect(function()
+    canDamage = true  -- 🟢 초록불
+    task.wait(0.5)
+    canDamage = false -- 🔴 빨간불
+end)
+
+-- ③ 자기 자신 제외 데미지
+handle.Touched:Connect(function(hit)
+    if canDamage and
+        hit.Parent ~= tool.Parent then
+        local h = hit.Parent
+            :FindFirstChild("Humanoid")
+        if h then
+            h:TakeDamage(25)
+            canDamage = false
+        end
+    end
+end)
+                        </lua-code-block>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 19: 도전 과제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🏆 도전 과제</span>
+                <h2 class="title-section mb-6">나만의 검 만들기!</h2>
+            </div>
+
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="lesson-card border-2 border-green-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐</div>
+                            <div class="font-bold text-green-700">기초 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>✅ 검 Tool 만들고 장착해보기</li>
+                            <li>✅ 클릭하면 print 출력</li>
+                            <li>✅ 다른 파트에 닿으면 감지</li>
+                        </ul>
+                    </div>
+                    <div class="lesson-card border-2 border-amber-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐⭐</div>
+                            <div class="font-bold text-amber-700">도전 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>🎯 canDamage 패턴으로 구현</li>
+                            <li>🎯 TakeDamage(25) 적용</li>
+                            <li>🎯 자기 자신 공격 방지</li>
+                        </ul>
+                    </div>
+                    <div class="lesson-card border-2 border-red-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐⭐⭐</div>
+                            <div class="font-bold text-red-700">하드 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>🔥 효과음 추가</li>
+                            <li>🔥 장착/해제 메시지 출력</li>
+                            <li>🔥 데미지량 마음대로 조정</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <HintBox type="info" title="추가 아이디어">
+                    <strong>방패 검:</strong> Equipped 때 WalkSpeed를 느리게, Unequipped 때 원래대로!<br>
+                    <strong>독 검:</strong> TakeDamage 후 for 루프로 매 초마다 체력 감소<br>
+                    <strong>치유 검:</strong> TakeDamage 대신 <code>humanoid.Health = humanoid.Health + 25</code>
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 20: 확인 퀴즈 + 마무리 -->
+    <section class="slide">
+        <div class="max-w-3xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
+                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
+            </div>
+
+            <div class="space-y-6">
+                <div class="animate-in">
+                    <quiz-question
+                        question="Tool 안에 반드시 있어야 하는, 손에 쥐는 파트 이름은?"
+                        correct="A"
+                        options={quiz1Options}
+                        correct-explanation="정답! 'Handle'이라는 이름의 파트가 있어야 로블록스가 캐릭터 손에 붙여줘요."
+                        wrong-explanation="'Handle' (대소문자 정확히!)이 정답이에요. 다른 이름이면 손에 붙지 않아요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="Tool을 장착한 상태에서 마우스를 클릭할 때 발생하는 이벤트는?"
+                        correct="A"
+                        options={quiz2Options}
+                        correct-explanation="맞아요! Activated는 Tool을 들고 마우스 왼쪽 클릭할 때 발생해요."
+                        wrong-explanation="Activated가 정답이에요. Touched는 파트가 닿을 때, Equipped는 장착할 때예요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="canDamage 패턴에서 데미지를 준 직후에 해야 하는 것은?"
+                        correct="A"
+                        options={quiz3Options}
+                        correct-explanation="정답! 데미지를 준 뒤 canDamage = false로 꺼야 한 번만 데미지를 줄 수 있어요."
+                        wrong-explanation="canDamage = false가 정답이에요. 켜진 채로 두면 계속 데미지가 들어가요!"
+                    ></quiz-question>
+                </div>
+
+                <div class="animate-in">
+                    <quiz-question
+                        question="게임 시작할 때 모든 플레이어에게 자동으로 Tool을 지급하려면 어디에 넣어야 할까요?"
+                        correct="A"
+                        options={quiz4Options}
+                        correct-explanation="정답! StarterPack에 Tool을 넣으면 게임 시작할 때 모든 플레이어의 Backpack으로 자동 이동해요."
+                        wrong-explanation="StarterPack이 정답이에요! StarterPack은 시작 아이템을 보관하는 곳이에요."
+                    ></quiz-question>
+                </div>
+            </div>
+
+            <div class="animate-in mt-8 text-center">
+                <div class="inline-block bg-gradient-to-r from-red-100/50 to-amber-100/50 rounded-2xl p-6">
+                    <div class="text-2xl mb-2">⚔️</div>
+                    <h3 class="font-bold text-lg mb-2">9주차 A 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        다음 시간에는 마법 지팡이로<br>
+                        구체를 발사해봐요! 🪄✨
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>

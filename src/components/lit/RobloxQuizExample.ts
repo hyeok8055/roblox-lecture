@@ -117,11 +117,6 @@ const CONCEPT_DICTIONARY: Record<string, ConceptInfo> = {
         short: '부모 오브젝트',
         detail: '가족 관계 🌳 - 나무에서 가지가 달린 것처럼, 모든 오브젝트는 부모가 있어요. workspace에 넣으면 화면에 보여요!'
     },
-    'SurfaceGui': {
-        emoji: '📺',
-        short: 'Part 표면에 UI 표시',
-        detail: '표지판 📺 - Part의 표면(Surface)에 UI를 붙여요! TextLabel, ImageLabel 등을 넣어서 "위험!", "출구" 같은 표시를 할 수 있어요.'
-    },
     'TextLabel': {
         emoji: '📝',
         short: '글자를 보여주는 UI',
@@ -286,6 +281,61 @@ const CONCEPT_DICTIONARY: Record<string, ConceptInfo> = {
         emoji: '🧭',
         short: 'SurfaceGui가 붙을 면 방향',
         detail: '면 방향 🧭 - SurfaceGui의 Face 속성에 사용해요! Front(앞), Back(뒤), Top(위), Bottom(아래), Left(왼쪽), Right(오른쪽) 6가지가 있어요.'
+    },
+    'Tool': {
+        emoji: '⚔️',
+        short: '캐릭터가 장착하는 도구',
+        detail: '장착 아이템 ⚔️ - 검, 지팡이, 총 같은 도구예요! Handle(손잡이)이 꼭 있어야 하고, StarterPack에 넣으면 게임 시작할 때 자동으로 받아요. Backpack에서 1~9키로 장착!'
+    },
+    'Handle': {
+        emoji: '✋',
+        short: 'Tool에서 손에 쥐는 파트',
+        detail: '손잡이 ✋ - Tool 안에 반드시 있어야 하는 특별한 파트예요! 이름을 정확히 "Handle"로 해야 로블록스가 캐릭터 손에 붙여줘요. 검이라면 칼날+손잡이 파트 이름을 "Handle"로!'
+    },
+    'StarterPack': {
+        emoji: '🎒',
+        short: '시작 시 자동 지급 보관함',
+        detail: '스타터 꾸러미 🎒 - StarterPack에 Tool을 넣으면 게임 시작할 때 모든 플레이어가 자동으로 받아요! Explorer에서 StarterPack을 찾아서 Tool을 드래그해요.'
+    },
+    'Backpack': {
+        emoji: '🎽',
+        short: '플레이어 도구 인벤토리',
+        detail: '인벤토리 🎽 - 플레이어가 가지고 있는 Tool들이 들어있는 인벤토리예요! 화면 하단의 1~9 슬롯이 Backpack이에요. Tool을 Backpack에 넣으면 가방에 추가돼요!'
+    },
+    'Activated': {
+        emoji: '🖱️',
+        short: 'Tool 들고 클릭했을 때',
+        detail: '활성화 클릭 🖱️ - Tool을 장착한 상태에서 마우스 왼쪽 클릭하면 실행돼요! tool.Activated:Connect(function() ... end)로 연결해요. 검 휘두르기, 총 쏘기에 사용!'
+    },
+    'Equipped': {
+        emoji: '👊',
+        short: 'Tool을 장착했을 때',
+        detail: '장착 이벤트 👊 - 플레이어가 Tool을 꺼낼 때(1~9키) 실행돼요! tool.Equipped:Connect(function() ... end)로 연결. 장착 효과음, 특수 능력 활성화 등에 사용!'
+    },
+    'Unequipped': {
+        emoji: '✌️',
+        short: 'Tool을 해제했을 때',
+        detail: '해제 이벤트 ✌️ - 플레이어가 Tool을 집어넣을 때 실행돼요! tool.Unequipped:Connect(function() ... end)로 연결. 능력 비활성화, 효과 제거 등에 사용!'
+    },
+    'TakeDamage': {
+        emoji: '💢',
+        short: '캐릭터에게 데미지 주기',
+        detail: '데미지 공격 💢 - humanoid:TakeDamage(숫자)로 체력을 깎아요! Health를 직접 바꾸는 것보다 안전해요. TakeDamage(25)면 체력 -25! 0이 되면 사망!'
+    },
+    'BodyVelocity': {
+        emoji: '🚀',
+        short: '파트에 속도를 부여하는 힘',
+        detail: '속도 엔진 🚀 - 파트를 특정 방향으로 날려요! Velocity로 방향과 속도를 설정하고, MaxForce로 최대 힘을 정해요. BodyVelocity.new()로 생성 후 orb에 넣어요!'
+    },
+    'Debris': {
+        emoji: '🗑️',
+        short: 'N초 후 자동 삭제 서비스',
+        detail: '자동 청소부 🗑️ - Debris:AddItem(파트, 시간)으로 파트를 몇 초 후에 자동으로 삭제해요! 발사된 구체가 3초 후에 사라지게 할 때 사용. 직접 Destroy() 안 해도 돼요!'
+    },
+    'PointLight': {
+        emoji: '💡',
+        short: '점에서 빛이 나오는 광원',
+        detail: '전구 효과 💡 - 파트 주변을 환하게 밝혀요! Brightness(밝기)와 Range(범위)로 조절해요. 마법 구체, 횃불, 가로등 등에 사용! Part나 Handle에 넣으면 빛 효과가 생겨요.'
     }
 };
 

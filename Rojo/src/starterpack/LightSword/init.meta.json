@@ -1,0 +1,7 @@
+{
+  "className": "Tool",
+  "properties": {
+    "ToolTip": "10번: 빛 검 - 50 데미지 + 팝업!",
+    "CanBeDropped": false
+  }
+}

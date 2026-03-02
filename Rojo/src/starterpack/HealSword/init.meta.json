@@ -1,0 +1,7 @@
+{
+  "className": "Tool",
+  "properties": {
+    "ToolTip": "6번: 힐 검 - 클릭하면 자기 회복!",
+    "CanBeDropped": false
+  }
+}

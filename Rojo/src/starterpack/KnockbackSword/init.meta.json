@@ -1,0 +1,7 @@
+{
+  "className": "Tool",
+  "properties": {
+    "ToolTip": "8번: 넉백 검 - 적을 날려버림!",
+    "CanBeDropped": false
+  }
+}
