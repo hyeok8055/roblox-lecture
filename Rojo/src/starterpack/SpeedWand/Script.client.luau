@@ -1,159 +1,127 @@
 -- ╔══════════════════════════════════════════════════════════════╗
--- ║  💛 스피드 지팡이 - 5초간 WalkSpeed 3배!                   ║
+-- ║  💛 스피드 완드 - 황금 구체 발사! 닿으면 3초 슬로우        ║
 -- ╠══════════════════════════════════════════════════════════════╣
--- ║  Humanoid.WalkSpeed 조작 / 8초 쿨다운                       ║
+-- ║  꾹 누르면 연속 발사 / 적 WalkSpeed 0 → 3초 후 복구        ║
 -- ╚══════════════════════════════════════════════════════════════╝
 
 local tool = script.Parent
 local UIS = game:GetService("UserInputService")
+local Debris = game:GetService("Debris")
 
 tool.Grip = CFrame.new(0, 0, -1.5, 0, 0, 1, 1, 0, 0, 0, 1, 0)
 
-local canUse = true
-local SPEED_MULT = 3
-local BOOST_TIME = 5
-local COOLDOWN = 8
+local PROJ_SPEED = 50
+local FIRE_RATE  = 0.3
+local SLOW_TIME  = 3
 local isEquipped = false
-local isBoosted = false
-local effects = {}
+local isHolding  = false
+local slowed     = {}  -- 이미 슬로우 걸린 캐릭터 추적
 
-local function setupEffects(handle)
-	if not handle then return end
+local function shootProjectile()
+	local character = tool.Parent
+	local hrp = character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
 
-	local attTip  = Instance.new("Attachment"); attTip.Position  = Vector3.new(0,  1.8, 0); attTip.Parent  = handle
-	local attBase = Instance.new("Attachment"); attBase.Position = Vector3.new(0, -0.5, 0); attBase.Parent = handle
-	local trail = Instance.new("Trail")
-	trail.Attachment0    = attTip
-	trail.Attachment1    = attBase
-	trail.Lifetime       = 0.12
-	trail.MinLength      = 0
-	trail.FaceCamera     = false
-	trail.LightEmission  = 1
-	trail.LightInfluence = 0
-	trail.Color = ColorSequence.new({
+	local proj = Instance.new("Part")
+	proj.Name        = "SlowOrb"
+	proj.Size        = Vector3.new(0.55, 0.55, 0.55)
+	proj.Shape       = Enum.PartType.Ball
+	proj.Color       = Color3.fromRGB(255, 215, 0)
+	proj.Material    = Enum.Material.Neon
+	proj.CanCollide  = false
+	proj.CastShadow  = false
+	proj.CFrame      = hrp.CFrame * CFrame.new(0, 0.5, -3)
+	proj.Parent      = workspace
+
+	-- 💡 황금빛 별 잔상
+	local emitter = Instance.new("ParticleEmitter")
+	emitter.Texture        = "rbxasset://textures/particles/sparkles_main.dds"
+	emitter.Color          = ColorSequence.new({
 		ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 255, 200)),
-		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 220, 50)),
-		ColorSequenceKeypoint.new(1,   Color3.fromRGB(200, 140, 0)),
+		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 210, 50)),
+		ColorSequenceKeypoint.new(1,   Color3.fromRGB(180, 120, 0)),
 	})
-	trail.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,   0),
-		NumberSequenceKeypoint.new(0.5, 0.1),
-		NumberSequenceKeypoint.new(1,   1),
-	})
-	trail.Parent = handle
-
-	-- 스피드 별똥: 뒤로 흘러가는 빠른 별 파티클
-	local star = Instance.new("ParticleEmitter")
-	star.Texture     = "rbxasset://textures/particles/sparkles_main.dds"
-	star.Color       = ColorSequence.new({
-		ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 255, 200)),
-		ColorSequenceKeypoint.new(0.4, Color3.fromRGB(255, 220, 60)),
-		ColorSequenceKeypoint.new(1,   Color3.fromRGB(200, 130, 0)),
-	})
-	star.Size        = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,   0.05),
-		NumberSequenceKeypoint.new(0.25, 0.22),
+	emitter.Size           = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,   0.12),
+		NumberSequenceKeypoint.new(0.4, 0.28),
 		NumberSequenceKeypoint.new(1,   0),
 	})
-	star.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,   0.3),
-		NumberSequenceKeypoint.new(0.3, 0),
+	emitter.Transparency   = NumberSequence.new({
+		NumberSequenceKeypoint.new(0,   0),
+		NumberSequenceKeypoint.new(0.5, 0.2),
 		NumberSequenceKeypoint.new(1,   1),
 	})
-	star.Rate         = 18
-	star.Speed        = NumberRange.new(2, 6)
-	star.SpreadAngle  = Vector2.new(55, 55)
-	star.Lifetime     = NumberRange.new(0.3, 0.7)
-	star.RotSpeed     = NumberRange.new(-180, 180)
-	star.Acceleration = Vector3.new(0, 5, 0)   -- 빠른 에너지는 위로!
-	star.LightEmission  = 1
-	star.LightInfluence = 0
-	star.LockedToPart   = false
-	star.Name           = "Star"
-	star.Parent         = handle
+	emitter.Rate           = 35
+	emitter.Speed          = NumberRange.new(0.5, 2)
+	emitter.SpreadAngle    = Vector2.new(25, 25)
+	emitter.Lifetime       = NumberRange.new(0.15, 0.3)
+	emitter.RotSpeed       = NumberRange.new(-200, 200)
+	emitter.LightEmission  = 1
+	emitter.LightInfluence = 0
+	emitter.LockedToPart   = true
+	emitter.Parent         = proj
 
-	-- 노란 글로우 연기
-	local glow = Instance.new("ParticleEmitter")
-	glow.Texture     = "rbxasset://textures/particles/smoke_main.dds"
-	glow.Color       = ColorSequence.new({
-		ColorSequenceKeypoint.new(0,   Color3.fromRGB(255, 240, 150)),
-		ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 200, 60)),
-		ColorSequenceKeypoint.new(1,   Color3.fromRGB(200, 140, 0)),
-	})
-	glow.Size        = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,   0.05),
-		NumberSequenceKeypoint.new(0.4, 0.38),
-		NumberSequenceKeypoint.new(1,   0.55),
-	})
-	glow.Transparency = NumberSequence.new({
-		NumberSequenceKeypoint.new(0,   0.55),
-		NumberSequenceKeypoint.new(0.5, 0.75),
-		NumberSequenceKeypoint.new(1,   1),
-	})
-	glow.Rate         = 6
-	glow.Speed        = NumberRange.new(0.3, 1.2)
-	glow.SpreadAngle  = Vector2.new(22, 22)
-	glow.Lifetime     = NumberRange.new(0.5, 1.0)
-	glow.RotSpeed     = NumberRange.new(-20, 20)
-	glow.Acceleration = Vector3.new(0, 2.5, 0)
-	glow.LightEmission  = 0.9
-	glow.LightInfluence = 0.1
-	glow.LockedToPart   = false
-	glow.Name           = "Glow"
-	glow.Parent         = handle
+	local bv = Instance.new("BodyVelocity")
+	bv.Velocity  = hrp.CFrame.LookVector * PROJ_SPEED
+	bv.MaxForce  = Vector3.new(1e5, 1e5, 1e5)
+	bv.Parent    = proj
 
-	effects = {attTip, attBase, trail, star, glow}
-end
+	-- 💡 닿으면 슬로우!
+	local didHit = false
+	proj.Touched:Connect(function(other)
+		if didHit then return end
+		if other.Parent == character then return end
+		local hum = other.Parent:FindFirstChildOfClass("Humanoid")
+		if hum and hum.Health > 0 and not slowed[hum] then
+			didHit = true
+			slowed[hum] = true
+			local origSpeed = hum.WalkSpeed
+			local origJump  = hum.JumpPower
+			hum.WalkSpeed = 0
+			hum.JumpPower = 0
+			print("💛 [스피드완드] " .. other.Parent.Name .. " 슬로우! (" .. SLOW_TIME .. "초)")
+			proj:Destroy()
 
-local function cleanupEffects()
-	for _, e in ipairs(effects) do if e.Parent then e:Destroy() end end
-	effects = {}
-end
+			-- 💡 3초 후 복구
+			task.spawn(function()
+				task.wait(SLOW_TIME)
+				if hum.Parent then
+					hum.WalkSpeed = origSpeed
+					hum.JumpPower = origJump
+					print("💛 [스피드완드] " .. other.Parent.Name .. " 슬로우 해제!")
+				end
+				slowed[hum] = nil
+			end)
+		end
+	end)
 
-local function playWave()
-	local h = tool:FindFirstChild("Handle")
-	local st = h and h:FindFirstChild("Star")
-	local gl = h and h:FindFirstChild("Glow")
-	if st then st:Emit(45) end
-	if gl then gl:Emit(14) end
+	Debris:AddItem(proj, 4)
 end
 
 tool.Equipped:Connect(function()
-	isEquipped = true; canUse = true
-	setupEffects(tool:FindFirstChild("Handle"))
-	print("💛 [스피드완드] 장착! (클릭 → " .. BOOST_TIME .. "초간 " .. SPEED_MULT .. "배 속도)")
+	isEquipped = true
+	print("💛 [스피드완드] 장착! (클릭/꾹누르면 슬로우 구체 발사)")
 end)
 
 tool.Unequipped:Connect(function()
 	isEquipped = false
-	cleanupEffects()
+	isHolding  = false
 	print("💛 [스피드완드] 해제!")
 end)
 
 UIS.InputBegan:Connect(function(input, gameProcessed)
 	if gameProcessed or not isEquipped then return end
 	if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-	if not canUse then print("💛 [스피드완드] 쿨타임 중!"); return end
-	if isBoosted then print("💛 [스피드완드] 이미 부스트 중!"); return end
-	canUse = false
-	playWave()
+	isHolding = true
+	task.spawn(function()
+		while isHolding and isEquipped do
+			shootProjectile()
+			task.wait(FIRE_RATE)
+		end
+	end)
+end)
 
-	local character = tool.Parent
-	local hum = character:FindFirstChildOfClass("Humanoid")
-	if hum then
-		local origSpeed = hum.WalkSpeed
-		isBoosted = true
-		hum.WalkSpeed = origSpeed * SPEED_MULT
-		print("💛 [스피드완드] 속도 " .. origSpeed .. " → " .. hum.WalkSpeed .. "! (" .. BOOST_TIME .. "초)")
-
-		task.spawn(function()
-			task.wait(BOOST_TIME)
-			if hum.Parent then hum.WalkSpeed = origSpeed end
-			isBoosted = false
-			print("💛 [스피드완드] 속도 원상복구!")
-		end)
-	end
-
-	task.wait(COOLDOWN); canUse = true
-	print("💛 [스피드완드] 쿨타임 종료!")
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+	isHolding = false
 end)

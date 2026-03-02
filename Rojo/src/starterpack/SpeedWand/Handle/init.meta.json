@@ -3,7 +3,7 @@
   "properties": {
     "Anchored": false,
     "CanCollide": false,
-    "Size": [0.2, 3.5, 0.2],
+    "Size": [0.3, 3.5, 0.3],
     "Color": [1.0, 0.85, 0.0],
     "Material": "Neon"
   }

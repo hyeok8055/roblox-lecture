@@ -1,8 +1,6 @@
 {
   "ClassName": "SpecialMesh",
   "Properties": {
-    "MeshType": "FileMesh",
-    "MeshId": "rbxasset://fonts/sword.mesh",
-    "Scale": { "Vector3": [0.4, 1, 0.4] }
+    "MeshType": "Cylinder"
   }
 }
