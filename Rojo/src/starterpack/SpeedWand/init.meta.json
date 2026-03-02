@@ -1,0 +1,7 @@
+{
+  "className": "Tool",
+  "properties": {
+    "ToolTip": "스피드 지팡이 - 5초간 3배 속도!",
+    "CanBeDropped": false
+  }
+}

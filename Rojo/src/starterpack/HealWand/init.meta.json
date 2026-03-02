@@ -1,0 +1,7 @@
+{
+  "className": "Tool",
+  "properties": {
+    "ToolTip": "힐 지팡이 - 체력 +50 회복!",
+    "CanBeDropped": false
+  }
+}
