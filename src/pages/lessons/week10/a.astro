@@ -3,979 +3,1066 @@ import LessonLayout from '../../../layouts/LessonLayout.astro';
 import HintBox from '../../../components/astro/HintBox.astro';
 
 // 확인 퀴즈 옵션
-const quiz1Options = JSON.stringify(["SoundService", "Workspace", "StarterGui", "ReplicatedStorage"]);
-const quiz2Options = JSON.stringify([":Play()", ":Stop()", ":Pause()", ":Resume()"]);
-const quiz3Options = JSON.stringify(["Ended", "Played", "Stopped", "DidLoop"]);
-const quiz4Options = JSON.stringify(["#musicList", "3", "musicList", "math.max()"]);
+const quiz1Options = JSON.stringify(["TweenService", "SoundService", "RunService", "Players"]);
+const quiz2Options = JSON.stringify(["TouchEnded", "Touched", "MouseClick", "Triggered"]);
+const quiz3Options = JSON.stringify(["RollOffMaxDistance", "Volume", "PlaybackSpeed", "TimePosition"]);
+const quiz4Options = JSON.stringify(["speed / 14", "speed * 2", "speed / 2", "speed + 1"]);
 
 // =========================================
 // 드롭다운 퀴즈 데이터 (5개)
 // =========================================
 
-// 퀴즈 1: BGM 기본 설정
-const bgmSetupBlanks = JSON.stringify([
-    { id: "b1", correct: "\"SoundService\"", options: ["\"SoundService\"", "\"Workspace\"", "\"Players\"", "\"ServerScriptService\""] },
-    { id: "b2", correct: "\"BGM\"", options: ["\"BGM\"", "\"Sound\"", "\"Music\"", "\"Audio\""] },
-    { id: "b3", correct: "true", options: ["true", "false", "0", "nil"] }
+// 퀴즈 1: TweenService 볼륨 페이드인/페이드아웃
+const fadeBlanks = JSON.stringify([
+    { id: "b1", correct: "\"TweenService\"", options: ["\"TweenService\"", "\"SoundService\"", "\"RunService\"", "\"Players\""] },
+    { id: "b2", correct: "TweenInfo.new(duration)", options: ["TweenInfo.new(duration)", "Info.new(2)", "TweenInfo(2)", "TweenInfo.new()"] },
+    { id: "b3", correct: "{Volume = targetVolume}", options: ["{Volume = targetVolume}", "{volume = target}", "{Sound.Volume = 1}", "Volume = targetVolume"] },
+    { id: "b4", correct: "tween:Play()", options: ["tween:Play()", "tween:Start()", "tween:Run()", "tween:Begin()"] }
 ]);
-const bgmSetupTemplate = `-- ========================================
--- 🎵 배경음악(BGM) 루프 재생 설정
+const fadeTemplate = `-- ========================================
+-- 🎵 부드럽게 볼륨 올리면서 BGM 시작 (페이드인)
 -- ========================================
--- 📦 준비: SoundService 안에 Sound 오브젝트 추가 후 이름 "BGM"으로 변경
--- 💡 SoundService = 어디서든 동일한 음량으로 들리는 특수 서비스
--- 💡 Looped = 끝나면 자동으로 처음부터 반복할지 여부
+-- 📦 준비: SoundService > Sound("BGM") + LocalScript
+-- 💡 TweenService = 숫자를 부드럽게 변화시켜주는 서비스
+-- 💡 Volume을 0→목표값으로 서서히 올려 자연스럽게 들리게!
 -- ========================================
 
--- 💡 SoundService 서비스 가져오기
-local SoundService = game:GetService([b1])
+-- 💡 두 서비스 모두 가져오기
+local TweenService = game:GetService([b1])
+local SoundService = game:GetService("SoundService")
 
--- 💡 SoundService 안에 미리 만들어둔 BGM 사운드 찾기
-local bgm = SoundService:WaitForChild([b2])
+-- 💡 SoundService 안의 BGM 사운드
+local bgm = SoundService:WaitForChild("BGM")
 
--- 💡 true = 끝나면 자동으로 다시 처음부터 재생!
-bgm.Looped = [b3]
+-- 💡 페이드인 함수: 볼륨을 0부터 서서히 올리기
+local function fadeIn(sound, targetVolume, duration)
+    sound.Volume = 0  -- 💡 처음엔 소리 0
+    sound:Play()       -- 💡 재생 시작 (들리지 않음)
 
--- 💡 재생 시작!
-bgm:Play()
-print("🎵 배경음악 시작!")`;
-const bgmSetupFullCode = `-- 🎵 BGM 루프 재생
+    -- 💡 TweenInfo: 몇 초 동안 변화할지 설정
+    local tweenInfo = [b2]
+
+    -- 💡 Volume을 targetVolume까지 부드럽게 올리기
+    local tween = TweenService:Create(sound, tweenInfo, [b3])
+    [b4]  -- 💡 Tween 시작!
+end
+
+-- 💡 2초 동안 부드럽게 볼륨 0.5까지 올리기
+fadeIn(bgm, 0.5, 2)
+print("🎵 BGM 페이드인 시작!")`;
+const fadeFullCode = `-- 🎵 TweenService 볼륨 페이드인/아웃
 -- 📦 SoundService > Sound("BGM") + LocalScript
+local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 local bgm = SoundService:WaitForChild("BGM")
-bgm.Looped = true
-bgm:Play()`;
 
-// 퀴즈 2: BGM 볼륨 조절 (LocalScript)
-const bgmVolumeBlanks = JSON.stringify([
-    { id: "b1", correct: "\"SoundService\"", options: ["\"SoundService\"", "\"Workspace\"", "\"Players\"", "\"game\""] },
-    { id: "b2", correct: "0.25", options: ["0.25", "1", "5", "10"] },
-    { id: "b3", correct: ":Play()", options: [":Play()", ":Stop()", ":Pause()", ":Resume()"] }
+local function fadeIn(sound, targetVolume, duration)
+    sound.Volume = 0
+    sound:Play()
+    local tween = TweenService:Create(sound, TweenInfo.new(duration), {Volume = targetVolume})
+    tween:Play()
+end
+
+local function fadeOut(sound, duration)
+    local tween = TweenService:Create(sound, TweenInfo.new(duration), {Volume = 0})
+    tween:Play()
+    tween.Completed:Wait()
+    sound:Stop()
+end
+
+fadeIn(bgm, 0.5, 2)`;
+
+// 퀴즈 2: 존(Zone) 기반 BGM 자동 전환
+const zoneBlanks = JSON.stringify([
+    { id: "b1", correct: "\"currentBGM\"", options: ["\"currentBGM\"", "\"bgm\"", "\"music\"", "\"sound\""] },
+    { id: "b2", correct: "currentBGM ~= newBGM", options: ["currentBGM ~= newBGM", "currentBGM == newBGM", "currentBGM = newBGM", "newBGM ~= nil"] },
+    { id: "b3", correct: "currentBGM:Stop()", options: ["currentBGM:Stop()", "currentBGM:Pause()", "currentBGM = nil", "currentBGM:Destroy()"] },
+    { id: "b4", correct: "Touched", options: ["Touched", "TouchEnded", "MouseClick", "Triggered"] }
 ]);
-const bgmVolumeTemplate = `-- ========================================
--- 🎛️ BGM 볼륨 조절 (LocalScript)
+const zoneTemplate = `-- ========================================
+-- 🗺️ 구역마다 다른 배경음악 자동 재생!
 -- ========================================
--- 📦 준비: StarterPlayerScripts > LocalScript
--- 💡 LocalScript = 각 플레이어의 컴퓨터에서만 실행됨
--- 💡 Volume = 음량 (0 ~ 10, 배경음은 0.25가 딱 좋음!)
--- 💡 너무 크면 효과음이 안 들리고 집중도 방해됨
+-- 📦 준비:
+--   SoundService > ForestBGM, CaveBGM (각각 SoundId 설정)
+--   Workspace > ForestZone (Part, Anchored, CanCollide=false, Transparency=0.8)
+--   Workspace > CaveZone  (Part, Anchored, CanCollide=false, Transparency=0.8)
+--   ServerScript 또는 LocalScript
+-- 💡 투명한 파트를 밟으면 BGM이 바뀜!
 -- ========================================
 
--- 💡 SoundService 가져오기
-local SoundService = game:GetService([b1])
-local bgm = SoundService:WaitForChild("BGM")
-
--- 💡 볼륨 설정! (배경음악은 낮게 = 0.25 추천)
-bgm.Volume = [b2]
-bgm.Looped = true
-
--- 💡 재생!
-bgm[b3]
-print("🎵 배경음악 재생 중! 볼륨:", bgm.Volume)`;
-const bgmVolumeFullCode = `-- 🎛️ BGM 볼륨 조절
--- 📦 StarterPlayerScripts > LocalScript
+local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
-local bgm = SoundService:WaitForChild("BGM")
-bgm.Volume = 0.25
-bgm.Looped = true
-bgm:Play()`;
 
-// 퀴즈 3: 코인 효과음
-const coinSoundBlanks = JSON.stringify([
-    { id: "b1", correct: "\"CoinSound\"", options: ["\"CoinSound\"", "\"Sound\"", "\"Effect\"", "\"Audio\""] },
-    { id: "b2", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"Character\"", "\"Part\"", "\"Player\""] },
-    { id: "b3", correct: ":Play()", options: [":Play()", ":Stop()", ":Pause()", ":Resume()"] }
-]);
-const coinSoundTemplate = `-- ========================================
--- 🪙 코인 먹으면 효과음 재생!
--- ========================================
--- 📦 준비: 코인 Part > Script + Sound("CoinSound")
--- 💡 코인 파트 안에 Sound 오브젝트를 미리 넣어두세요
--- 💡 SoundId 예시: rbxassetid://4590662766 (코인 짤랑)
--- 💡 sound.Ended:Wait() = 소리가 끝날 때까지 기다림
--- ========================================
+-- 💡 현재 재생 중인 BGM을 추적 (처음엔 없음)
+local [b1] = nil
 
-local coin = script.Parent
--- 💡 코인 안에 있는 CoinSound 찾기
-local sound = coin:WaitForChild([b1])
-local collected = false  -- 💡 중복 실행 방지
+-- 💡 BGM 부드럽게 전환 함수
+local function switchBGM(newBGM)
+    -- 💡 지금이랑 다른 BGM일 때만 전환!
+    if [b2] then
+        if currentBGM then
+            -- 💡 현재 음악 0.5초에 걸쳐 꺼주기
+            [b3]
+        end
+        -- 💡 새 BGM 0.5초에 걸쳐 켜주기
+        newBGM.Volume = 0
+        newBGM:Play()
+        TweenService:Create(newBGM, TweenInfo.new(0.5), {Volume = 0.5}):Play()
+        currentBGM = newBGM
+    end
+end
 
-coin.Touched:Connect(function(hit)
-    -- 💡 이미 먹었으면 무시
-    if collected then return end
+-- 💡 숲 구역 파트를 밟으면 숲 BGM 재생!
+local forestZone = workspace:WaitForChild("ForestZone")
+local forestBGM = SoundService:WaitForChild("ForestBGM")
 
-    -- 💡 사람인지 확인 (Humanoid가 있는지)
-    local humanoid = hit.Parent:FindFirstChild([b2])
-    if humanoid then
-        collected = true
-
-        -- 💡 효과음 재생!
-        sound[b3]
-
-        -- 💡 코인 일단 숨기기 (소리는 계속 들려야 하니까)
-        coin.Transparency = 1
-        coin.CanCollide = false
-
-        -- 💡 소리가 끝나면 코인 제거!
-        sound.Ended:Wait()
-        coin:Destroy()
+forestZone.[b4]:Connect(function(hit)
+    local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+    if player then
+        switchBGM(forestBGM)
     end
 end)`;
-const coinSoundFullCode = `-- 🪙 코인 효과음
--- 📦 코인 Part > Script + Sound("CoinSound")
-local coin = script.Parent
-local sound = coin:WaitForChild("CoinSound")
-local collected = false
+const zoneFullCode = `-- 🗺️ 존 기반 BGM 전환 시스템
+local TweenService = game:GetService("TweenService")
+local SoundService = game:GetService("SoundService")
+local currentBGM = nil
 
-coin.Touched:Connect(function(hit)
-    if collected then return end
-    local humanoid = hit.Parent:FindFirstChild("Humanoid")
-    if humanoid then
-        collected = true
-        sound:Play()
-        coin.Transparency = 1
-        coin.CanCollide = false
-        sound.Ended:Wait()
-        coin:Destroy()
+local function switchBGM(newBGM)
+    if currentBGM ~= newBGM then
+        if currentBGM then
+            TweenService:Create(currentBGM, TweenInfo.new(0.5), {Volume = 0}):Play()
+            task.delay(0.5, function() currentBGM:Stop() end)
+        end
+        newBGM.Volume = 0
+        newBGM:Play()
+        TweenService:Create(newBGM, TweenInfo.new(0.5), {Volume = 0.5}):Play()
+        currentBGM = newBGM
+    end
+end
+
+local forestZone = workspace:WaitForChild("ForestZone")
+local forestBGM = SoundService:WaitForChild("ForestBGM")
+forestZone.Touched:Connect(function(hit)
+    if game.Players:GetPlayerFromCharacter(hit.Parent) then
+        switchBGM(forestBGM)
     end
 end)`;
 
-// 퀴즈 4: 랜덤 BGM 재생
-const randomBgmBlanks = JSON.stringify([
-    { id: "b1", correct: "#musicList", options: ["#musicList", "3", "musicList", "10"] },
-    { id: "b2", correct: "musicList[randomIndex]", options: ["musicList[randomIndex]", "musicList", "randomIndex", "musicList[1]"] },
-    { id: "b3", correct: "Ended", options: ["Ended", "Played", "Stopped", "DidLoop"] }
+// 퀴즈 3: 3D 공간 사운드 (RollOffMaxDistance)
+const spatialBlanks = JSON.stringify([
+    { id: "b1", correct: "Instance.new(\"Sound\")", options: ["Instance.new(\"Sound\")", "Instance.new(\"Audio\")", "game:GetService(\"Sound\")", "Sound.new()"] },
+    { id: "b2", correct: "waterfall", options: ["waterfall", "workspace", "SoundService", "game"] },
+    { id: "b3", correct: "RollOffMaxDistance", options: ["RollOffMaxDistance", "Volume", "MaxDistance", "PlaybackDistance"] },
+    { id: "b4", correct: "sound:Play()", options: ["sound:Play()", "sound:Start()", "sound.Looped = true", "sound:Resume()"] }
 ]);
-const randomBgmTemplate = `-- ========================================
--- 🎲 여러 BGM 중 랜덤으로 재생하기
+const spatialTemplate = `-- ========================================
+-- 🌊 가까이 가면 들리는 3D 공간 사운드!
 -- ========================================
--- 📦 준비: StarterPlayerScripts > LocalScript
--- 💡 musicList = 여러 BGM ID를 담은 표(table)
--- 💡 #musicList = 표 안에 있는 항목 개수 (자동으로 셈!)
--- 💡 bgm.Ended = 곡이 끝났을 때 발생하는 이벤트
+-- 📦 준비: Workspace > Waterfall (Part, Anchored) + Script
+-- 💡 파트에 Sound를 붙이면 3D 위치 기반으로 들림!
+-- 💡 가까울수록 크게, 멀어질수록 작게 들림
 -- ========================================
 
-local SoundService = game:GetService("SoundService")
+-- 💡 스크립트가 붙어있는 폭포 파트
+local waterfall = script.Parent
 
--- 💡 배경음악 에셋 ID 목록 (원하는 ID로 바꿔보세요!)
-local musicList = {
-    "rbxassetid://1843463175",   -- 💡 첫 번째 곡
-    "rbxassetid://1837849285",   -- 💡 두 번째 곡
-    "rbxassetid://1848183670",   -- 💡 세 번째 곡
-}
+-- 💡 파트 안에 Sound를 동적으로 생성!
+local sound = [b1]
 
--- 💡 Sound 오브젝트 만들기
-local bgm = Instance.new("Sound")
-bgm.Parent = SoundService
-bgm.Volume = 0.25
+-- 💡 사운드를 폭포 파트의 자식으로 설정 (3D 위치 고정)
+sound.Parent = [b2]
 
--- 💡 랜덤 곡 재생 함수
-local function playRandomMusic()
-    -- 💡 1 ~ musicList 개수 중 랜덤 숫자 선택!
-    local randomIndex = math.random(1, [b1])
-    -- 💡 그 번호에 해당하는 음악 ID 설정
-    bgm.SoundId = [b2]
-    bgm:Play()
-    print("🎵 " .. randomIndex .. "번 곡 재생!")
-end
+-- 💡 사운드 에셋 ID (로블록스 오디오 에셋)
+sound.SoundId = "rbxassetid://136523485"
 
--- 💡 처음 재생
-playRandomMusic()
+-- 💡 멀어질수록 소리 줄어드는 최대 거리 (스터드 단위)
+sound.[b3] = 60   -- 💡 60스터드 밖에선 안 들림
 
--- 💡 곡이 끝나면 자동으로 다음 랜덤 곡!
-bgm.[b3]:Connect(function()
-    playRandomMusic()
-end)`;
-const randomBgmFullCode = `-- 🎲 랜덤 BGM 재생
--- 📦 StarterPlayerScripts > LocalScript
-local SoundService = game:GetService("SoundService")
-local musicList = {
-    "rbxassetid://1843463175",
-    "rbxassetid://1837849285",
-    "rbxassetid://1848183670",
-}
-local bgm = Instance.new("Sound")
-bgm.Parent = SoundService
-bgm.Volume = 0.25
+-- 💡 가장 가까운 거리에서의 최대 볼륨 거리
+sound.RollOffMinDistance = 5
 
-local function playRandomMusic()
-    local randomIndex = math.random(1, #musicList)
-    bgm.SoundId = musicList[randomIndex]
-    bgm:Play()
-end
+-- 💡 반복 재생 + 시작!
+sound.Looped = true
+[b4]
+print("🌊 폭포 소리 시작! 가까이 다가가보세요~")`;
+const spatialFullCode = `-- 🌊 3D 공간 사운드 (파트에 붙이기)
+-- 📦 Workspace > Waterfall (Part) + Script
+local waterfall = script.Parent
+local sound = Instance.new("Sound")
+sound.Parent = waterfall
+sound.SoundId = "rbxassetid://136523485"
+sound.RollOffMaxDistance = 60  -- 60스터드 밖에선 안 들림
+sound.RollOffMinDistance = 5
+sound.Looped = true
+sound:Play()`;
 
-playRandomMusic()
-bgm.Ended:Connect(function()
-    playRandomMusic()
-end)`;
-
-// 퀴즈 5: SoundGroup 분리 관리
-const soundGroupBlanks = JSON.stringify([
-    { id: "b1", correct: "\"SoundGroup\"", options: ["\"SoundGroup\"", "\"Folder\"", "\"Sound\"", "\"AudioGroup\""] },
-    { id: "b2", correct: "SoundService", options: ["SoundService", "workspace", "game", "script"] },
-    { id: "b3", correct: "sfxGroup", options: ["sfxGroup", "bgmGroup", "SoundService", "sound"] }
+// 퀴즈 4: 발소리 속도 동기화 (Humanoid.Running)
+const footstepBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"HumanoidRootPart\"", "\"Character\"", "\"Player\""] },
+    { id: "b2", correct: "humanoid.Running", options: ["humanoid.Running", "humanoid.Touched", "humanoid.Walking", "character.Running"] },
+    { id: "b3", correct: "speed / 14", options: ["speed / 14", "speed * 2", "speed / 2", "speed + 1"] },
+    { id: "b4", correct: "0", options: ["0", "1", "nil", "false"] }
 ]);
-const soundGroupTemplate = `-- ========================================
--- 🎛️ SoundGroup으로 BGM / 효과음 분리 관리
+const footstepTemplate = `-- ========================================
+-- 👟 달릴수록 빨라지는 발소리!
 -- ========================================
--- 📦 준비: ServerScriptService > Script
--- 💡 SoundGroup = 소리들을 그룹으로 묶어서 한번에 음량 조절!
--- 💡 bgmGroup.Volume = 0.3 → BGM 전체 30% 볼륨
--- 💡 sfxGroup.Volume = 0.7 → 효과음 전체 70% 볼륨
+-- 📦 준비:
+--   StarterCharacterScripts > LocalScript
+--   HumanoidRootPart 안에 Sound("Footstep") 추가
+--   Sound에 발소리 에셋ID 설정, Looped = true
+-- 💡 Humanoid.Running = 이동 속도가 바뀔 때마다 발동!
+-- 💡 PlaybackSpeed = 사운드 재생 속도 (1 = 정상, 2 = 2배 빠름)
 -- ========================================
 
+-- 💡 캐릭터가 스폰될 때 실행 (LocalScript는 캐릭터 안에서 시작)
+local character = script.Parent
+local humanoid = character:WaitForChild([b1])
+
+-- 💡 캐릭터의 몸 중심 파트에서 발소리 찾기
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local footstep = rootPart:WaitForChild("Footstep")
+
+-- 💡 Humanoid.Running: 이동 속도(speed)를 계속 알려줌!
+[b2]:Connect(function(speed)
+    if speed > 0 then
+        -- 💡 속도에 비례해서 발소리 속도 설정 (16 / 14 ≈ 1.14배)
+        footstep.PlaybackSpeed = [b3]
+        if not footstep.IsPlaying then
+            footstep:Play()
+        end
+    else
+        -- 💡 멈추면 발소리 속도를 0으로 (정지)
+        footstep.PlaybackSpeed = [b4]
+        footstep:Stop()
+    end
+end)`;
+const footstepFullCode = `-- 👟 발소리 속도 동기화 (StarterCharacterScripts > LocalScript)
+-- 📦 HumanoidRootPart > Sound("Footstep", Looped=true)
+local character = script.Parent
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local footstep = rootPart:WaitForChild("Footstep")
+
+humanoid.Running:Connect(function(speed)
+    if speed > 0 then
+        footstep.PlaybackSpeed = speed / 14
+        if not footstep.IsPlaying then footstep:Play() end
+    else
+        footstep.PlaybackSpeed = 0
+        footstep:Stop()
+    end
+end)`;
+
+// 퀴즈 5: 승리 효과음 피치 업 (PlaybackSpeed TweenService)
+const pitchBlanks = JSON.stringify([
+    { id: "b1", correct: "winSound:Play()", options: ["winSound:Play()", "winSound:Start()", "winSound:Resume()", "winSound:Begin()"] },
+    { id: "b2", correct: "TweenInfo.new(2, Enum.EasingStyle.Quad)", options: ["TweenInfo.new(2, Enum.EasingStyle.Quad)", "TweenInfo.new(2)", "TweenInfo.new(2, Linear)", "Info.new(2, Quad)"] },
+    { id: "b3", correct: "{PlaybackSpeed = 2.0}", options: ["{PlaybackSpeed = 2.0}", "{Speed = 2.0}", "{Pitch = 2.0}", "{Volume = 2.0}"] },
+    { id: "b4", correct: "pitchTween:Play()", options: ["pitchTween:Play()", "pitchTween:Start()", "pitchTween:Run()", "pitchTween:Begin()"] }
+]);
+const pitchTemplate = `-- ========================================
+-- 🏆 승리 시 피치가 점점 올라가는 효과음!
+-- ========================================
+-- 📦 준비: SoundService > WinSound (승리 효과음 에셋ID)
+--         ServerScriptService > Script
+-- 💡 PlaybackSpeed = 1.0(기본) → 2.0(2배 높은 음)
+-- 💡 TweenService로 부드럽게 피치 올리기
+-- ========================================
+
+local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
 
--- 💡 BGM 그룹 만들기!
-local bgmGroup = Instance.new([b1])
-bgmGroup.Name = "BGM_Group"
-bgmGroup.Volume = 0.3
-bgmGroup.Parent = [b2]
+-- 💡 승리 효과음 가져오기
+local winSound = SoundService:WaitForChild("WinSound")
 
--- 💡 효과음(SFX) 그룹 만들기!
-local sfxGroup = Instance.new("SoundGroup")
-sfxGroup.Name = "SFX_Group"
-sfxGroup.Volume = 0.7
-sfxGroup.Parent = SoundService
+-- 💡 플레이어가 골인 파트에 닿으면!
+local goalPart = workspace:WaitForChild("GoalPart")
+goalPart.Touched:Connect(function(hit)
+    if game.Players:GetPlayerFromCharacter(hit.Parent) then
+        -- 💡 피치를 0.8에서 시작 (약간 낮게)
+        winSound.PlaybackSpeed = 0.8
+        -- 💡 승리 효과음 재생!
+        [b1]
 
--- 💡 코인 효과음을 SFX 그룹에 연결하기
-local coinSfx = Instance.new("Sound")
-coinSfx.SoundId = "rbxassetid://4590662766"
--- 💡 SoundGroup 속성에 그룹을 지정! (Parent가 아니라 SoundGroup 속성으로!)
-coinSfx.SoundGroup = [b3]
-coinSfx.Parent = SoundService
+        -- 💡 Quad 이징: 처음엔 천천히, 나중엔 빠르게
+        local tweenInfo = [b2]
 
-print("🎛️ BGM 그룹 볼륨:", bgmGroup.Volume)
-print("🔊 SFX 그룹 볼륨:", sfxGroup.Volume)`;
-const soundGroupFullCode = `-- 🎛️ SoundGroup 분리 관리
--- 📦 ServerScriptService > Script
+        -- 💡 PlaybackSpeed를 2.0까지 올려서 피치 업 효과!
+        local pitchTween = TweenService:Create(winSound, tweenInfo, [b3])
+        -- 💡 Tween 시작!
+        [b4]
+
+        print("🏆 승리! 피치 업 효과 재생!")
+    end
+end)`;
+const pitchFullCode = `-- 🏆 승리 사운드 피치 업 효과
+-- 📦 SoundService > WinSound + Script (ServerScriptService)
+local TweenService = game:GetService("TweenService")
 local SoundService = game:GetService("SoundService")
+local winSound = SoundService:WaitForChild("WinSound")
+local goalPart = workspace:WaitForChild("GoalPart")
 
-local bgmGroup = Instance.new("SoundGroup")
-bgmGroup.Name = "BGM_Group"
-bgmGroup.Volume = 0.3
-bgmGroup.Parent = SoundService
-
-local sfxGroup = Instance.new("SoundGroup")
-sfxGroup.Name = "SFX_Group"
-sfxGroup.Volume = 0.7
-sfxGroup.Parent = SoundService
-
-local coinSfx = Instance.new("Sound")
-coinSfx.SoundId = "rbxassetid://4590662766"
-coinSfx.SoundGroup = sfxGroup
-coinSfx.Parent = SoundService`;
+goalPart.Touched:Connect(function(hit)
+    if game.Players:GetPlayerFromCharacter(hit.Parent) then
+        winSound.PlaybackSpeed = 0.8
+        winSound:Play()
+        local pitchTween = TweenService:Create(
+            winSound,
+            TweenInfo.new(2, Enum.EasingStyle.Quad),
+            {PlaybackSpeed = 2.0}
+        )
+        pitchTween:Play()
+    end
+end)`;
 ---
 
-<LessonLayout title="사운드 시스템: 배경음 & 효과음" lessonNumber={10} totalSlides={15}>
+<LessonLayout title="고급 사운드 시스템" lessonNumber={10} totalSlides={15}>
+
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
             <div class="text-center animate-in">
                 <span class="badge badge-roblox mb-6">10주차 A</span>
                 <h1 class="title-display mb-4">
-                    사운드 시스템:<br>
-                    <span class="text-neon-mint">🎵 배경음 & 효과음!</span>
+                    고급 사운드 시스템<br>
+                    <span class="text-neon-mint">살아있는 게임 소리</span>
                 </h1>
-                <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
-                    배경음악(BGM)을 삽입하고<br>
-                    코인 효과음, 랜덤 음악 시스템을 만들어요!
+                <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                    단순한 Play()는 이제 그만! TweenService로 부드럽게 페이드, 구역마다 다른 BGM,
+                    가까이 가야 들리는 3D 소리, 달릴수록 빨라지는 발소리까지 —
+                    프로 게임 수준의 사운드 디자인을 배워보자.
                 </p>
-                <div class="flex gap-3 justify-center flex-wrap">
-                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🎵 Sound 클래스</span>
-                    </div>
-                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🔊 SoundService</span>
-                    </div>
-                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🔁 Looped BGM</span>
-                    </div>
-                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🎲 랜덤 음악</span>
-                    </div>
-                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🎛️ SoundGroup</span>
-                    </div>
-                </div>
-
-                <div class="mt-12 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl max-w-md mx-auto">
-                    <div class="text-3xl mb-2">🎯</div>
-                    <h3 class="font-bold mb-2">오늘의 목표</h3>
-                    <ul class="text-left text-sm text-ink-light space-y-1">
-                        <li>✓ Sound 클래스 속성 이해 (SoundId, Volume, Looped)</li>
-                        <li>✓ SoundService에 BGM 삽입해서 루프 재생</li>
-                        <li>✓ 코인 파트에 효과음 연결</li>
-                        <li>✓ 여러 BGM 중 랜덤 재생하기</li>
-                        <li>✓ SoundGroup으로 BGM/효과음 분리 관리</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 2: Sound 클래스 속성 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">🎵 Sound 오브젝트란?</h2>
-            </div>
-
-            <div class="flex flex-col gap-6">
-                <div class="animate-in">
-                    <div class="lesson-card">
-                        <h3 class="font-bold text-lg mb-4">핵심 속성 4가지</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm border-collapse">
-                                <thead>
-                                    <tr class="bg-ink-pale">
-                                        <th class="text-left p-3 rounded-tl-lg font-bold">속성명</th>
-                                        <th class="text-left p-3 font-bold">기본값</th>
-                                        <th class="text-left p-3 rounded-tr-lg font-bold">설명</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr class="border-b border-gray-100">
-                                        <td class="p-3 font-mono text-neon-sky font-bold">SoundId</td>
-                                        <td class="p-3 text-ink-light">""</td>
-                                        <td class="p-3">재생할 음악 에셋 ID<br><span class="text-xs text-ink-light">rbxassetid://숫자 형식</span></td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100 bg-gray-50">
-                                        <td class="p-3 font-mono text-neon-sky font-bold">Volume</td>
-                                        <td class="p-3 text-ink-light">0.5</td>
-                                        <td class="p-3">음량 (0 ~ 10)<br><span class="text-xs text-ink-light">BGM은 0.25, 효과음은 0.7 권장</span></td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100">
-                                        <td class="p-3 font-mono text-neon-sky font-bold">Looped</td>
-                                        <td class="p-3 text-ink-light">false</td>
-                                        <td class="p-3">반복 재생 여부<br><span class="text-xs text-ink-light">BGM은 true로 설정!</span></td>
-                                    </tr>
-                                    <tr class="border-b border-gray-100 bg-gray-50">
-                                        <td class="p-3 font-mono text-neon-sky font-bold">PlaybackSpeed</td>
-                                        <td class="p-3 text-ink-light">1.0</td>
-                                        <td class="p-3">재생 속도 (높으면 음조도 올라감)<br><span class="text-xs text-ink-light">2.0 = 2배 빠르고 고음, 0.5 = 느리고 저음</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-3 font-mono text-neon-sky font-bold">IsPlaying</td>
-                                        <td class="p-3 text-ink-light">false (읽기전용)</td>
-                                        <td class="p-3">현재 재생 중인지 확인용<br><span class="text-xs text-ink-light">if sound.IsPlaying then ... end</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="animate-in grid md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-2 gap-4 max-w-2xl mx-auto mt-8">
                     <div class="lesson-card text-center">
-                        <div class="text-3xl mb-2">▶️</div>
-                        <div class="font-bold font-mono text-sm mb-1">sound:Play()</div>
-                        <p class="text-xs text-ink-light">재생 시작</p>
+                        <div class="text-3xl mb-2">🎵</div>
+                        <div class="font-bold text-neon-mint">페이드 인/아웃</div>
+                        <div class="text-sm text-gray-400">TweenService</div>
                     </div>
                     <div class="lesson-card text-center">
-                        <div class="text-3xl mb-2">⏸️</div>
-                        <div class="font-bold font-mono text-sm mb-1">sound:Pause()</div>
-                        <p class="text-xs text-ink-light">일시정지</p>
+                        <div class="text-3xl mb-2">🗺️</div>
+                        <div class="font-bold text-neon-mint">존 BGM 전환</div>
+                        <div class="text-sm text-gray-400">구역별 음악</div>
                     </div>
                     <div class="lesson-card text-center">
-                        <div class="text-3xl mb-2">⏹️</div>
-                        <div class="font-bold font-mono text-sm mb-1">sound:Stop()</div>
-                        <p class="text-xs text-ink-light">정지 + 처음으로</p>
+                        <div class="text-3xl mb-2">🌊</div>
+                        <div class="font-bold text-neon-mint">3D 공간 사운드</div>
+                        <div class="text-sm text-gray-400">RollOffMaxDistance</div>
+                    </div>
+                    <div class="lesson-card text-center">
+                        <div class="text-3xl mb-2">👟</div>
+                        <div class="font-bold text-neon-mint">발소리 동기화</div>
+                        <div class="text-sm text-gray-400">Humanoid.Running</div>
                     </div>
                 </div>
-
-                <HintBox type="info" title="Sound 이벤트">
-                    <code>sound.Ended</code> → 곡이 끝났을 때 발생<br>
-                    <code>sound.DidLoop</code> → 루프가 한 번 완료될 때마다 발생<br>
-                    <code>sound.Played</code> → Play() 호출 시 발생
-                </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 3: 배치 위치 차이 -->
+    <!-- 슬라이드 2: TweenService 볼륨 페이드 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">핵심 개념</span>
-                <h2 class="title-section mb-6">🗺️ Sound를 어디에 넣어야 할까?</h2>
-            </div>
+            <span class="badge badge-lua mb-4">개념 1</span>
+            <h2 class="title-section mb-6">🎵 TweenService로 볼륨 페이드</h2>
 
-            <div class="flex flex-col gap-5 animate-in">
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div class="lesson-card border-2 border-neon-mint">
-                        <div class="text-center mb-3">
-                            <div class="text-3xl mb-1">🔊</div>
-                            <div class="font-bold text-neon-mint">SoundService</div>
-                        </div>
-                        <p class="text-sm text-ink-light mb-3">어디서나 <strong>같은 음량</strong>으로 들림</p>
-                        <div class="bg-green-50 rounded-lg p-3 text-xs">
-                            ✅ 배경음악(BGM)<br>
-                            ✅ UI 클릭음<br>
-                            ✅ 전역 이펙트음
-                        </div>
-                    </div>
-                    <div class="lesson-card border-2 border-neon-sky">
-                        <div class="text-center mb-3">
-                            <div class="text-3xl mb-1">🌍</div>
-                            <div class="font-bold text-neon-sky">Workspace</div>
-                        </div>
-                        <p class="text-sm text-ink-light mb-3">플레이어와 <strong>거리에 따라</strong> 음량 변화</p>
-                        <div class="bg-blue-50 rounded-lg p-3 text-xs">
-                            ✅ 폭포 소리<br>
-                            ✅ 공간 환경음<br>
-                            ✅ 거리 기반 이벤트
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                    <p class="text-gray-300 mb-4">
+                        게임에서 BGM이 갑자기 <strong class="text-neon-coral">뚝!</strong> 켜지거나 꺼지면 어색하다.
+                        프로 게임들은 <strong class="text-neon-mint">TweenService</strong>를 이용해 볼륨을 <em>서서히</em> 올리거나 내린다.
+                    </p>
+                    <div class="info-box mb-4">
+                        <p class="font-bold mb-2">📌 TweenService:Create() 구조</p>
+                        <div class="text-sm font-mono bg-black/30 p-3 rounded">
+                            TweenService:Create(<br>
+                            &nbsp;&nbsp;<span class="text-neon-sky">대상 오브젝트</span>,<br>
+                            &nbsp;&nbsp;<span class="text-neon-gold">TweenInfo.new(시간)</span>,<br>
+                            &nbsp;&nbsp;<span class="text-neon-mint">{바꿀속성 = 목표값}</span><br>
+                            ):Play()
                         </div>
                     </div>
-                    <div class="lesson-card border-2 border-neon-gold">
-                        <div class="text-center mb-3">
-                            <div class="text-3xl mb-1">📦</div>
-                            <div class="font-bold text-neon-gold">Part 안</div>
+                    <HintBox type="tip" title="Sound에 적용 가능한 Tween 속성">
+                        <ul class="text-sm space-y-1">
+                            <li>• <code>Volume</code> → 볼륨 (0 ~ 1)</li>
+                            <li>• <code>PlaybackSpeed</code> → 재생 속도/피치</li>
+                            <li>• <code>TimePosition</code> → 재생 위치</li>
+                        </ul>
+                    </HintBox>
+                </div>
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">📊 페이드인 vs 그냥 Play()</p>
+                    <div class="space-y-3">
+                        <div class="lesson-card border border-neon-coral/30">
+                            <div class="text-sm font-bold text-neon-coral mb-1">❌ 나쁜 방법</div>
+                            <div class="font-mono text-sm">bgm:Play()</div>
+                            <div class="text-xs text-gray-400 mt-1">→ 갑자기 풀볼륨으로 시작, 어색함</div>
                         </div>
-                        <p class="text-sm text-ink-light mb-3">그 파트 위치에서 <strong>3D 입체</strong>로 들림</p>
-                        <div class="bg-yellow-50 rounded-lg p-3 text-xs">
-                            ✅ 코인 효과음<br>
-                            ✅ 함정 경고음<br>
-                            ✅ NPC 대화음
+                        <div class="lesson-card border border-neon-mint/30">
+                            <div class="text-sm font-bold text-neon-mint mb-1">✅ 좋은 방법</div>
+                            <div class="font-mono text-sm">bgm.Volume = 0<br>bgm:Play()<br>-- Tween으로 0→0.5</div>
+                            <div class="text-xs text-gray-400 mt-1">→ 2초간 서서히 커짐, 자연스러움</div>
                         </div>
+                    </div>
+                    <div class="mt-4 p-3 bg-neon-mint/10 rounded-lg border border-neon-mint/30">
+                        <p class="text-sm text-neon-mint font-bold">💡 fadeOut도 같은 원리</p>
+                        <p class="text-sm text-gray-300 mt-1">Volume을 현재값 → 0으로 Tween, 완료되면 :Stop()</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="lesson-card">
-                    <h4 class="font-bold mb-3">📋 Explorer 트리 예시</h4>
-                    <div class="grid md:grid-cols-2 gap-4 font-mono text-sm">
-                        <div class="bg-green-50 rounded-lg p-4">
-                            <div class="font-bold text-green-700 mb-2">BGM (배경음)</div>
-                            <div class="text-xs space-y-1">
-                                <div>📁 SoundService</div>
-                                <div class="ml-4">🔊 Sound (이름: "BGM")</div>
-                                <div class="ml-8 text-ink-light">Looped: ✓</div>
-                                <div class="ml-8 text-ink-light">Volume: 0.25</div>
-                            </div>
-                        </div>
-                        <div class="bg-yellow-50 rounded-lg p-4">
-                            <div class="font-bold text-yellow-700 mb-2">효과음 (파트 안)</div>
-                            <div class="text-xs space-y-1">
-                                <div>📁 Workspace</div>
-                                <div class="ml-4">📦 Coin (Part)</div>
-                                <div class="ml-8">🔊 Sound (이름: "CoinSound")</div>
-                                <div class="ml-12 text-ink-light">SoundId: rbxassetid://...</div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Explorer 트리 -->
+            <div class="lesson-card mt-4">
+                <p class="font-bold text-neon-gold mb-2">📁 Explorer 구조</p>
+                <div class="font-mono text-sm space-y-1">
+                    <div>📁 SoundService</div>
+                    <div class="ml-4">🔊 BGM &nbsp;&nbsp;<span class="text-gray-400 text-xs">SoundId = rbxassetid://[ID] / Looped = true</span></div>
+                    <div>📁 StarterGui</div>
+                    <div class="ml-4">📁 StarterPlayerScripts</div>
+                    <div class="ml-8">📄 <span class="text-neon-sky">LocalScript</span> &nbsp;&nbsp;<span class="text-gray-400 text-xs">(BGM 제어)</span></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 4: 스튜디오 BGM 설정 방법 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
-                <h2 class="title-section mb-6">따라하기: BGM 삽입하기</h2>
-            </div>
-
-            <div class="flex flex-col gap-6 animate-in">
-                <div class="lesson-card">
-                    <h4 class="font-bold mb-4 flex items-center gap-2">
-                        <span class="text-2xl">🎵</span>
-                        BGM 설정 순서
-                    </h4>
-                    <ol class="space-y-3 text-sm">
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                            <div>Explorer에서 <strong>SoundService</strong> 찾기 (없으면 우클릭 → Insert Object → SoundService)</div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                            <div>SoundService 우클릭 → Insert Object → <strong>Sound</strong></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                            <div>Sound 이름을 <strong>"BGM"</strong>으로 변경</div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
-                            <div>Properties에서 <strong>SoundId</strong>에 에셋 ID 입력: <code>rbxassetid://1843463175</code></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
-                            <div>Properties에서 <strong>Looped</strong> 체크박스 ✓ 체크</div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">6</span>
-                            <div>StarterPlayerScripts 우클릭 → Insert Object → <strong>LocalScript</strong></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">7</span>
-                            <div><strong>F5</strong>로 플레이 → 배경음악 들리는지 확인!</div>
-                        </li>
-                    </ol>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="text-center">
-                        <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/add-2D-audio/Looping-DataModel.png" alt="BGM DataModel" class="rounded-xl w-full" loading="lazy" />
-                        <p class="text-xs text-ink-light mt-2">SoundService 안에 Sound 배치 예시</p>
-                    </div>
-                    <div class="text-center">
-                        <img src="https://prod.docsiteassets.roblox.com/assets/audio/sound-objects/Sound-Point-RollOff.jpg" alt="Sound RollOff" class="rounded-xl w-full" loading="lazy" />
-                        <p class="text-xs text-ink-light mt-2">거리에 따른 음량 감쇠 그래프</p>
-                    </div>
-                </div>
-
-                <HintBox type="tip" title="무료 배경음악 에셋 ID">
-                    <code>rbxassetid://1843463175</code> — 던전/판타지 분위기<br>
-                    <code>rbxassetid://1837849285</code> — 경쾌한 전자음악<br>
-                    <code>rbxassetid://1848183670</code> — 웅장한 판타지<br>
-                    Studio Toolbox → Audio 탭에서 "music"으로 검색해도 찾을 수 있어요!
-                </HintBox>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 5: 퀴즈1 - BGM 기본 설정 -->
+    <!-- 슬라이드 3: 퀴즈 1 - 볼륨 페이드인 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🎵 배경음악(BGM) 루프 재생 설정"
-                setup="SoundService > Sound(이름: BGM) + LocalScript"
-                concepts='["SoundService", "WaitForChild", "Looped", "Play"]'
-                blanks={bgmSetupBlanks}
-                template={bgmSetupTemplate}
-                full-code={bgmSetupFullCode}
+                name="🎵 BGM 페이드인 (TweenService 볼륨)"
+                setup="SoundService > Sound('BGM', SoundId 설정, Looped=true) | StarterPlayerScripts > LocalScript"
+                concepts='["TweenService:Create(대상, TweenInfo, {속성=값})", "TweenInfo.new(시간) — 몇 초 동안 변화할지", "Volume — 볼륨 값 (0=무음, 1=최대)", "tween:Play() — Tween 시작"]'
+                blanks={JSON.stringify(fadeBlanks)}
+                template={fadeTemplate}
+                full-code={fadeFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 6: 퀴즈2 - BGM 볼륨 조절 -->
+    <!-- 슬라이드 4: 존(Zone) 기반 BGM 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">개념 2</span>
+            <h2 class="title-section mb-6">🗺️ 구역별 BGM 자동 전환 시스템</h2>
+
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                    <p class="text-gray-300 mb-4">
+                        Minecraft의 지하 동굴, 마을, 전투 BGM처럼 — 구역(Zone)에 들어가면
+                        자동으로 음악이 바뀌는 시스템이다.
+                        <strong class="text-neon-mint">투명한 파트</strong>를 존으로 쓰면 된다.
+                    </p>
+
+                    <div class="info-box mb-4">
+                        <p class="font-bold mb-2">🔑 핵심 패턴</p>
+                        <ol class="text-sm space-y-2 list-decimal list-inside">
+                            <li><code>currentBGM</code> 변수로 현재 음악 추적</li>
+                            <li>존 파트 Touched → 새 BGM 감지</li>
+                            <li>다른 음악이면 → 이전 꺼주고 새거 켜기</li>
+                            <li>TweenService로 부드럽게 전환!</li>
+                        </ol>
+                    </div>
+
+                    <HintBox type="warning" title="존 파트 설정 주의">
+                        <ul class="text-sm space-y-1">
+                            <li>• <code>CanCollide = false</code> (통과 가능)</li>
+                            <li>• <code>Anchored = true</code> (움직이지 않게)</li>
+                            <li>• <code>Transparency = 0.8</code> (반투명)</li>
+                        </ul>
+                    </HintBox>
+                </div>
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">🗺️ 맵 구조 예시</p>
+                    <div class="bg-black/40 rounded-xl p-4 font-mono text-sm">
+                        <div class="text-center text-gray-400 text-xs mb-3">위에서 본 맵</div>
+                        <div class="grid grid-cols-3 gap-1 text-center">
+                            <div class="bg-green-900/40 border border-green-400/30 rounded p-2 text-xs">
+                                🌲 숲 구역<br>
+                                <span class="text-neon-mint">ForestBGM</span>
+                            </div>
+                            <div class="bg-gray-700/40 border border-gray-400/30 rounded p-2 text-xs">
+                                🏠 마을<br>
+                                <span class="text-neon-sky">TownBGM</span>
+                            </div>
+                            <div class="bg-stone-900/40 border border-red-400/30 rounded p-2 text-xs">
+                                ⚔️ 전투<br>
+                                <span class="text-neon-coral">BattleBGM</span>
+                            </div>
+                        </div>
+                        <div class="text-center mt-2 text-xs text-gray-500">각 구역에 투명 파트 = Zone</div>
+                    </div>
+
+                    <div class="mt-4 lesson-card">
+                        <p class="text-sm font-bold text-neon-gold mb-2">📁 Explorer 구조</p>
+                        <div class="font-mono text-xs space-y-1">
+                            <div>📁 SoundService</div>
+                            <div class="ml-4">🔊 ForestBGM</div>
+                            <div class="ml-4">🔊 TownBGM</div>
+                            <div class="ml-4">🔊 BattleBGM</div>
+                            <div>📁 Workspace</div>
+                            <div class="ml-4">🟦 ForestZone <span class="text-gray-500">(투명 파트)</span></div>
+                            <div class="ml-4">🟦 TownZone</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: 퀴즈 2 - 존 BGM 전환 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🎛️ BGM 볼륨 조절 (LocalScript)"
-                setup="StarterPlayerScripts > LocalScript"
-                concepts='["Volume = 0.25", "Looped", ":Play()"]'
-                blanks={bgmVolumeBlanks}
-                template={bgmVolumeTemplate}
-                full-code={bgmVolumeFullCode}
+                name="🗺️ 구역별 BGM 자동 전환"
+                setup="SoundService > ForestBGM, TownBGM | Workspace > ForestZone (CanCollide=false, Anchored=true, Transparency=0.8) | Script"
+                concepts='["currentBGM 변수 — 현재 재생 중인 사운드 추적", "~= 연산자 — 같지 않을 때 (not equal)", "Touched 이벤트 — 캐릭터가 파트에 닿을 때", "TweenService:Create — 볼륨 서서히 전환"]'
+                blanks={JSON.stringify(zoneBlanks)}
+                template={zoneTemplate}
+                full-code={zoneFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 7: 효과음 + 에셋 ID 개념 -->
+    <!-- 슬라이드 6: 3D 공간 사운드 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">🔊 효과음(SFX)과 에셋 ID</h2>
-            </div>
+            <span class="badge badge-lua mb-4">개념 3</span>
+            <h2 class="title-section mb-6">🌊 3D 공간 사운드 (Spatial Audio)</h2>
 
-            <div class="flex flex-col gap-5 animate-in">
-                <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">rbxassetid:// 사용법</h3>
-                    <div class="bg-ink-deep text-neon-mint font-mono text-sm p-4 rounded-xl mb-4">
-                        <div class="text-ink-light text-xs mb-2">-- SoundId 설정 방법</div>
-                        sound.SoundId = "rbxassetid://<strong class='text-neon-gold'>4590662766</strong>"
-                    </div>
-                    <p class="text-sm text-ink-light">숫자 부분이 에셋 ID예요. Roblox Toolbox에서 오디오를 찾으면 ID를 확인할 수 있어요!</p>
-                </div>
-
-                <div class="lesson-card">
-                    <h4 class="font-bold mb-4">🎧 다양한 무료 효과음 ID</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div>
+                    <p class="text-gray-300 mb-4">
+                        Sound를 <strong class="text-neon-mint">파트의 자식으로</strong> 넣으면
+                        그 파트의 위치에서 소리가 난다.
+                        플레이어가 가까이 갈수록 크게, 멀어질수록 작게 들린다.
+                    </p>
+                    <div class="info-box mb-4">
+                        <p class="font-bold mb-2">📌 핵심 속성</p>
+                        <table class="text-sm w-full">
                             <thead>
-                                <tr class="bg-ink-pale">
-                                    <th class="text-left p-3 font-bold">종류</th>
-                                    <th class="text-left p-3 font-bold">에셋 ID</th>
-                                    <th class="text-left p-3 font-bold">용도</th>
+                                <tr class="border-b border-white/10">
+                                    <th class="text-left py-1 text-neon-sky">속성</th>
+                                    <th class="text-left py-1 text-neon-gold">기본값</th>
+                                    <th class="text-left py-1">설명</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="border-b border-gray-100">
-                                    <td class="p-3">🪙 코인</td>
-                                    <td class="p-3 font-mono text-xs text-neon-sky">rbxassetid://4590662766</td>
-                                    <td class="p-3">코인 수집 효과음</td>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-1 font-mono">RollOffMinDistance</td>
+                                    <td class="py-1 text-neon-gold">10</td>
+                                    <td class="py-1 text-gray-400">이 거리 안에선 최대 볼륨</td>
                                 </tr>
-                                <tr class="border-b border-gray-100 bg-gray-50">
-                                    <td class="p-3">💥 폭발</td>
-                                    <td class="p-3 font-mono text-xs text-neon-sky">rbxassetid://131092162</td>
-                                    <td class="p-3">함정 폭발 효과</td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="p-3">⚡ 번개</td>
-                                    <td class="p-3 font-mono text-xs text-neon-sky">rbxassetid://131332129</td>
-                                    <td class="p-3">전기 함정, 번개</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 bg-gray-50">
-                                    <td class="p-3">🏃 점프</td>
-                                    <td class="p-3 font-mono text-xs text-neon-sky">rbxasset://sounds/action_jump.mp3</td>
-                                    <td class="p-3">캐릭터 기본 점프음</td>
+                                <tr class="border-b border-white/5">
+                                    <td class="py-1 font-mono">RollOffMaxDistance</td>
+                                    <td class="py-1 text-neon-gold">10000</td>
+                                    <td class="py-1 text-gray-400">이 거리 밖에선 안 들림</td>
                                 </tr>
                                 <tr>
-                                    <td class="p-3">🎉 완료</td>
-                                    <td class="p-3 font-mono text-xs text-neon-sky">rbxassetid://1507428517</td>
-                                    <td class="p-3">스테이지 완료, 승리</td>
+                                    <td class="py-1 font-mono">RollOffMode</td>
+                                    <td class="py-1 text-neon-gold">InverseTapered</td>
+                                    <td class="py-1 text-gray-400">거리에 따른 볼륨 감소 방식</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
+                    <HintBox type="tip" title="SoundService vs 파트 자식 Sound">
+                        <ul class="text-sm space-y-1">
+                            <li>• <strong>SoundService</strong>: 어디서든 같은 볼륨 → BGM에 적합</li>
+                            <li>• <strong>파트 자식</strong>: 위치 기반 3D 소리 → 환경음에 적합</li>
+                        </ul>
+                    </HintBox>
                 </div>
-
-                <HintBox type="tip" title="나만의 효과음 찾기">
-                    Studio에서 <strong>Toolbox</strong> → <strong>Audio</strong> 탭 → 검색창에 "coin", "explosion", "win" 등 입력하면<br>
-                    공개된 무료 오디오 에셋을 직접 찾을 수 있어요! 클릭하면 미리 들을 수 있어요.
-                </HintBox>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 8: 코인 효과음 설정 방법 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-roblox mb-4">🛠️ 스튜디오</span>
-                <h2 class="title-section mb-6">따라하기: 코인 효과음 넣기</h2>
-            </div>
-
-            <div class="flex flex-col gap-6 animate-in">
-                <div class="lesson-card">
-                    <ol class="space-y-3 text-sm">
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                            <div>Workspace에서 <strong>코인 Part</strong> 우클릭 → Insert Object → <strong>Sound</strong></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                            <div>Sound 이름을 <strong>"CoinSound"</strong>로 변경</div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                            <div>Properties → <strong>SoundId</strong>: <code>rbxassetid://4590662766</code></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
-                            <div>코인 Part에 <strong>Script</strong> 추가 후 아래 코드 작성</div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">5</span>
-                            <div><strong>F5</strong>로 플레이 → 코인 밟으면 효과음 확인!</div>
-                        </li>
-                    </ol>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="text-center">
-                        <img src="https://prod.docsiteassets.roblox.com/assets/tutorials/add-2D-audio/UI-DataModel.png" alt="Sound in Part" class="rounded-xl w-full" loading="lazy" />
-                        <p class="text-xs text-ink-light mt-2">파트 안에 Sound 오브젝트 배치 예시</p>
-                    </div>
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">Explorer 트리</h4>
-                        <div class="font-mono text-xs space-y-1 text-ink-medium">
-                            <div>📁 Workspace</div>
-                            <div class="ml-4">📦 Coin (Part, 노란색)</div>
-                            <div class="ml-8">🔊 CoinSound (Sound)</div>
-                            <div class="ml-12 text-ink-light">SoundId: rbxassetid://4590662766</div>
-                            <div class="ml-8">📄 Script</div>
-                            <div class="ml-12 text-ink-light">← 다음 슬라이드 코드</div>
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">📡 거리별 볼륨 변화</p>
+                    <div class="bg-black/40 rounded-xl p-4">
+                        <div class="relative h-32 mb-2">
+                            <!-- 간단한 거리 시각화 -->
+                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2">
+                                <div class="text-2xl">🌊</div>
+                                <div class="text-xs text-center text-neon-coral">소스</div>
+                            </div>
+                            <!-- 거리 링 시각화 -->
+                            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-12 h-6 border border-neon-mint/60 rounded-full"></div>
+                            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-24 h-12 border border-neon-gold/40 rounded-full"></div>
+                            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-40 h-20 border border-neon-sky/20 rounded-full"></div>
+                            <div class="absolute top-0 left-2 text-xs text-neon-mint">Min(5스터드)<br>최대 볼륨</div>
+                            <div class="absolute top-0 right-0 text-xs text-gray-500">Max(60스터드)<br>무음</div>
+                        </div>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-neon-mint">0~5 스터드</span>
+                                <span>🔊🔊🔊 최대</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-neon-gold">~30 스터드</span>
+                                <span>🔊🔊 중간</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">60+ 스터드</span>
+                                <span>🔇 안 들림</span>
+                            </div>
                         </div>
                     </div>
+                    <div class="mt-4 lesson-card">
+                        <p class="text-sm font-bold mb-2">🎮 활용 예시</p>
+                        <ul class="text-sm space-y-1 text-gray-300">
+                            <li>🌊 폭포 → 가까이 갈수록 물소리 커짐</li>
+                            <li>🔥 모닥불 → 주변 탁탁거리는 소리</li>
+                            <li>🚪 문 → 문 근처에서만 삐걱 소리</li>
+                            <li>💎 보물 → 근처에서만 반짝 효과음</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 9: 퀴즈3 - 코인 효과음 -->
+    <!-- 슬라이드 7: 퀴즈 3 - 3D 공간 사운드 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🪙 코인 먹으면 효과음 재생"
-                setup="코인 Part > Script + Sound(이름: CoinSound)"
-                concepts='["WaitForChild", "FindFirstChild", "sound:Play()", "Ended:Wait()"]'
-                blanks={coinSoundBlanks}
-                template={coinSoundTemplate}
-                full-code={coinSoundFullCode}
+                name="🌊 3D 공간 사운드 (폭포 효과음)"
+                setup="Workspace > Waterfall (Part, Anchored=true) > Script"
+                concepts='["Instance.new(\"Sound\") — 코드로 Sound 오브젝트 생성", "sound.Parent = 파트 — 파트에 붙여서 3D 위치 사운드!", "RollOffMaxDistance — 이 거리 밖에선 안 들림 (스터드 단위)", "sound:Play() — 재생 시작"]'
+                blanks={JSON.stringify(spatialBlanks)}
+                template={spatialTemplate}
+                full-code={spatialFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 10: 랜덤 BGM 개념 -->
+    <!-- 슬라이드 8: 발소리 속도 동기화 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">🎲 여러 BGM 중 랜덤 재생하기</h2>
-            </div>
+            <span class="badge badge-lua mb-4">개념 4</span>
+            <h2 class="title-section mb-6">👟 달릴수록 빨라지는 발소리</h2>
 
-            <div class="flex flex-col gap-5 animate-in">
-                <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">어떻게 동작할까?</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
-                            <div class="text-sm">
-                                <strong>musicList 테이블</strong>에 여러 BGM의 에셋 ID를 담아요
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 p-3 bg-purple-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-purple-400 text-white flex items-center justify-center text-sm font-bold shrink-0">2</div>
-                            <div class="text-sm">
-                                <strong>math.random(1, #musicList)</strong>으로 1~개수 사이 랜덤 숫자 선택
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-green-400 text-white flex items-center justify-center text-sm font-bold shrink-0">3</div>
-                            <div class="text-sm">
-                                <strong>bgm.SoundId = musicList[randomIndex]</strong>로 음악 변경 후 재생
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-3 p-3 bg-amber-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-sm font-bold shrink-0">4</div>
-                            <div class="text-sm">
-                                <strong>bgm.Ended</strong> 이벤트로 곡이 끝나면 자동으로 다음 곡 재생!
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">#(샵) 연산자</h4>
-                        <div class="bg-ink-pale rounded-lg p-3 font-mono text-sm space-y-2">
-                            <div><span class="text-ink-light">-- 테이블 개수 세기</span></div>
-                            <div>local list = {"A", "B", "C"}</div>
-                            <div>print(<span class="text-neon-gold">#list</span>)  <span class="text-ink-light">-- 3</span></div>
-                        </div>
-                        <p class="text-xs text-ink-light mt-2"># 뒤에 테이블 이름을 쓰면 개수를 자동으로 세줘요!</p>
-                    </div>
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">sound.Ended 이벤트</h4>
-                        <div class="bg-ink-pale rounded-lg p-3 font-mono text-sm space-y-2">
-                            <div><span class="text-ink-light">-- 곡이 끝나면 실행</span></div>
-                            <div>bgm.<span class="text-neon-mint">Ended</span>:Connect(function()</div>
-                            <div class="ml-4">-- 다음 곡 재생!</div>
-                            <div>end)</div>
-                        </div>
-                        <p class="text-xs text-ink-light mt-2">Looped=false로 설정해야 Ended가 발생해요!</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 11: 퀴즈4 - 랜덤 BGM -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🎲 여러 BGM 중 랜덤으로 재생하기"
-                setup="StarterPlayerScripts > LocalScript"
-                concepts='["musicList 테이블", "math.random(1, #musicList)", "bgm.Ended 이벤트"]'
-                blanks={randomBgmBlanks}
-                template={randomBgmTemplate}
-                full-code={randomBgmFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 12: SoundGroup 개념 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">심화 학습</span>
-                <h2 class="title-section mb-6">🎛️ SoundGroup으로 소리 분리 관리</h2>
-            </div>
-
-            <div class="flex flex-col gap-5 animate-in">
-                <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">왜 SoundGroup이 필요할까?</h3>
-                    <p class="text-sm text-ink-light mb-4">게임에는 BGM, 효과음, 환경음 등 다양한 소리가 있어요. SoundGroup을 쓰면 <strong>한 번에 그룹 전체 음량을 조절</strong>할 수 있어요!</p>
-
-                    <div class="grid md:grid-cols-3 gap-3">
-                        <div class="bg-purple-50 rounded-xl p-4 text-center">
-                            <div class="text-2xl mb-2">🎵</div>
-                            <div class="font-bold text-sm mb-1">BGM_Group</div>
-                            <div class="text-xs text-ink-light">Volume: 0.3</div>
-                            <div class="text-xs text-ink-light">배경음악 전체 조절</div>
-                        </div>
-                        <div class="bg-blue-50 rounded-xl p-4 text-center">
-                            <div class="text-2xl mb-2">🔊</div>
-                            <div class="font-bold text-sm mb-1">SFX_Group</div>
-                            <div class="text-xs text-ink-light">Volume: 0.7</div>
-                            <div class="text-xs text-ink-light">효과음 전체 조절</div>
-                        </div>
-                        <div class="bg-green-50 rounded-xl p-4 text-center">
-                            <div class="text-2xl mb-2">🌊</div>
-                            <div class="font-bold text-sm mb-1">Ambient_Group</div>
-                            <div class="text-xs text-ink-light">Volume: 0.5</div>
-                            <div class="text-xs text-ink-light">환경음 전체 조절</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lesson-card">
-                    <h4 class="font-bold mb-3 text-sm">⚠️ 주의! SoundGroup 연결 방법</h4>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-red-50 rounded-xl p-4">
-                            <div class="font-bold text-red-600 text-sm mb-2">❌ 틀린 방법</div>
-                            <div class="font-mono text-xs">
-                                -- Parent로 넣으면 안 돼요!<br>
-                                coinSfx.Parent = sfxGroup
-                            </div>
-                        </div>
-                        <div class="bg-green-50 rounded-xl p-4">
-                            <div class="font-bold text-green-600 text-sm mb-2">✅ 올바른 방법</div>
-                            <div class="font-mono text-xs">
-                                -- SoundGroup 속성에 지정!<br>
-                                coinSfx.SoundGroup = sfxGroup<br>
-                                coinSfx.Parent = SoundService
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <HintBox type="info" title="실용 팁: 런타임 음량 조절">
-                    게임 설정 메뉴에서 BGM만 끄거나 효과음만 끄는 기능을 만들 수 있어요!<br>
-                    <code>bgmGroup.Volume = 0</code> → BGM 음소거<br>
-                    <code>sfxGroup.Volume = 0</code> → 효과음 음소거
-                </HintBox>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 13: 퀴즈5 - SoundGroup -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🎛️ SoundGroup으로 BGM / 효과음 분리 관리"
-                setup="ServerScriptService > Script"
-                concepts='["SoundGroup", "SoundGroup.Volume", "sound.SoundGroup 속성"]'
-                blanks={soundGroupBlanks}
-                template={soundGroupTemplate}
-                full-code={soundGroupFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 14: 도전 과제 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-roblox mb-4">🏆 도전 과제</span>
-                <h2 class="title-section mb-6">나만의 사운드 시스템 만들기!</h2>
-            </div>
-
-            <div class="flex flex-col gap-6 animate-in">
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div class="lesson-card border-2 border-green-200">
-                        <div class="text-center mb-3">
-                            <div class="text-3xl mb-2">⭐</div>
-                            <div class="font-bold text-green-700">기초 미션</div>
-                        </div>
-                        <ul class="text-sm text-ink-light space-y-2">
-                            <li>✅ SoundService에 BGM 넣고 루프 재생</li>
-                            <li>✅ 코인 파트에 효과음 추가</li>
-                            <li>✅ 볼륨 0.25로 설정하기</li>
-                        </ul>
-                    </div>
-                    <div class="lesson-card border-2 border-amber-200">
-                        <div class="text-center mb-3">
-                            <div class="text-3xl mb-2">⭐⭐</div>
-                            <div class="font-bold text-amber-700">도전 미션</div>
-                        </div>
-                        <ul class="text-sm text-ink-light space-y-2">
-                            <li>🎯 BGM 3곡 이상 랜덤 재생</li>
-                            <li>🎯 죽었을 때 효과음 추가</li>
-                            <li>🎯 스테이지 완료 효과음</li>
-                        </ul>
-                    </div>
-                    <div class="lesson-card border-2 border-purple-200">
-                        <div class="text-center mb-3">
-                            <div class="text-3xl mb-2">⭐⭐⭐</div>
-                            <div class="font-bold text-purple-700">하드 미션</div>
-                        </div>
-                        <ul class="text-sm text-ink-light space-y-2">
-                            <li>🔥 SoundGroup으로 BGM/SFX 분리</li>
-                            <li>🔥 PlaybackSpeed로 빠른 구간 = 빠른 BGM</li>
-                            <li>🔥 GUI 버튼으로 BGM 음소거 토글</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <HintBox type="tip" title="구간별 다른 BGM 아이디어">
-                    <strong>평화로운 구간:</strong> 조용한 음악 (Volume = 0.2)<br>
-                    <strong>위험한 구간:</strong> 빠른 템포 음악 (PlaybackSpeed = 1.2)<br>
-                    <strong>보스 구간:</strong> 웅장한 음악 + 효과음 증폭<br>
-                    플레이어가 특정 구역에 들어가면 BGM이 바뀌는 시스템도 만들 수 있어요!
-                </HintBox>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 15: 확인 퀴즈 + 마무리 -->
-    <section class="slide">
-        <div class="max-w-3xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-quiz mb-4">확인 퀴즈</span>
-                <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
-            </div>
-
-            <div class="space-y-6">
-                <div class="animate-in">
-                    <quiz-question
-                        question="배경음악을 어디서나 같은 음량으로 들리게 하려면 Sound를 어디에 넣어야 할까?"
-                        correct="A"
-                        options={quiz1Options}
-                        correct-explanation="정답! SoundService 안에 배치하면 거리와 상관없이 어디서나 같은 음량으로 들려요. BGM에 딱이에요!"
-                        wrong-explanation="SoundService가 정답이에요! Workspace에 넣으면 거리에 따라 음량이 달라지기 때문에 BGM에는 적합하지 않아요."
-                    ></quiz-question>
-                </div>
-
-                <div class="animate-in">
-                    <quiz-question
-                        question="코인 효과음을 재생하는 올바른 메서드는?"
-                        correct="A"
-                        options={quiz2Options}
-                        correct-explanation="정답! :Play()로 Sound 오브젝트를 재생해요. :Stop()은 멈추기, :Pause()는 일시정지예요."
-                        wrong-explanation=":Play()가 정답이에요! sound:Play()로 효과음을 재생해요."
-                    ></quiz-question>
-                </div>
-
-                <div class="animate-in">
-                    <quiz-question
-                        question="곡이 끝났을 때 발생하는 Sound 이벤트는?"
-                        correct="A"
-                        options={quiz3Options}
-                        correct-explanation="정답! Ended 이벤트는 Sound가 끝까지 재생되면 발생해요. 이걸 활용해서 다음 곡을 자동 재생할 수 있어요!"
-                        wrong-explanation="Ended가 정답이에요! sound.Ended:Connect(function() ... end)로 곡이 끝났을 때 동작을 설정해요."
-                    ></quiz-question>
-                </div>
-
-                <div class="animate-in">
-                    <quiz-question
-                        question="musicList 테이블의 항목 개수를 구하는 방법은?"
-                        correct="A"
-                        options={quiz4Options}
-                        correct-explanation="정답! # 연산자를 테이블 앞에 붙이면 항목 개수를 반환해요. math.random(1, #musicList)로 랜덤 인덱스를 뽑아요!"
-                        wrong-explanation="#musicList가 정답이에요! # 연산자는 테이블의 개수를 세는 Lua 문법이에요."
-                    ></quiz-question>
-                </div>
-            </div>
-
-            <div class="animate-in mt-8 text-center">
-                <div class="inline-block bg-gradient-to-r from-purple-100/50 to-blue-100/50 rounded-2xl p-6">
-                    <div class="text-2xl mb-2">🎉</div>
-                    <h3 class="font-bold text-lg mb-2">10주차 A 완료!</h3>
-                    <p class="text-ink-light text-sm">
-                        사운드 시스템을 완전 정복했어요!<br>
-                        다음 시간에는 고급 오비 맵 설계 기법을 배워요 🏃
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-gray-300 mb-4">
+                        <code class="text-neon-mint">Humanoid.Running</code> 이벤트는
+                        캐릭터의 이동 속도(speed)를 계속 알려준다.
+                        이 값으로 <code class="text-neon-gold">PlaybackSpeed</code>를 조절하면
+                        속도에 맞게 발소리 빠르기가 바뀐다!
                     </p>
+
+                    <div class="info-box mb-4">
+                        <p class="font-bold mb-2">📌 Humanoid.Running</p>
+                        <ul class="text-sm space-y-2">
+                            <li>• 캐릭터가 움직일 때마다 <code>speed</code> 값을 전달</li>
+                            <li>• 기본 이동속도: <code class="text-neon-gold">WalkSpeed = 16</code></li>
+                            <li>• 멈추면 <code>speed = 0</code> 으로 발동</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <p class="font-bold mb-2">📌 PlaybackSpeed</p>
+                        <ul class="text-sm space-y-2">
+                            <li>• <code>1.0</code> = 정상 속도</li>
+                            <li>• <code>2.0</code> = 2배 빠르게 (피치도 높아짐)</li>
+                            <li>• <code>0</code> = 정지 (볼륨은 그대로)</li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">🧮 speed / 14 계산 이유</p>
+                    <div class="bg-black/40 rounded-xl p-4 text-sm mb-4">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-center border-b border-white/10 pb-2">
+                                <span class="text-gray-400">이동속도 (speed)</span>
+                                <span class="text-neon-gold">PlaybackSpeed</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>0 (정지)</span>
+                                <span class="text-neon-coral">0 → 발소리 중단</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>14 (조금 느림)</span>
+                                <span class="text-neon-gold">14/14 = <strong>1.0</strong></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>16 (기본)</span>
+                                <span class="text-neon-mint">16/14 ≈ <strong>1.14</strong></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>32 (빠름)</span>
+                                <span class="text-neon-sky">32/14 ≈ <strong>2.28</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lesson-card">
+                        <p class="text-sm font-bold mb-2">📁 Explorer 구조</p>
+                        <div class="font-mono text-xs space-y-1">
+                            <div>📁 StarterCharacterScripts</div>
+                            <div class="ml-4">📄 <span class="text-neon-sky">LocalScript</span></div>
+                            <div>📁 Character (자동 생성)</div>
+                            <div class="ml-4">📁 HumanoidRootPart</div>
+                            <div class="ml-8">🔊 Footstep <span class="text-gray-500">(발소리 Sound)</span></div>
+                            <div class="ml-4">🧍 Humanoid</div>
+                        </div>
+                    </div>
+
+                    <HintBox type="tip" title="발소리 에셋 찾기">
+                        Roblox 라이브러리에서 "footstep sound"로 검색하거나,
+                        에셋 ID: <code>5853037813</code> (자갈 발소리) 같은 무료 에셋 활용
+                    </HintBox>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Lit 컴포넌트 로드 -->
+    <!-- 슬라이드 9: 퀴즈 4 - 발소리 동기화 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="👟 달릴수록 빨라지는 발소리"
+                setup="StarterCharacterScripts > LocalScript | HumanoidRootPart > Sound('Footstep', SoundId 설정, Looped=true)"
+                concepts='["Humanoid.Running — 이동 속도 변화를 실시간 감지", "PlaybackSpeed — 사운드 재생 속도 (=피치)", "speed / 14 — 속도를 발소리 빠르기로 변환", "footstep.IsPlaying — 현재 재생 중인지 확인"]'
+                blanks={JSON.stringify(footstepBlanks)}
+                template={footstepTemplate}
+                full-code={footstepFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 피치 효과 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">개념 5</span>
+            <h2 class="title-section mb-6">🏆 승리 사운드 피치 업 효과</h2>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-gray-300 mb-4">
+                        마리오가 코인을 먹거나 골인할 때 효과음이 점점 높아지는 느낌 알지?
+                        <code class="text-neon-mint">PlaybackSpeed</code>를 TweenService로
+                        0.8 → 2.0까지 올리면 피치가 점점 높아지는 효과를 낼 수 있다!
+                    </p>
+
+                    <div class="info-box mb-4">
+                        <p class="font-bold mb-2">🎵 PlaybackSpeed와 피치 관계</p>
+                        <ul class="text-sm space-y-2">
+                            <li>• <code class="text-neon-gold">0.5</code> = 1옥타브 낮음 (느리고 낮음)</li>
+                            <li>• <code class="text-neon-mint">1.0</code> = 기본 (원본 사운드)</li>
+                            <li>• <code class="text-neon-sky">2.0</code> = 1옥타브 높음 (빠르고 높음)</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box">
+                        <p class="font-bold mb-2">📌 EasingStyle 종류</p>
+                        <ul class="text-sm space-y-1">
+                            <li>• <code>Linear</code>: 일정하게 변화</li>
+                            <li>• <code>Quad</code>: 처음 빠르고 나중에 천천히</li>
+                            <li>• <code>Bounce</code>: 튕기는 효과</li>
+                            <li>• <code>Elastic</code>: 스프링 효과</li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">🎵 피치 변화 시각화</p>
+                    <div class="bg-black/40 rounded-xl p-4 mb-4">
+                        <div class="flex items-end justify-between h-24 mb-2">
+                            <div class="text-xs text-gray-500 -rotate-90 mr-2">피치</div>
+                            <!-- 피치 그래프 바들 -->
+                            <div class="flex items-end gap-1 flex-1">
+                                <div class="w-4 bg-neon-coral/60 rounded-t" style="height: 20%"></div>
+                                <div class="w-4 bg-neon-coral/60 rounded-t" style="height: 30%"></div>
+                                <div class="w-4 bg-neon-gold/60 rounded-t" style="height: 45%"></div>
+                                <div class="w-4 bg-neon-gold/60 rounded-t" style="height: 60%"></div>
+                                <div class="w-4 bg-neon-mint/60 rounded-t" style="height: 75%"></div>
+                                <div class="w-4 bg-neon-mint/60 rounded-t" style="height: 88%"></div>
+                                <div class="w-4 bg-neon-sky/60 rounded-t" style="height: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>시작(0.8)</span>
+                            <span>→ 시간 →</span>
+                            <span>끝(2.0)</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="lesson-card border border-neon-coral/30 text-sm">
+                            <span class="text-neon-coral font-bold">시작:</span> PlaybackSpeed = 0.8 (낮은 음)
+                        </div>
+                        <div class="text-center text-gray-400">⬇️ 2초간 TweenService</div>
+                        <div class="lesson-card border border-neon-mint/30 text-sm">
+                            <span class="text-neon-mint font-bold">끝:</span> PlaybackSpeed = 2.0 (높은 음)
+                        </div>
+                    </div>
+
+                    <HintBox type="tip" title="코인 효과음에도 응용!">
+                        코인을 많이 먹을수록 피치가 올라가게:
+                        연속으로 먹을 때마다 PlaybackSpeed += 0.1
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 퀴즈 5 - 피치 업 효과 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🏆 승리 사운드 피치 업 효과"
+                setup="SoundService > WinSound (SoundId 설정) | Workspace > GoalPart (Anchored) > Script"
+                concepts='["winSound:Play() — 사운드 재생 시작", "TweenInfo.new(2, Enum.EasingStyle.Quad) — 2초, Quad 이징", "{PlaybackSpeed = 2.0} — 목표 PlaybackSpeed 설정", "pitchTween:Play() — Tween 시작으로 피치 점점 높이기"]'
+                blanks={JSON.stringify(pitchBlanks)}
+                template={pitchTemplate}
+                full-code={pitchFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 종합 확인 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">종합 퀴즈</span>
+            <h2 class="title-section mb-8 text-center">오늘 배운 것 확인!</h2>
+            <div class="grid grid-cols-1 gap-6 max-w-2xl mx-auto">
+
+                <quiz-question
+                    question="TweenService로 BGM 볼륨을 0에서 0.5로 서서히 올리려면 어디에 넣어야 할까?"
+                    correct="A"
+                    options={quiz1Options}
+                    correct-explanation="맞아! TweenService는 숫자 속성을 부드럽게 변화시켜주는 서비스야. Sound의 Volume 속성도 Tween으로 조절할 수 있어!"
+                    wrong-explanation="TweenService가 맞아. SoundService는 사운드를 관리하고, RunService는 프레임마다 실행하는 서비스야."
+                ></quiz-question>
+
+                <quiz-question
+                    question="존(Zone) BGM 전환 시스템에서 플레이어가 ForestZone 파트를 밟았을 때 발동되는 이벤트는?"
+                    correct="A"
+                    options={quiz2Options}
+                    correct-explanation="맞아! Touched 이벤트는 캐릭터가 파트에 닿을 때 발동돼. TouchEnded는 파트에서 떠날 때야!"
+                    wrong-explanation="Touched가 정답이야. 파트에 닿을 때 = Touched, 떠날 때 = TouchEnded!"
+                ></quiz-question>
+
+                <quiz-question
+                    question="3D 공간 사운드에서 이 거리 밖에선 소리가 안 들리게 설정하는 속성은?"
+                    correct="A"
+                    options={quiz3Options}
+                    correct-explanation="정확해! RollOffMaxDistance = 최대 감쇠 거리. 이 거리 밖에서는 소리가 전혀 들리지 않아!"
+                    wrong-explanation="RollOffMaxDistance가 맞아. '거리 밖에서 안 들림' = MaxDistance!"
+                ></quiz-question>
+
+                <quiz-question
+                    question="Humanoid.Running에서 발소리 PlaybackSpeed를 이동 속도에 맞추려면 어떻게 계산할까? (기본 속도 = 16)"
+                    correct="A"
+                    options={quiz4Options}
+                    correct-explanation="맞아! speed / 14를 쓰면 기본 이동속도(16)일 때 PlaybackSpeed ≈ 1.14가 돼서 살짝 빠른 발소리가 나. 자연스럽게 속도에 비례해!"
+                    wrong-explanation="speed / 14야! 14로 나누면 속도에 딱 맞는 발소리 빠르기가 나와."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 실습 아이디어 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">실습 아이디어</span>
+            <h2 class="title-section mb-6">🎮 오늘 배운 기술로 만들 수 있는 것들</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="lesson-card border border-neon-mint/30">
+                    <div class="text-2xl mb-2">🎵</div>
+                    <h3 class="font-bold text-neon-mint mb-2">구역별 BGM 오비 맵</h3>
+                    <p class="text-sm text-gray-300 mb-3">
+                        초반부는 경쾌한 음악, 중반은 긴장감 있는 음악, 보스 구간은 웅장한 BGM으로 전환.
+                        게임 분위기를 음악으로 완성!
+                    </p>
+                    <div class="text-xs text-gray-500">
+                        사용: 존 BGM 전환 + TweenService 페이드
+                    </div>
+                </div>
+
+                <div class="lesson-card border border-neon-sky/30">
+                    <div class="text-2xl mb-2">🌊</div>
+                    <h3 class="font-bold text-neon-sky mb-2">살아있는 환경음 맵</h3>
+                    <p class="text-sm text-gray-300 mb-3">
+                        폭포 소리, 모닥불 탁탁, 바람 소리 등 환경 파트마다
+                        3D 사운드 추가. 맵이 훨씬 실감나게!
+                    </p>
+                    <div class="text-xs text-gray-500">
+                        사용: 3D 공간 사운드 (RollOffMaxDistance)
+                    </div>
+                </div>
+
+                <div class="lesson-card border border-neon-gold/30">
+                    <div class="text-2xl mb-2">👟</div>
+                    <h3 class="font-bold text-neon-gold mb-2">스피드 부스터 발소리</h3>
+                    <p class="text-sm text-gray-300 mb-3">
+                        스피드 패드 밟으면 WalkSpeed 증가 + 발소리도 자동으로
+                        더 빠르게! 속도감이 더 실감남.
+                    </p>
+                    <div class="text-xs text-gray-500">
+                        사용: Humanoid.Running + PlaybackSpeed
+                    </div>
+                </div>
+
+                <div class="lesson-card border border-neon-coral/30">
+                    <div class="text-2xl mb-2">🏆</div>
+                    <h3 class="font-bold text-neon-coral mb-2">콤보 코인 효과음</h3>
+                    <p class="text-sm text-gray-300 mb-3">
+                        코인을 연속으로 먹을수록 효과음 피치가 점점 올라감.
+                        마리오 스타 코인처럼 시간 내 못 먹으면 피치 리셋!
+                    </p>
+                    <div class="text-xs text-gray-500">
+                        사용: PlaybackSpeed += 0.1 per coin
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="다음 시간 예고: 10B 타워/점프맵 고급 기믹">
+                다음 시간엔 ClickDetector 버튼으로 순차 계단 소환, 저중력 구역,
+                색깔 트랩 등 타워/점프맵에서 쓰이는 핵심 메커니즘을 배울 거야!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 14: 자주 쓰는 SoundId 레퍼런스 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">레퍼런스</span>
+            <h2 class="title-section mb-6">📋 사운드 시스템 치트시트</h2>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">🔧 자주 쓰는 코드 패턴</p>
+                    <div class="space-y-3">
+                        <div class="lesson-card text-sm">
+                            <div class="text-neon-mint font-bold mb-1">🎵 BGM 페이드인</div>
+                            <div class="font-mono text-xs bg-black/30 p-2 rounded">
+                                sound.Volume = 0 / sound:Play()<br>
+                                TweenService:Create(sound,<br>
+                                &nbsp;&nbsp;TweenInfo.new(2),<br>
+                                &nbsp;&nbsp;{'{'}{'}'}Volume = 0.5{'}'}):Play()
+                            </div>
+                        </div>
+                        <div class="lesson-card text-sm">
+                            <div class="text-neon-sky font-bold mb-1">🌊 3D 사운드</div>
+                            <div class="font-mono text-xs bg-black/30 p-2 rounded">
+                                local s = Instance.new("Sound")<br>
+                                s.Parent = part  -- 파트에 붙임<br>
+                                s.RollOffMaxDistance = 60<br>
+                                s.Looped = true / s:Play()
+                            </div>
+                        </div>
+                        <div class="lesson-card text-sm">
+                            <div class="text-neon-gold font-bold mb-1">👟 발소리 동기화</div>
+                            <div class="font-mono text-xs bg-black/30 p-2 rounded">
+                                humanoid.Running:Connect(<br>
+                                &nbsp;&nbsp;function(speed)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;footstep.PlaybackSpeed = speed/14<br>
+                                end)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="font-bold text-neon-gold mb-3">🎵 Sound 핵심 속성 정리</p>
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-white/20">
+                                <th class="text-left py-2 text-neon-sky">속성</th>
+                                <th class="text-left py-2">설명</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-300">
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 font-mono text-xs">SoundId</td>
+                                <td class="py-2 text-xs">에셋 ID (rbxassetid://숫자)</td>
+                            </tr>
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 font-mono text-xs">Volume</td>
+                                <td class="py-2 text-xs">볼륨 (0~1, 기본 0.5)</td>
+                            </tr>
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 font-mono text-xs">PlaybackSpeed</td>
+                                <td class="py-2 text-xs">재생 속도/피치 (기본 1.0)</td>
+                            </tr>
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 font-mono text-xs">Looped</td>
+                                <td class="py-2 text-xs">반복 재생 여부</td>
+                            </tr>
+                            <tr class="border-b border-white/10">
+                                <td class="py-2 font-mono text-xs">RollOffMaxDistance</td>
+                                <td class="py-2 text-xs">최대 감쇠 거리 (3D 사운드)</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2 font-mono text-xs">IsPlaying</td>
+                                <td class="py-2 text-xs">재생 중인지 확인 (읽기 전용)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-4 p-3 bg-neon-mint/10 rounded-lg border border-neon-mint/30">
+                        <p class="text-sm font-bold text-neon-mint mb-1">💡 사운드 배치 원칙</p>
+                        <ul class="text-xs text-gray-300 space-y-1">
+                            <li>• BGM → <strong>SoundService</strong> (전체 균일 볼륨)</li>
+                            <li>• 환경음 → <strong>파트 자식</strong> (3D 위치 기반)</li>
+                            <li>• UI 효과음 → <strong>StarterGui</strong> (LocalScript)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 15: 마무리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <div class="text-6xl mb-6">🎵</div>
+                <h2 class="title-section mb-4">고급 사운드 시스템 완료!</h2>
+                <p class="text-gray-400 mb-8 max-w-xl">
+                    오늘 배운 기술들로 게임이 훨씬 살아있게 느껴질 거야.
+                    소리 하나가 게임의 분위기를 완전히 바꿔줘!
+                </p>
+
+                <div class="grid grid-cols-1 gap-3 max-w-lg mx-auto mb-8 text-left">
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">TweenService 볼륨 페이드</div>
+                            <div class="text-sm text-gray-400">BGM을 자연스럽게 켜고 끄기</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">존(Zone) 기반 BGM 전환</div>
+                            <div class="text-sm text-gray-400">구역마다 다른 음악 자동 재생</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">3D 공간 사운드</div>
+                            <div class="text-sm text-gray-400">파트에 붙여서 거리별 볼륨 조절</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">발소리 속도 동기화</div>
+                            <div class="text-sm text-gray-400">Humanoid.Running + PlaybackSpeed</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">피치 업 효과</div>
+                            <div class="text-sm text-gray-400">TweenService로 승리 효과음 완성</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-neon-gold font-bold text-lg">
+                    다음 시간: 10B — 타워/점프맵 고급 기믹 🪜
+                </div>
+            </div>
+        </div>
+    </section>
+
     <script>
         import('../../../components/lit/index').catch(console.error);
     </script>

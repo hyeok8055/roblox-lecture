@@ -3,590 +3,697 @@ import LessonLayout from '../../../layouts/LessonLayout.astro';
 import HintBox from '../../../components/astro/HintBox.astro';
 
 // 확인 퀴즈 옵션
-const quiz1Options = JSON.stringify(["TweenService:Create()", "RunService.Heartbeat", "Part:MoveTo()", "CFrame.new()"]);
-const quiz2Options = JSON.stringify(["-1", "0", "1", "10"]);
-const quiz3Options = JSON.stringify(["AssemblyLinearVelocity", "Velocity", "BodyVelocity", "LinearVelocity"]);
-const quiz4Options = JSON.stringify(["i / 10", "i", "0.1", "i * 10"]);
+const quiz1Options = JSON.stringify(["MouseClick", "Triggered", "Touched", "Activated"]);
+const quiz2Options = JSON.stringify(["Workspace.Gravity", "Humanoid.GravityScale", "workspace.FallenPartsDestroyHeight", "Humanoid.JumpPower"]);
+const quiz3Options = JSON.stringify(["JumpPower", "WalkSpeed", "Health", "MaxHealth"]);
+const quiz4Options = JSON.stringify(["math.random(1, #COLORS)", "#COLORS", "math.random()", "1"]);
 
 // =========================================
 // 드롭다운 퀴즈 데이터 (6개)
 // =========================================
 
-// 퀴즈 1: 수평 이동 플랫폼
-const movePlatformBlanks = JSON.stringify([
-    { id: "b1", correct: "\"TweenService\"", options: ["\"TweenService\"", "\"RunService\"", "\"Workspace\"", "\"Players\""] },
-    { id: "b2", correct: "Vector3.new(20, 0, 0)", options: ["Vector3.new(20, 0, 0)", "Vector3.new(0, 20, 0)", "Vector3.new(0, 0, 20)", "Vector3.new(20, 20, 0)"] },
-    { id: "b3", correct: "-1", options: ["-1", "0", "1", "10"] },
+// 퀴즈 1: ClickDetector 순차 계단 소환
+const stairsBlanks = JSON.stringify([
+    { id: "b1", correct: "\"ClickDetector\"", options: ["\"ClickDetector\"", "\"Button\"", "\"Trigger\"", "\"ProximityPrompt\""] },
+    { id: "b2", correct: "MouseClick", options: ["MouseClick", "Triggered", "Touched", "Activated"] },
+    { id: "b3", correct: "0", options: ["0", "1", "0.5", "nil"] },
     { id: "b4", correct: "true", options: ["true", "false", "nil", "0"] }
 ]);
-const movePlatformTemplate = `-- ========================================
--- 🚂 수평 왕복 이동 플랫폼
--- ========================================
--- 📦 준비: Part (Anchored ✓) + Script
--- 💡 TweenService = 파트를 부드럽게 움직이는 서비스
--- 💡 TweenInfo = 이동 방식 설정 (시간, 속도, 반복, 왕복)
--- 💡 RepeatCount = -1 이면 무한반복!
--- 💡 Reverses = true 이면 왔다갔다 왕복!
--- ========================================
-
--- 💡 TweenService 가져오기
-local TweenService = game:GetService([b1])
-local platform = script.Parent
-
--- 💡 시작 위치 기억
-local startPos = platform.Position
--- 💡 도착 위치 = 오른쪽으로 20스터드
-local endPos = startPos + [b2]
-
--- 💡 이동 방식 설정
-local tweenInfo = TweenInfo.new(
-    2,                           -- 💡 이동에 걸리는 시간 (초)
-    Enum.EasingStyle.Linear,     -- 💡 일정한 속도
-    Enum.EasingDirection.InOut,  -- 💡 끝에서 살짝 부드럽게
-    [b3],                        -- 💡 -1 = 무한 반복!
-    [b4],                        -- 💡 true = 왔다갔다 왕복!
-    0.5                          -- 💡 방향 바꿀 때 0.5초 대기
-)
-
--- 💡 트윈 생성: 플랫폼 위치를 endPos로 이동
-local tween = TweenService:Create(platform, tweenInfo, {Position = endPos})
-tween:Play()`;
-const movePlatformFullCode = `-- 🚂 수평 이동 플랫폼
--- 📦 Part (Anchored=true) > Script
-local TweenService = game:GetService("TweenService")
-local platform = script.Parent
-local startPos = platform.Position
-local endPos = startPos + Vector3.new(20, 0, 0)
-
-local tweenInfo = TweenInfo.new(
-    2,
-    Enum.EasingStyle.Linear,
-    Enum.EasingDirection.InOut,
-    -1,    -- 무한반복
-    true,  -- 왕복
-    0.5
-)
-
-local tween = TweenService:Create(platform, tweenInfo, {Position = endPos})
-tween:Play()`;
-
-// 퀴즈 2: 수직 이동 플랫폼
-const vertPlatformBlanks = JSON.stringify([
-    { id: "b1", correct: "15", options: ["15", "5", "30", "0"] },
-    { id: "b2", correct: "Sine", options: ["Sine", "Linear", "Bounce", "Back"] },
-    { id: "b3", correct: "Position", options: ["Position", "CFrame", "Size", "Color"] }
-]);
-const vertPlatformTemplate = `-- ========================================
--- 🛗 위아래 수직 이동 플랫폼
--- ========================================
--- 📦 준비: Part (Anchored ✓) + Script
--- 💡 수직 이동 = Y값만 변경!
--- 💡 EasingStyle.Sine = 가속/감속이 자연스러워서 수직 이동에 딱!
--- 💡 꼭대기에서 1초 대기 후 내려옴 (DelayTime = 1)
--- ========================================
-
-local TweenService = game:GetService("TweenService")
-local platform = script.Parent
-
-local startPos = platform.Position
--- 💡 Y값만 늘려서 위로 올라감! (15스터드 위)
-local topPos = startPos + Vector3.new(0, [b1], 0)
-
--- 💡 Sine = 자연스럽게 가속/감속
-local tweenInfo = TweenInfo.new(
-    3,                            -- 💡 3초 동안 이동 (느릴수록 쉬운 난이도)
-    Enum.EasingStyle.[b2],        -- 💡 자연스러운 가속/감속
-    Enum.EasingDirection.InOut,
-    -1,
-    true,
-    1   -- 💡 꼭대기에서 1초 대기 후 내려옴
-)
-
--- 💡 Position 속성을 topPos로 이동
-local tween = TweenService:Create(platform, tweenInfo, {[b3] = topPos})
-tween:Play()`;
-const vertPlatformFullCode = `-- 🛗 수직 이동 플랫폼
--- 📦 Part (Anchored=true) > Script
-local TweenService = game:GetService("TweenService")
-local platform = script.Parent
-local startPos = platform.Position
-local topPos = startPos + Vector3.new(0, 15, 0)
-
-local tweenInfo = TweenInfo.new(
-    3,
-    Enum.EasingStyle.Sine,
-    Enum.EasingDirection.InOut,
-    -1,
-    true,
-    1
-)
-
-local tween = TweenService:Create(platform, tweenInfo, {Position = topPos})
-tween:Play()`;
-
-// 퀴즈 3: 회전 장애물
-const spinnerBlanks = JSON.stringify([
-    { id: "b1", correct: "\"RunService\"", options: ["\"RunService\"", "\"TweenService\"", "\"Workspace\"", "\"Players\""] },
-    { id: "b2", correct: "Heartbeat", options: ["Heartbeat", "Stepped", "RenderStepped", "Connect"] },
-    { id: "b3", correct: "ROTATION_SPEED * deltaTime", options: ["ROTATION_SPEED * deltaTime", "deltaTime", "ROTATION_SPEED", "90"] }
-]);
-const spinnerTemplate = `-- ========================================
--- 🌀 회전하는 장애물 (스피너)
--- ========================================
--- 📦 준비: Part (Anchored ✓, 길쭉한 막대) + Script
--- 💡 RunService = 매 프레임마다 뭔가를 실행하는 서비스
--- 💡 deltaTime = 지난 프레임과 현재 사이의 시간(초)
---    → 이걸 곱해야 프레임 속도와 상관없이 일정하게 회전!
--- 💡 math.rad() = 도(°)를 라디안으로 변환 (Lua 필수!)
--- ========================================
-
-local RunService = game:GetService([b1])
-local spinner = script.Parent
-
--- 💡 초당 회전 각도 (90 = 초당 90도 = 4초에 한 바퀴)
-local ROTATION_SPEED = 90
-
--- 💡 Heartbeat = 매 프레임마다 실행됨
-RunService.[b2]:Connect(function(deltaTime)
-    -- 💡 CFrame을 Y축으로 회전시키기!
-    spinner.CFrame = spinner.CFrame * CFrame.Angles(
-        0,                                    -- 💡 X축: 회전 없음
-        math.rad([b3]),   -- 💡 Y축: 회전!
-        0                                     -- 💡 Z축: 회전 없음
-    )
-end)`;
-const spinnerFullCode = `-- 🌀 회전 장애물
--- 📦 Part (Anchored=true) > Script
-local RunService = game:GetService("RunService")
-local spinner = script.Parent
-local ROTATION_SPEED = 90
-
-RunService.Heartbeat:Connect(function(deltaTime)
-    spinner.CFrame = spinner.CFrame * CFrame.Angles(
-        0,
-        math.rad(ROTATION_SPEED * deltaTime),
-        0
-    )
-end)`;
-
-// 퀴즈 4: 컨베이어 벨트
-const conveyorBlanks = JSON.stringify([
-    { id: "b1", correct: "AssemblyLinearVelocity", options: ["AssemblyLinearVelocity", "Velocity", "BodyVelocity", "LinearVelocity"] },
-    { id: "b2", correct: "LookVector", options: ["LookVector", "RightVector", "UpVector", "Position"] },
-    { id: "b3", correct: "SPEED", options: ["SPEED", "1", "0", "-SPEED"] }
-]);
-const conveyorTemplate = `-- ========================================
--- 🏭 컨베이어 벨트
--- ========================================
--- 📦 준비: Part (Anchored ✓, 납작한 판) + Script
--- 💡 AssemblyLinearVelocity = 파트 위의 물체를 미는 힘!
--- 💡 CFrame.LookVector = 파트가 바라보는 앞방향 벡터
---    → 파트를 원하는 방향으로 회전시켜 놓으면 그 방향으로 밀어냄
--- ========================================
-
-local conveyor = script.Parent
-
--- 💡 밀어내는 속도 (숫자가 클수록 빠름)
-local SPEED = 20
-
--- 💡 파트 앞방향으로 초당 SPEED 스터드만큼 밀어냄!
--- 💡 한 번만 설정하면 계속 작동해요 (루프 불필요!)
-conveyor.[b1] = conveyor.CFrame.[b2] * [b3]
-
-print("🏭 컨베이어 벨트 활성화! 속도:", SPEED)`;
-const conveyorFullCode = `-- 🏭 컨베이어 벨트
--- 📦 Part (Anchored=true) > Script
-local conveyor = script.Parent
-local SPEED = 20
-
-conveyor.AssemblyLinearVelocity = conveyor.CFrame.LookVector * SPEED`;
-
-// 퀴즈 5: 사라지는 함정
-const fadingTrapBlanks = JSON.stringify([
-    { id: "b1", correct: "i / 10", options: ["i / 10", "i", "0.1", "i * 10"] },
-    { id: "b2", correct: "false", options: ["false", "true", "nil", "0"] },
-    { id: "b3", correct: "true", options: ["true", "false", "nil", "0"] }
-]);
-const fadingTrapTemplate = `-- ========================================
--- 💨 밟으면 사라지는 함정 플랫폼
--- ========================================
--- 📦 준비: Part (Anchored ✓, 노란색) + Script
--- 💡 isTouched = debounce (동시에 여러 번 실행 방지)
--- 💡 for i = 1, 10 → 10번 반복하면서 0.1씩 투명해짐!
--- 💡 CanCollide = false → 이제 발이 빠져 떨어짐!
--- ========================================
-
-local platform = script.Parent
-local isTouched = false   -- 💡 중복 방지 플래그
-
-local function fade()
-    if isTouched then return end   -- 💡 이미 진행 중이면 무시
-    isTouched = true
-
-    -- 💡 1초에 걸쳐 서서히 투명해짐
-    for i = 1, 10 do
-        -- 💡 i=1이면 0.1, i=5면 0.5, i=10이면 1.0 (완전 투명)
-        platform.Transparency = [b1]
-        task.wait(0.1)   -- 💡 0.1초마다 한 단계씩
-    end
-
-    -- 💡 투명해지면 이제 통과됨 (떨어짐!)
-    platform.CanCollide = [b2]
-
-    -- 💡 3초 후 다시 복구
-    task.wait(3)
-    platform.Transparency = 0   -- 💡 다시 보임
-    platform.CanCollide = [b3]  -- 💡 다시 밟을 수 있음
-    isTouched = false           -- 💡 잠금 해제
-end
-
-platform.Touched:Connect(fade)`;
-const fadingTrapFullCode = `-- 💨 사라지는 함정
--- 📦 Part (Anchored=true) > Script
-local platform = script.Parent
-local isTouched = false
-
-local function fade()
-    if isTouched then return end
-    isTouched = true
-
-    for i = 1, 10 do
-        platform.Transparency = i / 10
-        task.wait(0.1)
-    end
-
-    platform.CanCollide = false
-    task.wait(3)
-    platform.Transparency = 0
-    platform.CanCollide = true
-    isTouched = false
-end
-
-platform.Touched:Connect(fade)`;
-
-// 퀴즈 6: 고급 체크포인트 시스템
-const checkpointBlanks = JSON.stringify([
-    { id: "b1", correct: "\"Folder\"", options: ["\"Folder\"", "\"IntValue\"", "\"StringValue\"", "\"Frame\""] },
-    { id: "b2", correct: "stage.Value", options: ["stage.Value", "checkpointNum", "1", "stage"] },
-    { id: "b3", correct: "stage.Value", options: ["stage.Value", "checkpointNum", "0", "1"] }
-]);
-const checkpointTemplate = `-- ========================================
--- 🏁 고급 체크포인트 시스템 (Leaderstats 연동)
+const stairsTemplate = `-- ========================================
+-- 🪜 버튼 누르면 계단이 하나씩 나타남!
 -- ========================================
 -- 📦 준비:
---   ServerScriptService > Script (이 코드)
---   Workspace > Checkpoints (Folder)
---     > Checkpoint1, Checkpoint2, Checkpoint3 ... (Part들)
--- 💡 Stage = 현재 도달한 체크포인트 번호
--- 💡 죽으면 마지막 체크포인트로 자동 텔레포트!
+--   ButtonPart (ClickDetector 추가) > Script
+--   Workspace > Stairs(Folder) > Step1, Step2, Step3...
+--     (각 Step: Transparency=1, CanCollide=false 로 시작)
+-- 💡 ClickDetector = 파트를 클릭 가능하게 만드는 오브젝트
+-- 💡 MouseClick = 클릭했을 때 발생하는 이벤트!
+-- ========================================
+
+-- 💡 ButtonPart 안에 있는 ClickDetector 찾기
+local clickDetector = script.Parent:FindFirstChild([b1])
+-- 💡 계단들이 담긴 폴더
+local stairsFolder = workspace:FindFirstChild("Stairs")
+-- 💡 몇 번째 계단까지 나타났는지 추적
+local currentStep = 0
+
+-- 💡 버튼 클릭할 때마다 실행!
+clickDetector.[b2]:Connect(function(player)
+    currentStep = currentStep + 1
+
+    -- 💡 "Step1", "Step2"... 이름으로 다음 계단 찾기
+    local nextStair = stairsFolder:FindFirstChild("Step" .. currentStep)
+
+    if nextStair then
+        -- 💡 Transparency 0 = 눈에 보임!
+        nextStair.Transparency = [b3]
+        -- 💡 CanCollide = 밟을 수 있게!
+        nextStair.CanCollide = [b4]
+        print(player.Name .. " → " .. currentStep .. "번 계단 소환! 🪜")
+    else
+        print("모든 계단 소환 완료! 리셋")
+        -- 💡 모든 계단 다시 숨기기
+        for _, stair in pairs(stairsFolder:GetChildren()) do
+            stair.Transparency = 1
+            stair.CanCollide = false
+        end
+        currentStep = 0
+    end
+end)`;
+const stairsFullCode = `-- 🪜 버튼 → 순차 계단 소환
+-- 📦 ButtonPart > ClickDetector + Script
+-- Workspace > Stairs(Folder) > Step1, Step2, Step3...
+local clickDetector = script.Parent:FindFirstChild("ClickDetector")
+local stairsFolder = workspace:FindFirstChild("Stairs")
+local currentStep = 0
+
+clickDetector.MouseClick:Connect(function(player)
+    currentStep = currentStep + 1
+    local nextStair = stairsFolder:FindFirstChild("Step" .. currentStep)
+    if nextStair then
+        nextStair.Transparency = 0
+        nextStair.CanCollide = true
+        print(player.Name .. " → " .. currentStep .. "번 계단 소환!")
+    else
+        for _, stair in pairs(stairsFolder:GetChildren()) do
+            stair.Transparency = 1
+            stair.CanCollide = false
+        end
+        currentStep = 0
+    end
+end)`;
+
+// 퀴즈 2: ProximityPrompt 플랫폼 소환
+const proximityBlanks = JSON.stringify([
+    { id: "b1", correct: "\"ProximityPrompt\"", options: ["\"ProximityPrompt\"", "\"ClickDetector\"", "\"Button\"", "\"Trigger\""] },
+    { id: "b2", correct: "Triggered", options: ["Triggered", "MouseClick", "Touched", "Activated"] },
+    { id: "b3", correct: "stepIndex + 1", options: ["stepIndex + 1", "stepIndex", "1", "stepIndex - 1"] }
+]);
+const proximityTemplate = `-- ========================================
+-- ✨ ProximityPrompt: [E] 눌러서 발판 소환!
+-- ========================================
+-- 📦 준비:
+--   Part (ActivatorPart) > ProximityPrompt + Script
+--   Workspace > Platforms(Folder) > Platform1, Platform2...
+-- 💡 ProximityPrompt = 가까이 가면 [E] 안내가 나타남!
+-- 💡 ClickDetector보다 더 현대적인 방식!
+-- ========================================
+
+-- 💡 ProximityPrompt 찾기
+local prompt = script.Parent:FindFirstChild([b1])
+local platforms = workspace:FindFirstChild("Platforms")
+local stepIndex = 0   -- 💡 몇 번째 발판까지 소환했는지
+
+-- 💡 ProximityPrompt의 속성 설정
+prompt.ActionText = "발판 소환"     -- 💡 버튼에 표시되는 텍스트
+prompt.MaxActivationDistance = 10   -- 💡 10스터드 안에서만 작동
+
+-- 💡 [E] 키를 눌렀을 때 실행!
+prompt.[b2]:Connect(function(player)
+    -- 💡 다음 발판 번호로 업데이트
+    stepIndex = [b3]
+
+    local platform = platforms:FindFirstChild("Platform" .. stepIndex)
+    if platform then
+        platform.Transparency = 0
+        platform.CanCollide = true
+        -- 💡 안내 텍스트 업데이트!
+        prompt.ActionText = stepIndex .. "번 발판 소환됨!"
+        print(player.Name .. " → Platform" .. stepIndex .. " 소환!")
+    else
+        prompt.ActionText = "모두 소환 완료!"
+        task.wait(1)
+        prompt.Enabled = false  -- 💡 프롬프트 비활성화
+    end
+end)`;
+const proximityFullCode = `-- ✨ ProximityPrompt 발판 소환
+-- 📦 ActivatorPart > ProximityPrompt + Script
+local prompt = script.Parent:FindFirstChild("ProximityPrompt")
+local platforms = workspace:FindFirstChild("Platforms")
+local stepIndex = 0
+
+prompt.ActionText = "발판 소환"
+prompt.MaxActivationDistance = 10
+
+prompt.Triggered:Connect(function(player)
+    stepIndex = stepIndex + 1
+    local platform = platforms:FindFirstChild("Platform" .. stepIndex)
+    if platform then
+        platform.Transparency = 0
+        platform.CanCollide = true
+        prompt.ActionText = stepIndex .. "번 발판 소환됨!"
+    else
+        prompt.ActionText = "모두 소환 완료!"
+        task.wait(1)
+        prompt.Enabled = false
+    end
+end)`;
+
+// 퀴즈 3: 저중력 구역
+const gravityBlanks = JSON.stringify([
+    { id: "b1", correct: "196.2", options: ["196.2", "100", "9.8", "0"] },
+    { id: "b2", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"Character\"", "\"Player\"", "\"HumanoidRootPart\""] },
+    { id: "b3", correct: "workspace.Gravity", options: ["workspace.Gravity", "game.Gravity", "Humanoid.Gravity", "workspace.FallHeight"] }
+]);
+const gravityTemplate = `-- ========================================
+-- 🌙 저중력 구역 (달나라 존!)
+-- ========================================
+-- 📦 준비: 큰 투명 Part (Transparency=0.5, CanCollide=false) > Script
+-- 💡 Workspace.Gravity = 지구 중력값 (기본: 196.2)
+-- 💡 낮추면 달처럼 느리게 떨어지고 높이 점프됨!
+-- 💡 CanCollide=false 파트로 구역 경계 만들기
+-- ========================================
+
+local zone = script.Parent
+
+-- 💡 기본 중력 저장 (지구 = 196.2)
+local NORMAL_GRAVITY = [b1]
+-- 💡 달 중력 (30 = 지구의 약 1/6!)
+local LOW_GRAVITY    = 30
+
+-- 💡 구역에 있는 캐릭터들을 기억하는 테이블
+local inZone = {}
+
+-- 💡 구역에 들어왔을 때
+zone.Touched:Connect(function(hit)
+    -- 💡 사람인지 확인
+    if hit.Parent:FindFirstChild([b2]) and not inZone[hit.Parent] then
+        inZone[hit.Parent] = true
+        -- 💡 중력을 달나라 수준으로!
+        [b3] = LOW_GRAVITY
+        print(hit.Parent.Name .. " 저중력 구역 진입! 🌙")
+    end
+end)
+
+-- 💡 구역을 나갔을 때
+zone.TouchEnded:Connect(function(hit)
+    if hit.Parent:FindFirstChild("Humanoid") and inZone[hit.Parent] then
+        inZone[hit.Parent] = nil
+        -- 💡 플레이어가 모두 나가면 중력 복구
+        if next(inZone) == nil then
+            workspace.Gravity = NORMAL_GRAVITY
+            print("중력 복구! 지구로 돌아옴 🌍")
+        end
+    end
+end)`;
+const gravityFullCode = `-- 🌙 저중력 구역
+-- 📦 큰 투명 Part (CanCollide=false) > Script
+local zone = script.Parent
+local NORMAL_GRAVITY = 196.2
+local LOW_GRAVITY = 30
+local inZone = {}
+
+zone.Touched:Connect(function(hit)
+    if hit.Parent:FindFirstChild("Humanoid") and not inZone[hit.Parent] then
+        inZone[hit.Parent] = true
+        workspace.Gravity = LOW_GRAVITY
+    end
+end)
+
+zone.TouchEnded:Connect(function(hit)
+    if hit.Parent:FindFirstChild("Humanoid") and inZone[hit.Parent] then
+        inZone[hit.Parent] = nil
+        if next(inZone) == nil then
+            workspace.Gravity = NORMAL_GRAVITY
+        end
+    end
+end)`;
+
+// 퀴즈 4: 스프링 패드
+const springBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"Character\"", "\"HumanoidRootPart\"", "\"Player\""] },
+    { id: "b2", correct: "JumpPower", options: ["JumpPower", "WalkSpeed", "Health", "JumpHeight"] },
+    { id: "b3", correct: "true", options: ["true", "false", "50", "150"] }
+]);
+const springTemplate = `-- ========================================
+-- 🌀 스프링 패드 (엄청 높이 튀어오름!)
+-- ========================================
+-- 📦 준비: Part (노란색, Anchored ✓) > Script
+-- 💡 JumpPower = 점프 높이 (기본값: 50)
+-- 💡 humanoid.Jump = true = 강제로 점프 실행!
+-- 💡 밟으면 순간적으로 JumpPower를 150으로 높임!
+-- ========================================
+
+local springPad = script.Parent
+springPad.BrickColor = BrickColor.new("Bright yellow")  -- 💡 노란색
+springPad.Material = Enum.Material.Neon                  -- 💡 빛나게!
+
+local debounce = false  -- 💡 중복 방지
+
+springPad.Touched:Connect(function(hit)
+    -- 💡 사람인지 확인
+    local humanoid = hit.Parent:FindFirstChild([b1])
+
+    if humanoid and not debounce then
+        debounce = true
+
+        -- 💡 원래 점프력 저장 (나중에 복구용)
+        local originalJump = humanoid.[b2]
+
+        -- 💡 점프력 3배로 UP!
+        humanoid.JumpPower = 150
+        -- 💡 즉시 점프 실행!
+        humanoid.Jump = [b3]
+
+        -- 💡 1.5초 뒤 점프력 원래대로 복구
+        task.wait(1.5)
+        humanoid.JumpPower = originalJump
+
+        -- 💡 0.5초 쿨타임 후 다시 사용 가능
+        task.wait(0.5)
+        debounce = false
+    end
+end)`;
+const springFullCode = `-- 🌀 스프링 패드
+-- 📦 Part (Anchored=true) > Script
+local springPad = script.Parent
+springPad.BrickColor = BrickColor.new("Bright yellow")
+springPad.Material = Enum.Material.Neon
+local debounce = false
+
+springPad.Touched:Connect(function(hit)
+    local humanoid = hit.Parent:FindFirstChild("Humanoid")
+    if humanoid and not debounce then
+        debounce = true
+        local originalJump = humanoid.JumpPower
+        humanoid.JumpPower = 150
+        humanoid.Jump = true
+        task.wait(1.5)
+        humanoid.JumpPower = originalJump
+        task.wait(0.5)
+        debounce = false
+    end
+end)`;
+
+// 퀴즈 5: 색깔 함정
+const colorTrapBlanks = JSON.stringify([
+    { id: "b1", correct: "humanoid.Health = 0", options: ["humanoid.Health = 0", "humanoid:TakeDamage(100)", "humanoid:Destroy()", "humanoid.Health -= 50"] },
+    { id: "b2", correct: "COLORS[safeColorIndex]", options: ["COLORS[safeColorIndex]", "safeColorIndex", "COLORS", "COLORS[1]"] },
+    { id: "b3", correct: "math.random(1, #COLORS)", options: ["math.random(1, #COLORS)", "#COLORS", "math.random()", "1"] }
+]);
+const colorTrapTemplate = `-- ========================================
+-- 🎨 색깔 함정 (틀린 색 밟으면 즉사!)
+-- ========================================
+-- 📦 준비:
+--   Workspace > ColorTrap(Folder) > Tile1, Tile2, Tile3, Tile4
+--   Script를 ColorTrap 폴더 안에 넣기
+-- 💡 3초마다 안전한 색이 바뀜! 잘 보고 밟아요.
+-- 💡 safeColorIndex = 현재 안전한 색의 번호
+-- ========================================
+
+local colorTrap = script.Parent
+
+-- 💡 사용할 색상 목록
+local COLORS = {
+    BrickColor.new("Bright red"),
+    BrickColor.new("Bright blue"),
+    BrickColor.new("Bright yellow"),
+    BrickColor.new("Lime green"),
+}
+local safeColorIndex = 1  -- 💡 처음엔 1번(빨강)이 안전
+
+-- 💡 각 타일에 킬 기능 연결
+for _, tile in pairs(colorTrap:GetChildren()) do
+    if tile:IsA("BasePart") then
+        tile.Touched:Connect(function(hit)
+            local humanoid = hit.Parent:FindFirstChild("Humanoid")
+            if humanoid then
+                -- 💡 안전한 색이 아니면 즉사!
+                if tile.BrickColor ~= [b2] then
+                    [b1]
+                end
+            end
+        end)
+    end
+end
+
+-- 💡 3초마다 안전 색 변경 루프
+while true do
+    task.wait(3)
+
+    -- 💡 새 안전 색 랜덤 선택!
+    safeColorIndex = [b3]
+
+    -- 💡 잠깐 회색으로 바꿔서 힌트 제공
+    for _, tile in pairs(colorTrap:GetChildren()) do
+        if tile:IsA("BasePart") then
+            tile.BrickColor = BrickColor.new("Medium stone grey")
+        end
+    end
+    task.wait(0.5)
+
+    -- 💡 색 다시 배정
+    local tiles = {}
+    for _, t in pairs(colorTrap:GetChildren()) do
+        if t:IsA("BasePart") then table.insert(tiles, t) end
+    end
+    for i, tile in ipairs(tiles) do
+        tile.BrickColor = COLORS[((i - 1) % #COLORS) + 1]
+    end
+end`;
+const colorTrapFullCode = `-- 🎨 색깔 함정
+-- 📦 ColorTrap(Folder) > Tile1~4 + Script
+local colorTrap = script.Parent
+local COLORS = {
+    BrickColor.new("Bright red"),
+    BrickColor.new("Bright blue"),
+    BrickColor.new("Bright yellow"),
+    BrickColor.new("Lime green"),
+}
+local safeColorIndex = 1
+
+for _, tile in pairs(colorTrap:GetChildren()) do
+    if tile:IsA("BasePart") then
+        tile.Touched:Connect(function(hit)
+            local humanoid = hit.Parent:FindFirstChild("Humanoid")
+            if humanoid and tile.BrickColor ~= COLORS[safeColorIndex] then
+                humanoid.Health = 0
+            end
+        end)
+    end
+end
+
+while true do
+    task.wait(3)
+    safeColorIndex = math.random(1, #COLORS)
+    for _, tile in pairs(colorTrap:GetChildren()) do
+        if tile:IsA("BasePart") then
+            tile.BrickColor = BrickColor.new("Medium stone grey")
+        end
+    end
+    task.wait(0.5)
+    local tiles = {}
+    for _, t in pairs(colorTrap:GetChildren()) do
+        if t:IsA("BasePart") then table.insert(tiles, t) end
+    end
+    for i, tile in ipairs(tiles) do
+        tile.BrickColor = COLORS[((i - 1) % #COLORS) + 1]
+    end
+end`;
+
+// 퀴즈 6: 타이머 챌린지
+const timerBlanks = JSON.stringify([
+    { id: "b1", correct: "isRunning", options: ["isRunning", "timeLeft", "isFading", "triggered"] },
+    { id: "b2", correct: "true", options: ["true", "false", "nil", "0"] },
+    { id: "b3", correct: "timeLeft", options: ["timeLeft", "TIME_LIMIT", "0", "isRunning"] }
+]);
+const timerTemplate = `-- ========================================
+-- ⏱️ 타이머 챌린지 (제한시간 내에 도착!)
+-- ========================================
+-- 📦 준비:
+--   StarterPlayerScripts > LocalScript
+--   StarterGui > ScreenGui("TimerGui") > TextLabel("TimerLabel")
+--   Workspace > TimerStart, TimerEnd (파트)
+-- 💡 LocalScript = 이 플레이어에게만 실행됨
+-- 💡 isRunning = 타이머 실행 중인지 상태 추적
 -- ========================================
 
 local Players = game:GetService("Players")
-local checkpointsFolder = workspace:WaitForChild("Checkpoints")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
-Players.PlayerAdded:Connect(function(player)
-    -- 💡 Leaderstats 폴더 생성
-    local leaderstats = Instance.new([b1])
-    leaderstats.Name = "leaderstats"
-    leaderstats.Parent = player
+-- 💡 GUI 요소 찾기
+local timerLabel = player.PlayerGui
+    :WaitForChild("TimerGui"):WaitForChild("TimerLabel")
 
-    -- 💡 Stage 값 (0 = 아직 체크포인트 없음)
-    local stage = Instance.new("IntValue")
-    stage.Name = "Stage"
-    stage.Value = 0
-    stage.Parent = leaderstats
+local startPad = workspace:WaitForChild("TimerStart")
+local endPad   = workspace:WaitForChild("TimerEnd")
 
-    -- 💡 죽고 다시 스폰될 때마다 실행
-    player.CharacterAdded:Connect(function(character)
-        local rootPart = character:WaitForChild("HumanoidRootPart")
-        if stage.Value > 0 then
-            -- 💡 마지막 체크포인트 찾기 (번호로 검색)
-            local checkpoint = checkpointsFolder:FindFirstChild("Checkpoint" .. [b2])
-            if checkpoint then
-                task.wait(0.1)
-                rootPart.CFrame = checkpoint.CFrame + Vector3.new(0, 2, 0)
-            end
+local TIME_LIMIT = 30   -- 💡 30초 제한
+local isRunning  = false -- 💡 타이머 실행 중인지 상태
+
+-- 💡 타이머 함수
+local function startTimer()
+    -- 💡 이미 실행 중이면 무시 (중복 방지)
+    if [b1] then return end
+    isRunning = [b2]
+
+    local timeLeft = TIME_LIMIT
+    timerLabel.Visible = true
+
+    -- 💡 1초마다 카운트다운!
+    while timeLeft > 0 and isRunning do
+        timerLabel.Text = "⏱️ " .. [b3] .. "초"
+        -- 💡 10초 이하면 빨간색으로 강조
+        if timeLeft <= 10 then
+            timerLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
         end
-    end)
+        task.wait(1)
+        timeLeft = timeLeft - 1
+    end
+
+    -- 💡 시간 초과시 처음으로!
+    if isRunning then
+        timerLabel.Text = "💀 시간 초과!"
+        task.wait(2)
+        character.HumanoidRootPart.CFrame = startPad.CFrame + Vector3.new(0, 3, 0)
+    end
+    isRunning = false
+    timerLabel.Visible = false
+    timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+end
+
+-- 💡 스타트 패드 밟으면 타이머 시작!
+startPad.Touched:Connect(function(hit)
+    if hit.Parent == character then
+        task.spawn(startTimer)
+    end
 end)
 
--- 💡 각 체크포인트에 Touched 이벤트 연결
-for _, checkpoint in pairs(checkpointsFolder:GetChildren()) do
-    local checkpointNum = tonumber(checkpoint.Name:match("%d+"))
-    checkpoint.Touched:Connect(function(hit)
-        local humanoid = hit.Parent:FindFirstChildWhichIsA("Humanoid")
-        if not humanoid then return end
-        local player = Players:GetPlayerFromCharacter(hit.Parent)
-        if not player then return end
-        local stage = player.leaderstats.Stage
-        -- 💡 더 높은 체크포인트에 도달했을 때만 저장!
-        if checkpointNum > [b3] then
-            stage.Value = checkpointNum
-        end
-    end)
-end`;
-const checkpointFullCode = `-- 🏁 체크포인트 시스템
--- 📦 ServerScriptService > Script
+-- 💡 엔드 패드 밟으면 클리어!
+endPad.Touched:Connect(function(hit)
+    if hit.Parent == character and isRunning then
+        isRunning = false
+        timerLabel.Text = "🎉 클리어!"
+        timerLabel.TextColor3 = Color3.fromRGB(61, 255, 162)
+    end
+end)`;
+const timerFullCode = `-- ⏱️ 타이머 챌린지
+-- 📦 StarterPlayerScripts > LocalScript
 local Players = game:GetService("Players")
-local checkpointsFolder = workspace:WaitForChild("Checkpoints")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local timerLabel = player.PlayerGui:WaitForChild("TimerGui"):WaitForChild("TimerLabel")
+local startPad = workspace:WaitForChild("TimerStart")
+local endPad = workspace:WaitForChild("TimerEnd")
+local TIME_LIMIT = 30
+local isRunning = false
 
-Players.PlayerAdded:Connect(function(player)
-    local leaderstats = Instance.new("Folder")
-    leaderstats.Name = "leaderstats"
-    leaderstats.Parent = player
-
-    local stage = Instance.new("IntValue")
-    stage.Name = "Stage"
-    stage.Value = 0
-    stage.Parent = leaderstats
-
-    player.CharacterAdded:Connect(function(character)
-        local rootPart = character:WaitForChild("HumanoidRootPart")
-        if stage.Value > 0 then
-            local checkpoint = checkpointsFolder:FindFirstChild("Checkpoint" .. stage.Value)
-            if checkpoint then
-                task.wait(0.1)
-                rootPart.CFrame = checkpoint.CFrame + Vector3.new(0, 2, 0)
-            end
+local function startTimer()
+    if isRunning then return end
+    isRunning = true
+    local timeLeft = TIME_LIMIT
+    timerLabel.Visible = true
+    while timeLeft > 0 and isRunning do
+        timerLabel.Text = "⏱️ " .. timeLeft .. "초"
+        if timeLeft <= 10 then
+            timerLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
         end
-    end)
+        task.wait(1)
+        timeLeft = timeLeft - 1
+    end
+    if isRunning then
+        timerLabel.Text = "💀 시간 초과!"
+        task.wait(2)
+        character.HumanoidRootPart.CFrame = startPad.CFrame + Vector3.new(0, 3, 0)
+    end
+    isRunning = false
+    timerLabel.Visible = false
+    timerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+end
+
+startPad.Touched:Connect(function(hit)
+    if hit.Parent == character then task.spawn(startTimer) end
 end)
-
-for _, checkpoint in pairs(checkpointsFolder:GetChildren()) do
-    local checkpointNum = tonumber(checkpoint.Name:match("%d+"))
-    checkpoint.Touched:Connect(function(hit)
-        local humanoid = hit.Parent:FindFirstChildWhichIsA("Humanoid")
-        if not humanoid then return end
-        local player = Players:GetPlayerFromCharacter(hit.Parent)
-        if not player then return end
-        local stage = player.leaderstats.Stage
-        if checkpointNum > stage.Value then
-            stage.Value = checkpointNum
-        end
-    end)
-end`;
+endPad.Touched:Connect(function(hit)
+    if hit.Parent == character and isRunning then
+        isRunning = false
+        timerLabel.Text = "🎉 클리어!"
+        timerLabel.TextColor3 = Color3.fromRGB(61, 255, 162)
+    end
+end)`;
 ---
 
-<LessonLayout title="오비 맵 고급 설계: 5가지 기믹" lessonNumber={10} totalSlides={14}>
+<LessonLayout title="타워/점프맵 핵심 기믹 6가지" lessonNumber={10} totalSlides={16}>
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
             <div class="text-center animate-in">
                 <span class="badge badge-roblox mb-6">10주차 B</span>
                 <h1 class="title-display mb-4">
-                    오비 맵 고급 설계:<br>
-                    <span class="text-neon-mint">🏃 5가지 기믹!</span>
+                    타워/점프맵<br>
+                    <span class="text-neon-mint">🏆 핵심 기믹 6가지!</span>
                 </h1>
                 <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
-                    이동 플랫폼, 회전 장애물, 컨베이어 벨트,<br>
-                    사라지는 함정, 고급 체크포인트까지!
+                    Tower of Hell 같은 고퀄 맵을 만드는<br>
+                    핵심 메커니즘을 전부 배워요!
                 </p>
                 <div class="flex gap-3 justify-center flex-wrap">
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🚂 TweenService 이동</span>
+                        <span class="font-bold">🪜 버튼→순차 계단</span>
                     </div>
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🌀 RunService 회전</span>
+                        <span class="font-bold">✨ ProximityPrompt</span>
                     </div>
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🏭 컨베이어 벨트</span>
+                        <span class="font-bold">🌙 저중력 구역</span>
                     </div>
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">💨 사라지는 함정</span>
+                        <span class="font-bold">🌀 스프링 패드</span>
                     </div>
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
-                        <span class="font-bold">🏁 고급 체크포인트</span>
+                        <span class="font-bold">🎨 색깔 함정</span>
+                    </div>
+                    <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
+                        <span class="font-bold">⏱️ 타이머 챌린지</span>
                     </div>
                 </div>
-
                 <div class="mt-12 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl max-w-md mx-auto">
                     <div class="text-3xl mb-2">🎯</div>
                     <h3 class="font-bold mb-2">오늘의 목표</h3>
                     <ul class="text-left text-sm text-ink-light space-y-1">
-                        <li>✓ TweenService로 수평/수직 이동 플랫폼 만들기</li>
-                        <li>✓ RunService.Heartbeat로 회전 장애물 만들기</li>
-                        <li>✓ AssemblyLinearVelocity로 컨베이어 벨트</li>
-                        <li>✓ 서서히 사라지는 함정 플랫폼</li>
-                        <li>✓ Leaderstats 연동 고급 체크포인트 시스템</li>
+                        <li>✓ ClickDetector로 버튼 → 계단 순차 소환</li>
+                        <li>✓ ProximityPrompt [E] 키 인터랙션</li>
+                        <li>✓ Workspace.Gravity로 저중력 구역</li>
+                        <li>✓ JumpPower로 스프링 패드 제작</li>
+                        <li>✓ 색깔 함정 & 타이머 챌린지</li>
                     </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 2: TweenService 개념 -->
+    <!-- 슬라이드 2: ClickDetector 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
                 <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">🚂 TweenService: 부드러운 이동!</h2>
+                <h2 class="title-section mb-6">🖱️ ClickDetector: 클릭 가능한 파트!</h2>
             </div>
-
             <div class="flex flex-col gap-5 animate-in">
                 <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">TweenService란?</h3>
-                    <p class="text-sm text-ink-light mb-4">파트의 위치(Position), 색상(Color), 투명도 등을 <strong>부드럽게 변화</strong>시켜주는 서비스예요. while true do로 직접 이동시키는 것보다 훨씬 부드럽고 효율적이에요!</p>
-
-                    <div class="bg-ink-pale rounded-xl p-4 font-mono text-sm mb-4">
-                        <div class="text-ink-light text-xs mb-2">-- TweenService 사용 기본 구조</div>
-                        <div>local ts = game:GetService(<span class="text-neon-gold">"TweenService"</span>)</div>
-                        <div>local info = TweenInfo.new(시간, EasingStyle, ...)</div>
-                        <div>local tween = ts:Create(파트, info, &#123;속성 = 목표값&#125;)</div>
-                        <div>tween:<span class="text-neon-mint">Play()</span></div>
+                    <h3 class="font-bold text-lg mb-4">ClickDetector란?</h3>
+                    <p class="text-sm text-ink-light mb-4">파트 안에 넣으면 그 파트를 <strong>클릭할 수 있게</strong> 만들어주는 오브젝트예요. 버튼, 스위치, 문 등 모든 클릭형 오브젝트의 기반이 돼요!</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-ink-pale rounded-xl p-4">
+                            <div class="font-bold mb-2 text-sm">🔧 스튜디오 설정</div>
+                            <ol class="text-sm text-ink-light space-y-1">
+                                <li>1. 버튼으로 쓸 파트 생성</li>
+                                <li>2. 파트 우클릭 → Insert Object</li>
+                                <li>3. <strong>ClickDetector</strong> 추가</li>
+                                <li>4. 파트 안에 Script 추가</li>
+                            </ol>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-4">
+                            <div class="font-bold mb-2 text-sm">📋 Explorer 트리</div>
+                            <div class="font-mono text-xs space-y-1">
+                                <div>📁 Workspace</div>
+                                <div class="ml-4">📦 ButtonPart</div>
+                                <div class="ml-8">🖱️ ClickDetector</div>
+                                <div class="ml-8">📄 Script</div>
+                                <div class="ml-4">📂 Stairs (Folder)</div>
+                                <div class="ml-8">📦 Step1 (Transp=1)</div>
+                                <div class="ml-8">📦 Step2 (Transp=1)</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="lesson-card">
-                    <h4 class="font-bold mb-4">TweenInfo 파라미터 설명</h4>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm border-collapse">
-                            <thead>
-                                <tr class="bg-ink-pale">
-                                    <th class="text-left p-3 font-bold">순서</th>
-                                    <th class="text-left p-3 font-bold">이름</th>
-                                    <th class="text-left p-3 font-bold">예시값</th>
-                                    <th class="text-left p-3 font-bold">설명</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-gray-100">
-                                    <td class="p-3 font-bold text-neon-gold">1번째</td>
-                                    <td class="p-3 font-mono text-sm">Time</td>
-                                    <td class="p-3 font-mono">2</td>
-                                    <td class="p-3">이동 시간(초). 클수록 느리게 이동</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 bg-gray-50">
-                                    <td class="p-3 font-bold text-neon-gold">2번째</td>
-                                    <td class="p-3 font-mono text-sm">EasingStyle</td>
-                                    <td class="p-3 font-mono">Linear</td>
-                                    <td class="p-3">속도 곡선 (Linear=일정, Sine=자연스러운, Bounce=통통)</td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="p-3 font-bold text-neon-gold">3번째</td>
-                                    <td class="p-3 font-mono text-sm">EasingDirection</td>
-                                    <td class="p-3 font-mono">InOut</td>
-                                    <td class="p-3">방향 (In=처음에 가속, Out=끝에 감속, InOut=양쪽)</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 bg-gray-50">
-                                    <td class="p-3 font-bold text-neon-coral">4번째</td>
-                                    <td class="p-3 font-mono text-sm">RepeatCount</td>
-                                    <td class="p-3 font-mono text-neon-coral font-bold">-1</td>
-                                    <td class="p-3"><strong>-1 = 무한반복!</strong> 0 = 반복없음, 3 = 3회</td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="p-3 font-bold text-neon-mint">5번째</td>
-                                    <td class="p-3 font-mono text-sm">Reverses</td>
-                                    <td class="p-3 font-mono text-neon-mint font-bold">true</td>
-                                    <td class="p-3"><strong>true = 왕복!</strong> A→B 후 B→A로 돌아옴</td>
-                                </tr>
-                                <tr>
-                                    <td class="p-3 font-bold text-neon-gold">6번째</td>
-                                    <td class="p-3 font-mono text-sm">DelayTime</td>
-                                    <td class="p-3 font-mono">0.5</td>
-                                    <td class="p-3">반복 사이 대기 시간(초)</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <h4 class="font-bold mb-3 text-sm">핵심 이벤트 비교</h4>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-green-50 rounded-xl p-4">
+                            <div class="font-bold text-green-700 text-sm mb-2">🖱️ ClickDetector.MouseClick</div>
+                            <p class="text-xs text-ink-light mb-2">파트를 <strong>클릭</strong>했을 때 발생</p>
+                            <div class="font-mono text-xs bg-white rounded p-2">
+                                clickDetector.MouseClick:Connect(<br>
+                                &nbsp;&nbsp;function(player)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;-- player = 클릭한 플레이어<br>
+                                &nbsp;&nbsp;end)
+                            </div>
+                        </div>
+                        <div class="bg-purple-50 rounded-xl p-4">
+                            <div class="font-bold text-purple-700 text-sm mb-2">✨ ProximityPrompt.Triggered</div>
+                            <p class="text-xs text-ink-light mb-2">가까이 가서 <strong>[E] 키</strong>를 눌렀을 때 발생</p>
+                            <div class="font-mono text-xs bg-white rounded p-2">
+                                prompt.Triggered:Connect(<br>
+                                &nbsp;&nbsp;function(player)<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;-- 더 현대적인 방식!<br>
+                                &nbsp;&nbsp;end)
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <HintBox type="tip" title="EasingStyle 선택 가이드">
-                    <strong>Linear</strong>: 일정한 속도 → 수평 이동 플랫폼에 적합<br>
-                    <strong>Sine</strong>: 자연스러운 가속/감속 → 수직 이동 엘리베이터에 적합<br>
-                    <strong>Bounce</strong>: 통통 튀는 느낌 → 바운스 함정에 적합<br>
-                    <strong>Back</strong>: 살짝 당겼다가 앞으로 → 빠른 플랫폼에 적합
+                <HintBox type="tip" title="계단 파트 준비 방법">
+                    Step1~Step4 파트를 모두 만들고:<br>
+                    Properties에서 <code>Transparency = 1</code>, <code>CanCollide = false</code>로 설정!<br>
+                    그러면 처음엔 보이지도 않고 밟을 수도 없는 상태가 돼요.
                 </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 3: 퀴즈1 - 수평 이동 플랫폼 -->
+    <!-- 슬라이드 3: 퀴즈1 - 순차 계단 소환 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🚂 수평 왕복 이동 플랫폼"
-                setup="Part (Anchored=true) > Script"
-                concepts='["TweenService:Create()", "TweenInfo.new()", "RepeatCount=-1", "Reverses=true"]'
-                blanks={movePlatformBlanks}
-                template={movePlatformTemplate}
-                full-code={movePlatformFullCode}
+                name="🪜 버튼 누르면 계단이 하나씩 나타남!"
+                setup="ButtonPart > ClickDetector + Script / Workspace > Stairs Folder > Step1, Step2..."
+                concepts='["ClickDetector", "MouseClick 이벤트", "Transparency=0", "CanCollide=true"]'
+                blanks={stairsBlanks}
+                template={stairsTemplate}
+                full-code={stairsFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 4: 퀴즈2 - 수직 이동 플랫폼 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🛗 위아래 수직 이동 플랫폼"
-                setup="Part (Anchored=true) > Script"
-                concepts='["Vector3.new(0, 15, 0)", "EasingStyle.Sine", "Position 속성"]'
-                blanks={vertPlatformBlanks}
-                template={vertPlatformTemplate}
-                full-code={vertPlatformFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 5: RunService 개념 -->
+    <!-- 슬라이드 4: ProximityPrompt 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
                 <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">🌀 RunService: 매 프레임 실행!</h2>
+                <h2 class="title-section mb-6">✨ ProximityPrompt: 더 직관적인 버튼!</h2>
             </div>
-
             <div class="flex flex-col gap-5 animate-in">
                 <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">RunService란?</h3>
-                    <p class="text-sm text-ink-light mb-4">게임이 실행되는 동안 <strong>매 프레임마다</strong> 코드를 실행하는 서비스예요. 회전하는 장애물처럼 <strong>지속적으로 변화</strong>가 필요한 것에 사용해요!</p>
-
+                    <h3 class="font-bold text-lg mb-4">ProximityPrompt이란?</h3>
+                    <p class="text-sm text-ink-light mb-4">파트 가까이 가면 자동으로 <strong>[E] 눌러서 활성화</strong> 안내가 뜨는 최신 인터랙션 방식이에요. 요즘 로블록스 게임에서 많이 쓰이는 방식!</p>
                     <div class="grid md:grid-cols-3 gap-4">
-                        <div class="bg-blue-50 rounded-xl p-4 text-center">
-                            <div class="font-mono font-bold text-sm mb-1 text-blue-700">Stepped</div>
-                            <p class="text-xs text-ink-light">물리 계산 전에 실행<br>물리 속성 조정용</p>
+                        <div class="bg-ink-pale rounded-xl p-4 text-center">
+                            <div class="text-2xl mb-2">📏</div>
+                            <div class="font-bold text-sm mb-1">MaxActivationDistance</div>
+                            <p class="text-xs text-ink-light">기본값: 10 스터드<br>이 거리 안에서만 [E] 뜸</p>
                         </div>
-                        <div class="bg-green-50 rounded-xl p-4 text-center border-2 border-neon-mint">
-                            <div class="font-mono font-bold text-sm mb-1 text-green-700">Heartbeat ⭐</div>
-                            <p class="text-xs text-ink-light">물리 계산 후 실행<br><strong>일반 게임 로직, 이동</strong></p>
+                        <div class="bg-ink-pale rounded-xl p-4 text-center">
+                            <div class="text-2xl mb-2">📝</div>
+                            <div class="font-bold text-sm mb-1">ActionText</div>
+                            <p class="text-xs text-ink-light">[E] 버튼 옆에 표시되는 텍스트</p>
                         </div>
-                        <div class="bg-purple-50 rounded-xl p-4 text-center">
-                            <div class="font-mono font-bold text-sm mb-1 text-purple-700">RenderStepped</div>
-                            <p class="text-xs text-ink-light">렌더링 직전 실행<br>LocalScript 전용</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lesson-card">
-                    <h4 class="font-bold mb-3">⏱️ deltaTime이 왜 필요할까?</h4>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-red-50 rounded-xl p-4">
-                            <div class="font-bold text-red-600 text-sm mb-2">❌ deltaTime 없이</div>
-                            <div class="font-mono text-xs mb-2">spinner.CFrame = spinner.CFrame<br>  * CFrame.Angles(0, 0.1, 0)</div>
-                            <p class="text-xs text-ink-light">60fps → 빠름, 30fps → 느림<br>컴퓨터 성능에 따라 달라짐!</p>
-                        </div>
-                        <div class="bg-green-50 rounded-xl p-4">
-                            <div class="font-bold text-green-600 text-sm mb-2">✅ deltaTime 곱하기</div>
-                            <div class="font-mono text-xs mb-2">spinner.CFrame = spinner.CFrame<br>  * CFrame.Angles(0, math.rad(90 * deltaTime), 0)</div>
-                            <p class="text-xs text-ink-light">60fps든 30fps든 <strong>항상 같은 속도!</strong><br>초당 90도 회전 보장</p>
+                        <div class="bg-ink-pale rounded-xl p-4 text-center">
+                            <div class="text-2xl mb-2">⏱️</div>
+                            <div class="font-bold text-sm mb-1">HoldDuration</div>
+                            <p class="text-xs text-ink-light">0 = 즉시 발동<br>1 = 1초 누르고 있어야 발동</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div class="text-center">
-                        <img src="https://prod.docsiteassets.roblox.com/assets/studio/general/Toolbar-Properties.png" alt="Studio Properties" class="rounded-xl w-full" loading="lazy" />
-                        <p class="text-xs text-ink-light mt-2">파트 Properties 창에서 Anchored 체크 필수!</p>
+                        <img src="https://prod.docsiteassets.roblox.com/assets/ui/proximity-prompt/Prompt-Diagram.png" alt="ProximityPrompt UI" class="rounded-xl w-full" loading="lazy" />
+                        <p class="text-xs text-ink-light mt-2">ProximityPrompt가 화면에 표시되는 모습</p>
                     </div>
                     <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">Explorer 트리</h4>
-                        <div class="font-mono text-xs space-y-1 text-ink-medium">
-                            <div>📁 Workspace</div>
-                            <div class="ml-4">📦 Spinner (Part)</div>
-                            <div class="ml-8 text-ink-light">Size: (1, 1, 10) -- 길쭉하게</div>
-                            <div class="ml-8 text-ink-light">Anchored: ✓</div>
-                            <div class="ml-8">📄 Script</div>
-                            <div class="ml-12 text-ink-light">← RunService 코드</div>
+                        <h4 class="font-bold mb-3 text-sm">ClickDetector vs ProximityPrompt</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-start gap-2">
+                                <span class="font-bold text-ink-medium">🖱️ ClickDetector</span>
+                            </div>
+                            <div class="ml-4 text-ink-light text-xs">- 마우스 커서로 직접 클릭<br>- 거리 제한 없음<br>- 구버전 방식</div>
+                            <div class="flex items-start gap-2 mt-3">
+                                <span class="font-bold text-purple-600">✨ ProximityPrompt</span>
+                            </div>
+                            <div class="ml-4 text-ink-light text-xs">- [E] 키 또는 터치 자동 지원<br>- 거리 제한 있음 (현실감 ↑)<br>- 모바일 게임패드 자동 지원!</div>
                         </div>
                     </div>
                 </div>
@@ -594,410 +701,521 @@ end`;
         </div>
     </section>
 
-    <!-- 슬라이드 6: 퀴즈3 - 회전 장애물 -->
+    <!-- 슬라이드 5: 퀴즈2 - ProximityPrompt 발판 소환 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🌀 회전하는 장애물 (스피너)"
-                setup="Part (Anchored=true, 길쭉한 막대) > Script"
-                concepts='["RunService.Heartbeat", "deltaTime", "CFrame.Angles()", "math.rad()"]'
-                blanks={spinnerBlanks}
-                template={spinnerTemplate}
-                full-code={spinnerFullCode}
+                name="✨ ProximityPrompt: [E] 눌러서 발판 소환!"
+                setup="ActivatorPart > ProximityPrompt + Script / Workspace > Platforms Folder"
+                concepts='["ProximityPrompt", "Triggered 이벤트", "ActionText", "Enabled"]'
+                blanks={proximityBlanks}
+                template={proximityTemplate}
+                full-code={proximityFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 7: 컨베이어 벨트 개념 -->
+    <!-- 슬라이드 6: 저중력 구역 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
                 <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">🏭 컨베이어 벨트: 밀려가는 바닥!</h2>
+                <h2 class="title-section mb-6">🌙 저중력 구역: 달나라처럼!</h2>
             </div>
-
             <div class="flex flex-col gap-5 animate-in">
                 <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">AssemblyLinearVelocity란?</h3>
-                    <p class="text-sm text-ink-light mb-4">앵커된(Anchored) 파트에 <code>AssemblyLinearVelocity</code>를 설정하면, 그 위에 올라온 물체(캐릭터 포함)를 해당 방향으로 <strong>밀어내요</strong>! 루프 없이 한 번만 설정하면 계속 작동해요.</p>
-
-                    <div class="bg-ink-pale rounded-xl p-4 font-mono text-sm mb-4">
-                        <div class="text-ink-light text-xs mb-2">-- 컨베이어 핵심 코드</div>
-                        <div>conveyor.<span class="text-neon-coral">AssemblyLinearVelocity</span></div>
-                        <div class="ml-4">= conveyor.CFrame.<span class="text-neon-sky">LookVector</span> * 20</div>
-                        <div class="text-ink-light text-xs mt-2">-- LookVector = 파트가 바라보는 앞방향</div>
+                    <h3 class="font-bold text-lg mb-4">Workspace.Gravity란?</h3>
+                    <p class="text-sm text-ink-light mb-4">게임 전체의 중력을 조절하는 속성이에요. 낮추면 달처럼 천천히 떨어지고 높이 점프할 수 있어요!</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm border-collapse">
+                            <thead>
+                                <tr class="bg-ink-pale">
+                                    <th class="text-left p-3 font-bold">설정값</th>
+                                    <th class="text-left p-3 font-bold">효과</th>
+                                    <th class="text-left p-3 font-bold">느낌</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-gray-100">
+                                    <td class="p-3 font-mono font-bold text-neon-gold">196.2</td>
+                                    <td class="p-3">기본 중력 (지구)</td>
+                                    <td class="p-3">일반적인 게임 느낌</td>
+                                </tr>
+                                <tr class="border-b border-gray-100 bg-gray-50">
+                                    <td class="p-3 font-mono font-bold text-neon-sky">100</td>
+                                    <td class="p-3">절반 중력</td>
+                                    <td class="p-3">좀 더 둥둥 떠다니는 느낌</td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="p-3 font-mono font-bold text-neon-mint">30</td>
+                                    <td class="p-3">초저중력 (달)</td>
+                                    <td class="p-3">달나라처럼 높이 점프!</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-mono font-bold text-purple-500">5</td>
+                                    <td class="p-3">거의 무중력</td>
+                                    <td class="p-3">우주에 떠있는 느낌</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
+                </div>
 
-                    <HintBox type="tip" title="방향 설정 팁">
-                        파트를 스튜디오에서 원하는 방향으로 <strong>회전</strong>시켜두면<br>
-                        <code>CFrame.LookVector</code>가 자동으로 그 방향을 가리켜요!<br>
-                        파란색 화살표(LookVector)가 밀어내는 방향이에요.
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-3 text-sm">🛠️ 구역 설정 방법</h4>
+                        <ol class="text-sm text-ink-light space-y-2">
+                            <li class="flex gap-2"><span class="font-bold text-neon-gold">1.</span> 큰 Part 생성 (구역 크기로)</li>
+                            <li class="flex gap-2"><span class="font-bold text-neon-gold">2.</span> Transparency = 0.3 (반투명으로)</li>
+                            <li class="flex gap-2"><span class="font-bold text-neon-gold">3.</span> CanCollide = false (통과 가능)</li>
+                            <li class="flex gap-2"><span class="font-bold text-neon-gold">4.</span> BrickColor = "Cyan" (파란 안개 느낌)</li>
+                            <li class="flex gap-2"><span class="font-bold text-neon-gold">5.</span> Script 넣고 코드 작성</li>
+                        </ol>
+                    </div>
+                    <HintBox type="warning" title="주의! 멀티플레이어 문제">
+                        Workspace.Gravity를 변경하면 <strong>모든 플레이어에게</strong> 적용돼요!<br>
+                        혼자 플레이 게임이면 괜찮지만, 멀티플레이 게임이라면<br>
+                        BodyForce를 써서 개인별로 처리하는 방법도 있어요.
                     </HintBox>
                 </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">🔄 방향 전환 컨베이어</h4>
-                        <div class="bg-ink-pale rounded-lg p-3 font-mono text-xs space-y-1">
-                            <div class="text-ink-light">-- 3초마다 방향 전환</div>
-                            <div>local goForward = true</div>
-                            <div>while true do</div>
-                            <div class="ml-4">task.wait(3)</div>
-                            <div class="ml-4">goForward = not goForward</div>
-                            <div class="ml-4">local dir = goForward and 1 or -1</div>
-                            <div class="ml-4">conveyor.AssemblyLinearVelocity</div>
-                            <div class="ml-6">= conveyor.CFrame.LookVector * 20 * dir</div>
-                            <div>end</div>
-                        </div>
-                    </div>
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">📋 스튜디오 설정</h4>
-                        <div class="font-mono text-xs space-y-1 text-ink-medium">
-                            <div>📁 Workspace</div>
-                            <div class="ml-4">📦 ConveyorBelt (Part)</div>
-                            <div class="ml-8 text-ink-light">Size: (8, 0.5, 20) -- 납작하게</div>
-                            <div class="ml-8 text-ink-light">Anchored: ✓</div>
-                            <div class="ml-8 text-ink-light">Material: SmoothPlastic</div>
-                            <div class="ml-8">📄 Script</div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 8: 퀴즈4 - 컨베이어 벨트 -->
+    <!-- 슬라이드 7: 퀴즈3 - 저중력 구역 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🏭 컨베이어 벨트"
-                setup="Part (Anchored=true, 납작한 판) > Script"
-                concepts='["AssemblyLinearVelocity", "CFrame.LookVector", "한 번만 설정으로 계속 작동"]'
-                blanks={conveyorBlanks}
-                template={conveyorTemplate}
-                full-code={conveyorFullCode}
+                name="🌙 저중력 구역 (달나라 Zone!)"
+                setup="큰 투명 Part (CanCollide=false, Transparency=0.3) > Script"
+                concepts='["Workspace.Gravity = 196.2", "LOW_GRAVITY = 30", "Touched/TouchEnded", "inZone 테이블"]'
+                blanks={gravityBlanks}
+                template={gravityTemplate}
+                full-code={gravityFullCode}
             ></roblox-quiz-example>
         </div>
     </section>
 
-    <!-- 슬라이드 9: 사라지는 함정 개념 -->
+    <!-- 슬라이드 8: 스프링 패드 개념 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <div class="animate-in">
                 <span class="badge badge-lesson mb-4">개념 학습</span>
-                <h2 class="title-section mb-6">💨 사라지는 함정 플랫폼!</h2>
+                <h2 class="title-section mb-6">🌀 스프링 패드: 엄청 높이 튀어오름!</h2>
             </div>
-
             <div class="flex flex-col gap-5 animate-in">
                 <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">어떻게 만들까?</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-yellow-400 text-white flex items-center justify-center text-sm font-bold shrink-0">1</div>
-                            <div class="text-sm">플레이어가 <strong>밟으면 (Touched)</strong> fade 함수 실행</div>
-                        </div>
-                        <div class="flex items-start gap-3 p-3 bg-orange-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-orange-400 text-white flex items-center justify-center text-sm font-bold shrink-0">2</div>
-                            <div class="text-sm">for 반복문으로 <strong>1초에 걸쳐 서서히 투명</strong>해짐 (Transparency 0→1)</div>
-                        </div>
-                        <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-red-400 text-white flex items-center justify-center text-sm font-bold shrink-0">3</div>
-                            <div class="text-sm"><strong>CanCollide = false</strong>로 설정해서 플레이어가 떨어지게 함</div>
-                        </div>
-                        <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
-                            <div class="w-8 h-8 rounded-full bg-green-400 text-white flex items-center justify-center text-sm font-bold shrink-0">4</div>
-                            <div class="text-sm">3초 후 <strong>자동 복구</strong> (Transparency 0, CanCollide true)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">👻 가짜 바닥 (스크립트 없이!)</h4>
-                        <p class="text-sm text-ink-light mb-3">Properties 창에서 바로 설정 가능:</p>
-                        <div class="bg-ink-pale rounded-lg p-3 text-xs space-y-1">
-                            <div>Transparency = <span class="text-neon-coral font-bold">1</span> (완전 투명)</div>
-                            <div>CanCollide = <span class="text-neon-mint font-bold">true</span> (밟을 수 있음)</div>
-                            <div class="text-ink-light mt-2">→ 보이지 않지만 밟을 수 있는 바닥!</div>
-                        </div>
-                    </div>
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3 text-sm">📐 오비 배치 팁</h4>
-                        <ul class="text-sm text-ink-light space-y-2">
-                            <li>🟡 노란색 파트 = 사라지는 함정 시각적 힌트</li>
-                            <li>📏 크기는 6×1×6 이상 (착지하기 쉽게)</li>
-                            <li>📍 체크포인트 바로 앞에 배치하면 긴장감 ↑</li>
-                            <li>🔢 여러 개 연속 배치로 난이도 조절</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 10: 퀴즈5 - 사라지는 함정 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="💨 밟으면 사라지는 함정 플랫폼"
-                setup="Part (Anchored=true, 노란색) > Script"
-                concepts='["Transparency = i/10", "CanCollide = false", "3초 후 복구", "debounce"]'
-                blanks={fadingTrapBlanks}
-                template={fadingTrapTemplate}
-                full-code={fadingTrapFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 11: 고급 체크포인트 개념 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">심화 학습</span>
-                <h2 class="title-section mb-6">🏁 고급 체크포인트 시스템</h2>
-            </div>
-
-            <div class="flex flex-col gap-5 animate-in">
-                <div class="lesson-card">
-                    <h3 class="font-bold text-lg mb-4">기존 6주차 체크포인트 vs 고급 체크포인트</h3>
+                    <h3 class="font-bold text-lg mb-4">JumpPower & Jump</h3>
                     <div class="grid md:grid-cols-2 gap-4">
-                        <div class="bg-gray-50 rounded-xl p-4">
-                            <div class="font-bold text-sm mb-2 text-ink-medium">6주차 (기본)</div>
-                            <ul class="text-xs text-ink-light space-y-1">
-                                <li>• SpawnLocation 사용</li>
-                                <li>• Studio에서 직접 체크포인트 설정</li>
-                                <li>• 스크립트 없이 가능</li>
-                            </ul>
-                        </div>
-                        <div class="bg-green-50 rounded-xl p-4">
-                            <div class="font-bold text-sm mb-2 text-neon-mint">10주차 (고급)</div>
-                            <ul class="text-xs text-ink-light space-y-1">
-                                <li>• Leaderstats에 Stage 값 저장</li>
-                                <li>• 리더보드에 현재 스테이지 표시</li>
-                                <li>• 죽으면 자동 텔레포트</li>
-                                <li>• Checkpoint1~N 자동 인식</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="lesson-card">
-                    <h4 class="font-bold mb-4">📋 스튜디오 설정 방법</h4>
-                    <ol class="space-y-3 text-sm">
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                            <div>Workspace 우클릭 → Insert Object → <strong>Folder</strong>, 이름 <strong>"Checkpoints"</strong></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                            <div>Checkpoints 폴더에 파트 추가, 이름: <strong>Checkpoint1, Checkpoint2, Checkpoint3...</strong></div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                            <div>각 체크포인트 파트: 초록색, Anchored=true, Size (5, 1, 5)</div>
-                        </li>
-                        <li class="flex gap-3">
-                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
-                            <div>ServerScriptService에 <strong>Script</strong> 추가 후 다음 슬라이드 코드 입력</div>
-                        </li>
-                    </ol>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="lesson-card font-mono text-xs">
-                        <div class="font-bold mb-2 font-sans text-sm">Explorer 트리</div>
-                        <div>📁 Workspace</div>
-                        <div class="ml-4">📂 Checkpoints (Folder)</div>
-                        <div class="ml-8">🟩 Checkpoint1 (Part)</div>
-                        <div class="ml-8">🟩 Checkpoint2 (Part)</div>
-                        <div class="ml-8">🟩 Checkpoint3 (Part)</div>
-                        <div class="mt-2">📁 ServerScriptService</div>
-                        <div class="ml-4">📄 CheckpointSystem (Script)</div>
-                    </div>
-                    <HintBox type="info" title="체크포인트 이름 규칙">
-                        반드시 <strong>"Checkpoint" + 숫자</strong> 형식으로!<br>
-                        예: Checkpoint1, Checkpoint2, Checkpoint10<br>
-                        스크립트가 자동으로 번호를 인식해요.<br>
-                        <code>checkpoint.Name:match("%d+")</code>으로 번호 추출!
-                    </HintBox>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 슬라이드 12: 퀴즈6 - 체크포인트 시스템 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-8">
-            <roblox-quiz-example
-                name="🏁 고급 체크포인트 시스템 (Leaderstats 연동)"
-                setup="ServerScriptService > Script + Workspace > Checkpoints Folder"
-                concepts='["Folder 생성", "CharacterAdded 텔레포트", "checkpointNum > stage.Value"]'
-                blanks={checkpointBlanks}
-                template={checkpointTemplate}
-                full-code={checkpointFullCode}
-            ></roblox-quiz-example>
-        </div>
-    </section>
-
-    <!-- 슬라이드 13: 오비 설계 팁 -->
-    <section class="slide">
-        <div class="max-w-4xl mx-auto px-6 py-12">
-            <div class="animate-in">
-                <span class="badge badge-lesson mb-4">🗺️ 맵 설계</span>
-                <h2 class="title-section mb-6">오비 맵 설계 황금 법칙</h2>
-            </div>
-
-            <div class="flex flex-col gap-5 animate-in">
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3">📐 난이도 곡선 설계</h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex items-center gap-3 p-2 bg-green-50 rounded-lg">
-                                <span class="text-green-600 font-bold">1~2</span>
-                                <span class="text-ink-light">넓은 플랫폼, 짧은 거리 (튜토리얼)</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-2 bg-blue-50 rounded-lg">
-                                <span class="text-blue-600 font-bold">3~4</span>
-                                <span class="text-ink-light">느린 이동 플랫폼 (보통)</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-2 bg-yellow-50 rounded-lg">
-                                <span class="text-yellow-600 font-bold">5~6</span>
-                                <span class="text-ink-light">회전 장애물, 컨베이어 (어려움)</span>
-                            </div>
-                            <div class="flex items-center gap-3 p-2 bg-red-50 rounded-lg">
-                                <span class="text-red-600 font-bold">7~8</span>
-                                <span class="text-ink-light">사라지는 함정 + 복합 기믹 (최고 난이도)</span>
+                        <div class="bg-ink-pale rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">humanoid.JumpPower</div>
+                            <p class="text-xs text-ink-light mb-2">점프 높이를 결정하는 속성</p>
+                            <div class="space-y-1 text-xs">
+                                <div>기본값: <span class="font-bold">50</span></div>
+                                <div>스프링: <span class="font-bold text-neon-gold">150</span> (3배!)</div>
+                                <div>슈퍼 스프링: <span class="font-bold text-neon-coral">300</span></div>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="lesson-card">
-                        <h4 class="font-bold mb-3">🎨 섹션 테마 아이디어</h4>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex items-center gap-2">
-                                <span>🌿</span>
-                                <span><strong>초록 구간</strong>: 잔디밭, 기초 점프</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span>⚙️</span>
-                                <span><strong>공장 구간</strong>: 컨베이어 벨트, 회전 기어</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span>☁️</span>
-                                <span><strong>하늘 구간</strong>: 이동 플랫폼, 좁은 다리</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span>🌋</span>
-                                <span><strong>용암 구간</strong>: 사라지는 발판, KillBrick 바닥</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span>🏆</span>
-                                <span><strong>최종 구간</strong>: 모든 기믹 복합</span>
+                        <div class="bg-ink-pale rounded-xl p-4">
+                            <div class="font-bold text-sm mb-2">humanoid.Jump = true</div>
+                            <p class="text-xs text-ink-light mb-2">코드에서 강제로 점프 실행!</p>
+                            <div class="font-mono text-xs bg-white rounded p-2 mt-2">
+                                humanoid.JumpPower = 150<br>
+                                humanoid.Jump = true  -- 👆
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="lesson-card">
-                    <h4 class="font-bold mb-3">✅ 좋은 오비 설계 체크리스트</h4>
-                    <div class="grid md:grid-cols-2 gap-3 text-sm">
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span class="text-neon-mint">✓</span>
-                                <span>체크포인트는 어려운 구간 <strong>바로 앞</strong>에 배치</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-neon-mint">✓</span>
-                                <span>착지 최소 크기: <strong>4×4 스터드</strong> 이상</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-neon-mint">✓</span>
-                                <span>점프 거리: <strong>6~10 스터드</strong> 이내</span>
-                            </div>
+                    <h4 class="font-bold mb-3 text-sm">🎮 실제 게임 적용 아이디어</h4>
+                    <div class="grid md:grid-cols-3 gap-3">
+                        <div class="bg-yellow-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">🌀</div>
+                            <div class="font-bold text-sm">스프링 패드</div>
+                            <div class="text-xs text-ink-light">JumpPower=150<br>한 칸 위 직접 이동</div>
                         </div>
-                        <div class="space-y-2">
-                            <div class="flex items-center gap-2">
-                                <span class="text-neon-mint">✓</span>
-                                <span>이동 방향 힌트: <strong>화살표 파트</strong>로 표시</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-neon-mint">✓</span>
-                                <span>색상으로 위험도 구분 (초록→노랑→빨강)</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-neon-mint">✓</span>
-                                <span>죽음 바닥(KillBrick) 아래에 배치해서 낙사 방지</span>
-                            </div>
+                        <div class="bg-red-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">🚀</div>
+                            <div class="font-bold text-sm">발사 패드</div>
+                            <div class="text-xs text-ink-light">JumpPower=300<br>엄청 높이 발사!</div>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">🎯</div>
+                            <div class="font-bold text-sm">정확도 챌린지</div>
+                            <div class="text-xs text-ink-light">높이 날아가서<br>좁은 발판에 착지</div>
                         </div>
                     </div>
                 </div>
 
-                <HintBox type="tip" title="Tower of Hell에서 배우기">
-                    Tower of Hell은 체크포인트 없이 358개 섹션으로 구성된 유명 오비게임이에요.<br>
-                    비결은 <strong>각 섹션이 짧고</strong>, <strong>8분 라운드제</strong>로 긴장감을 유지해요.<br>
-                    우리 게임에는 체크포인트를 넣어서 학습 친화적으로 만들어봐요!
+                <HintBox type="tip" title="스프링 효과 조합하기">
+                    스프링 패드 위에 <strong>저중력 구역</strong>을 겹치면?<br>
+                    점프력도 높고 + 천천히 떨어지는 슈퍼 점프 구간이 완성돼요!
                 </HintBox>
             </div>
         </div>
     </section>
 
-    <!-- 슬라이드 14: 확인 퀴즈 + 마무리 -->
+    <!-- 슬라이드 9: 퀴즈4 - 스프링 패드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🌀 스프링 패드 (엄청 높이 튀어오름!)"
+                setup="Part (노란색, Anchored=true) > Script"
+                concepts='["humanoid.JumpPower", "humanoid.Jump = true", "원래 점프력 저장 후 복구", "debounce"]'
+                blanks={springBlanks}
+                template={springTemplate}
+                full-code={springFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 10: 색깔 함정 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">🎨 색깔 함정: 안전한 색을 찾아라!</h2>
+            </div>
+            <div class="flex flex-col gap-5 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">어떻게 동작할까?</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-xl">
+                            <div class="w-7 h-7 rounded-full bg-blue-400 text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                            <div class="text-sm">여러 색깔 파트가 바닥에 깔려있음</div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-yellow-50 rounded-xl">
+                            <div class="w-7 h-7 rounded-full bg-yellow-400 text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                            <div class="text-sm">잠깐 <strong>회색</strong>으로 바뀌면서 "색이 바뀐다!"는 힌트 제공</div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-green-50 rounded-xl">
+                            <div class="w-7 h-7 rounded-full bg-green-400 text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                            <div class="text-sm"><strong>안전한 색</strong> 1개가 랜덤으로 선택됨</div>
+                        </div>
+                        <div class="flex items-start gap-3 p-3 bg-red-50 rounded-xl">
+                            <div class="w-7 h-7 rounded-full bg-red-400 text-white flex items-center justify-center text-xs font-bold shrink-0">4</div>
+                            <div class="text-sm">틀린 색 밟으면 즉사! 안전한 색만 밟아야 살아남음</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-3 text-sm">📋 스튜디오 설정</h4>
+                        <div class="font-mono text-xs space-y-1">
+                            <div>📁 Workspace</div>
+                            <div class="ml-4">📂 ColorTrap (Folder)</div>
+                            <div class="ml-8">🔴 Tile1 (Part, 빨강)</div>
+                            <div class="ml-8">🔵 Tile2 (Part, 파랑)</div>
+                            <div class="ml-8">🟡 Tile3 (Part, 노랑)</div>
+                            <div class="ml-8">🟢 Tile4 (Part, 초록)</div>
+                            <div class="ml-8">📄 Script ← 여기!</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-3 text-sm">⚙️ 핵심 로직</h4>
+                        <div class="space-y-2 text-sm text-ink-light">
+                            <div>• <code>tile.BrickColor != COLORS[safeColorIndex]</code></div>
+                            <div class="ml-4 text-xs">→ 안전한 색이 아니면 즉사</div>
+                            <div>• <code>math.random(1, #COLORS)</code></div>
+                            <div class="ml-4 text-xs">→ 랜덤으로 새 안전색 선택</div>
+                            <div>• <code>while true do / task.wait(3)</code></div>
+                            <div class="ml-4 text-xs">→ 3초마다 색 변경 루프</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: 퀴즈5 - 색깔 함정 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🎨 색깔 함정 (틀린 색 밟으면 즉사!)"
+                setup="ColorTrap(Folder) > Tile1~4 (Part들) + Script"
+                concepts='["BrickColor 비교", "humanoid.Health=0", "math.random(1,#COLORS)", "while true do"]'
+                blanks={colorTrapBlanks}
+                template={colorTrapTemplate}
+                full-code={colorTrapFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 12: 타이머 챌린지 개념 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-lesson mb-4">개념 학습</span>
+                <h2 class="title-section mb-6">⏱️ 타이머 챌린지: 제한시간 내에 도착!</h2>
+            </div>
+            <div class="flex flex-col gap-5 animate-in">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-lg mb-4">전체 흐름</h3>
+                    <div class="grid md:grid-cols-4 gap-3">
+                        <div class="bg-blue-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">🏁</div>
+                            <div class="font-bold text-xs">스타트 패드 밟기</div>
+                            <div class="text-xs text-ink-light mt-1">타이머 시작!</div>
+                        </div>
+                        <div class="bg-yellow-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">⏱️</div>
+                            <div class="font-bold text-xs">카운트다운</div>
+                            <div class="text-xs text-ink-light mt-1">GUI에 시간 표시</div>
+                        </div>
+                        <div class="bg-green-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">🎉</div>
+                            <div class="font-bold text-xs">엔드 패드 도착</div>
+                            <div class="text-xs text-ink-light mt-1">클리어!</div>
+                        </div>
+                        <div class="bg-red-50 rounded-xl p-3 text-center">
+                            <div class="text-2xl mb-1">💀</div>
+                            <div class="font-bold text-xs">시간 초과</div>
+                            <div class="text-xs text-ink-light mt-1">처음으로 돌아감</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4 text-sm">🛠️ 스튜디오 설정 순서</h4>
+                    <ol class="space-y-3 text-sm">
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">1</span>
+                            <div>Workspace에 <strong>TimerStart</strong> (초록색), <strong>TimerEnd</strong> (금색) 파트 배치</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">2</span>
+                            <div>StarterGui → Insert Object → <strong>ScreenGui</strong> (이름: "TimerGui")</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-gold text-white flex items-center justify-center text-xs font-bold shrink-0">3</span>
+                            <div>TimerGui 안에 <strong>TextLabel</strong> (이름: "TimerLabel") 추가, 화면 상단 중앙 배치</div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span class="w-6 h-6 rounded-full bg-neon-mint text-white flex items-center justify-center text-xs font-bold shrink-0">4</span>
+                            <div>StarterPlayerScripts → Insert Object → <strong>LocalScript</strong>, 코드 입력</div>
+                        </li>
+                    </ol>
+                </div>
+
+                <HintBox type="info" title="LocalScript vs Script">
+                    타이머는 <strong>LocalScript</strong>를 사용해야 해요!<br>
+                    GUI는 각 플레이어마다 다르게 보여야 하기 때문에, LocalScript로 해당 플레이어의 화면에만 표시해요.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: 퀴즈6 - 타이머 챌린지 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="⏱️ 타이머 챌린지 (제한시간 내에 도착!)"
+                setup="StarterPlayerScripts > LocalScript / StarterGui > TimerGui > TimerLabel"
+                concepts='["isRunning 상태 관리", "while timeLeft > 0", "timerLabel.Text", "시간 초과 텔레포트"]'
+                blanks={timerBlanks}
+                template={timerTemplate}
+                full-code={timerFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 14: 기믹 조합 아이디어 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🗺️ 맵 설계</span>
+                <h2 class="title-section mb-6">기믹 조합으로 더 재밌는 맵!</h2>
+            </div>
+            <div class="flex flex-col gap-5 animate-in">
+                <div class="lesson-card">
+                    <h4 class="font-bold mb-4">🔥 추천 조합 예시</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl">
+                            <span class="text-2xl shrink-0">⭐</span>
+                            <div>
+                                <div class="font-bold text-sm mb-1">버튼 + 타이머 = 압박 퍼즐</div>
+                                <p class="text-xs text-ink-light">30초 안에 버튼을 눌러서 계단을 소환하고 올라가야 하는 구간. 실패하면 처음부터!</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+                            <span class="text-2xl shrink-0">⭐⭐</span>
+                            <div>
+                                <div class="font-bold text-sm mb-1">스프링 패드 + 저중력 = 슈퍼 점프 존</div>
+                                <p class="text-xs text-ink-light">스프링 패드 위에 저중력 구역 겹치기. 엄청 높이 올라가서 천천히 떨어지는 시그니처 구간!</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3 p-4 bg-gradient-to-r from-green-50 to-teal-50 rounded-xl">
+                            <span class="text-2xl shrink-0">⭐⭐⭐</span>
+                            <div>
+                                <div class="font-bold text-sm mb-1">색깔 함정 + 타이머 = 최고 난이도 구간</div>
+                                <p class="text-xs text-ink-light">색이 바뀌는 함정 바닥을 30초 안에 건너야 함. Tower of Hell의 최종 구간 느낌!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-3 text-sm">🏆 타워 맵 구성 예시</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded bg-green-400 shrink-0"></span>
+                                <span><strong>1~5층</strong>: 기본 점프 (워밍업)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded bg-blue-400 shrink-0"></span>
+                                <span><strong>6~10층</strong>: 버튼 소환 계단</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded bg-purple-400 shrink-0"></span>
+                                <span><strong>11~15층</strong>: 저중력 + 스프링</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded bg-yellow-400 shrink-0"></span>
+                                <span><strong>16~20층</strong>: 색깔 함정</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded bg-red-400 shrink-0"></span>
+                                <span><strong>21~25층</strong>: 타이머 + 모든 기믹 복합</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lesson-card">
+                        <h4 class="font-bold mb-3 text-sm">✅ 설계 체크리스트</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span>체크포인트는 어려운 구간 바로 앞</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span>색깔 함정 힌트: 0.5초 회색 깜빡임</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span>저중력 구역: Neon 파란색으로 시각화</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span>스프링 패드: 노란 Neon 소재로 눈에 띄게</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-neon-mint">✓</span>
+                                <span>버튼: 빨간색 + ClickDetector 표시</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 15: 도전 과제 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🏆 도전 과제</span>
+                <h2 class="title-section mb-6">나만의 타워 맵 만들기!</h2>
+            </div>
+            <div class="flex flex-col gap-6 animate-in">
+                <div class="grid md:grid-cols-3 gap-4">
+                    <div class="lesson-card border-2 border-green-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐</div>
+                            <div class="font-bold text-green-700">기초 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>✅ 버튼 → 3개 계단 소환</li>
+                            <li>✅ 스프링 패드 만들기</li>
+                            <li>✅ 저중력 구역 추가</li>
+                        </ul>
+                    </div>
+                    <div class="lesson-card border-2 border-amber-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐⭐</div>
+                            <div class="font-bold text-amber-700">도전 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>🎯 색깔 함정 4색 바닥 제작</li>
+                            <li>🎯 30초 타이머 챌린지 구간</li>
+                            <li>🎯 ProximityPrompt 비밀 문</li>
+                        </ul>
+                    </div>
+                    <div class="lesson-card border-2 border-purple-200">
+                        <div class="text-center mb-3">
+                            <div class="text-3xl mb-2">⭐⭐⭐</div>
+                            <div class="font-bold text-purple-700">하드 미션</div>
+                        </div>
+                        <ul class="text-sm text-ink-light space-y-2">
+                            <li>🔥 10층 타워 맵 완성</li>
+                            <li>🔥 색깔 함정 + 타이머 복합 구간</li>
+                            <li>🔥 스프링 + 저중력 슈퍼 점프 존</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="Tower of Hell 분석">
+                    유명한 Tower of Hell은 358개의 섹션으로 구성되어 있고, <strong>체크포인트가 없는</strong> 것이 특징이에요.<br>
+                    대신 8분 라운드제로 긴장감을 주죠. 우리 맵에는 체크포인트를 넣어서 더 학습 친화적으로 만들어봐요!
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 16: 확인 퀴즈 + 마무리 -->
     <section class="slide">
         <div class="max-w-3xl mx-auto px-6 py-12">
             <div class="animate-in">
                 <span class="badge badge-quiz mb-4">확인 퀴즈</span>
                 <h2 class="title-section mb-8">오늘 배운 내용 확인!</h2>
             </div>
-
             <div class="space-y-6">
                 <div class="animate-in">
                     <quiz-question
-                        question="파트를 부드럽게 왕복 이동시키는 가장 좋은 방법은?"
+                        question="ClickDetector를 클릭했을 때 발생하는 이벤트는?"
                         correct="A"
                         options={quiz1Options}
-                        correct-explanation="정답! TweenService:Create()로 트윈을 만들고, TweenInfo에서 RepeatCount=-1, Reverses=true로 설정하면 왕복 무한반복 이동 플랫폼이 완성돼요!"
-                        wrong-explanation="TweenService:Create()가 정답이에요! RunService.Heartbeat로도 가능하지만 TweenService가 훨씬 간편하고 부드러워요."
+                        correct-explanation="정답! MouseClick 이벤트는 플레이어가 ClickDetector가 있는 파트를 클릭했을 때 발생해요. player 인자로 누가 클릭했는지도 알 수 있어요!"
+                        wrong-explanation="MouseClick이 정답이에요! ClickDetector.MouseClick:Connect(function(player) ... end) 형태로 사용해요."
                     ></quiz-question>
                 </div>
-
                 <div class="animate-in">
                     <quiz-question
-                        question="TweenInfo에서 RepeatCount를 몇으로 설정하면 무한반복될까?"
+                        question="저중력 구역에서 달나라 느낌을 주려면 어떤 속성을 변경해야 할까?"
                         correct="A"
                         options={quiz2Options}
-                        correct-explanation="정답! RepeatCount = -1이 무한반복이에요. 0은 반복없음, 양수는 그 횟수만큼 반복해요."
-                        wrong-explanation="-1이 정답이에요! TweenInfo.new(2, ..., -1, true, 0)처럼 4번째 파라미터를 -1로 설정하면 무한반복돼요."
+                        correct-explanation="정답! Workspace.Gravity를 기본값 196.2에서 30으로 낮추면 달나라처럼 천천히 떨어지고 높이 점프할 수 있어요!"
+                        wrong-explanation="Workspace.Gravity가 정답이에요! 이 값을 낮추면 전체 게임의 중력이 줄어들어요."
                     ></quiz-question>
                 </div>
-
                 <div class="animate-in">
                     <quiz-question
-                        question="앵커된 파트 위의 물체를 밀어내는 속성은?"
+                        question="스프링 패드에서 엄청 높이 뛰게 하려면 어떤 속성을 증가시켜야 할까?"
                         correct="A"
                         options={quiz3Options}
-                        correct-explanation="정답! AssemblyLinearVelocity를 앵커된 파트에 설정하면 그 위의 캐릭터를 해당 방향으로 밀어요. 컨베이어 벨트의 핵심이에요!"
-                        wrong-explanation="AssemblyLinearVelocity가 정답이에요! 앵커된 파트에 이 속성을 설정하면 컨베이어 벨트 효과를 낼 수 있어요."
+                        correct-explanation="정답! humanoid.JumpPower를 기본값 50에서 150으로 높이면 3배 높이 점프할 수 있어요. humanoid.Jump = true로 강제 점프도 가능해요!"
+                        wrong-explanation="JumpPower가 정답이에요! humanoid.JumpPower = 150으로 설정하고 humanoid.Jump = true로 강제 점프해요."
                     ></quiz-question>
                 </div>
-
                 <div class="animate-in">
                     <quiz-question
-                        question="사라지는 함정에서 서서히 투명해지게 하려면 Transparency를 어떻게 설정할까? (for i = 1, 10 루프 안에서)"
+                        question="색깔 함정에서 3초마다 안전한 색을 랜덤으로 바꾸는 코드는?"
                         correct="A"
                         options={quiz4Options}
-                        correct-explanation="정답! i / 10을 사용하면 i=1→0.1, i=5→0.5, i=10→1.0으로 서서히 투명해져요. 10번 반복에 걸쳐 완전히 사라지는 효과예요!"
-                        wrong-explanation="i / 10이 정답이에요! for i = 1, 10 루프에서 platform.Transparency = i / 10으로 설정하면 0.1씩 증가해 1.0(완전 투명)이 돼요."
+                        correct-explanation="정답! math.random(1, #COLORS)로 COLORS 테이블의 1번부터 마지막 번호 사이에서 랜덤으로 고를 수 있어요. #COLORS는 테이블 개수를 자동으로 세줘요!"
+                        wrong-explanation="math.random(1, #COLORS)가 정답이에요! #COLORS = 테이블 안에 있는 색 개수, math.random으로 그 중 하나를 랜덤 선택해요."
                     ></quiz-question>
                 </div>
             </div>
-
             <div class="animate-in mt-8 text-center">
                 <div class="inline-block bg-gradient-to-r from-green-100/50 to-blue-100/50 rounded-2xl p-6">
                     <div class="text-2xl mb-2">🎉</div>
-                    <h3 class="font-bold text-lg mb-2">10주차 완료!</h3>
+                    <h3 class="font-bold text-lg mb-2">10주차 B 완료!</h3>
                     <p class="text-ink-light text-sm">
-                        사운드 시스템과 고급 오비 기믹까지 완벽하게 배웠어요!<br>
-                        다음 시간에는 파티클 & 이펙트로 게임을 화려하게 꾸며요 ✨
+                        타워/점프맵 핵심 기믹 6가지 완벽 정복!<br>
+                        다음 시간에는 파티클 & 라이팅으로 게임을 화려하게 꾸며요 ✨
                     </p>
                 </div>
             </div>
