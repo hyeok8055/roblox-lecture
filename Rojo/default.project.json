@@ -4,11 +4,22 @@
     "$className": "DataModel",
 
     "ServerScriptService": {
+      "$ignoreUnknownInstances": true,
       "LeaderstatsScript": {
         "$path": "src/server"
       },
       "DummySpawner": {
         "$path": "src/server-dummy"
+      },
+      "ShopHandler": {
+        "$path": "src/server-shop"
+      }
+    },
+
+    "StarterGui": {
+      "$ignoreUnknownInstances": true,
+      "ShopGui": {
+        "$path": "src/starterGui/ShopGui"
       }
     },
 
