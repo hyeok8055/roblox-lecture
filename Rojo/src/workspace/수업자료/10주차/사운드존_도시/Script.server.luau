@@ -1,17 +1,58 @@
 -- ========================================
--- 🏙 도시 배경음악 존 (Town BGM Zone)
+-- 도시 BGM 존 (Town BGM Zone)
 -- ========================================
--- 📦 준비: 이 투명한 노란 구역에 들어오면 도시 BGM이 페이드인
--- 💡 숲 BGM과 겹치지 않도록 별개의 Sound 인스턴스 사용
+-- 이 투명한 노란 구역에 들어오면 도시 BGM이 켜집니다.
+-- 숲 구역과 별개의 사운드를 사용합니다.
 -- ========================================
 
 local zone = script.Parent
 local TweenService = game:GetService("TweenService")
 
--- 💡 도시 BGM 사운드 생성
+-- 라벨 GUI 만들기
+local function makeLabel(parent, titleText, descText, titleColor, yOffset)
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.new(0, 220, 0, 65)
+	gui.StudsOffset = Vector3.new(0, yOffset or 4, 0)
+	gui.AlwaysOnTop = false
+	gui.Parent = parent
+
+	local bg = Instance.new("Frame")
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(25, 20, 5)
+	bg.BackgroundTransparency = 0.15
+	bg.BorderSizePixel = 0
+	bg.Parent = gui
+
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 12)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0.55, 0)
+	title.Position = UDim2.new(0, 0, 0, 0)
+	title.Text = titleText
+	title.TextScaled = true
+	title.TextColor3 = titleColor or Color3.fromRGB(255, 220, 80)
+	title.BackgroundTransparency = 1
+	title.Font = Enum.Font.GothamBold
+	title.Parent = bg
+
+	local desc = Instance.new("TextLabel")
+	desc.Size = UDim2.new(1, 0, 0.45, 0)
+	desc.Position = UDim2.new(0, 0, 0.55, 0)
+	desc.Text = descText
+	desc.TextScaled = true
+	desc.TextColor3 = Color3.fromRGB(255, 240, 160)
+	desc.BackgroundTransparency = 1
+	desc.Font = Enum.Font.Gotham
+	desc.Parent = bg
+
+	return bg
+end
+
+makeLabel(zone, "도시 BGM 구역", "들어오면 음악이 켜져요", Color3.fromRGB(255, 210, 60), 6)
+
 local bgm = Instance.new("Sound")
 bgm.Name = "TownBGM"
-bgm.SoundId = "rbxassetid://1843053625"  -- 🎵 도시 BGM (원하는 ID로 교체 가능)
+bgm.SoundId = "rbxassetid://1843053625"  -- 원하는 BGM ID로 교체 가능
 bgm.Volume = 0
 bgm.Looped = true
 bgm.Parent = game:GetService("SoundService")
@@ -21,7 +62,7 @@ local inZone = false
 local function fadeIn()
 	bgm:Play()
 	TweenService:Create(bgm, TweenInfo.new(2), {Volume = 0.5}):Play()
-	print("🏙 도시 구역 진입! BGM 페이드인")
+	print("[도시 BGM] 페이드인 시작")
 end
 
 local function fadeOut()
@@ -31,20 +72,18 @@ local function fadeOut()
 		bgm:Stop()
 		bgm.Volume = 0
 	end)
-	print("🏙 도시 구역 이탈! BGM 페이드아웃")
+	print("[도시 BGM] 페이드아웃")
 end
 
 zone.Touched:Connect(function(hit)
-	local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-	if humanoid and not inZone then
+	if hit.Parent:FindFirstChildOfClass("Humanoid") and not inZone then
 		inZone = true
 		fadeIn()
 	end
 end)
 
 zone.TouchEnded:Connect(function(hit)
-	local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-	if humanoid and inZone then
+	if hit.Parent:FindFirstChildOfClass("Humanoid") and inZone then
 		inZone = false
 		fadeOut()
 	end

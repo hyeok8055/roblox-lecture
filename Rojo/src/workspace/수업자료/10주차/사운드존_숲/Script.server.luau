@@ -1,57 +1,90 @@
 -- ========================================
--- 🌲 숲 배경음악 존 (Forest BGM Zone)
+-- 🌲 숲 BGM 존 (Forest BGM Zone)
 -- ========================================
--- 📦 준비: 이 투명한 초록 구역에 들어오면 숲 BGM이 페이드인
---          구역을 벗어나면 BGM이 페이드아웃
--- 💡 핵심: TweenService로 Volume을 서서히 올리고 내림 = 부드러운 전환
+-- 이 투명한 초록 구역에 들어오면 숲 BGM이 부드럽게 켜지고
+-- 나가면 서서히 꺼집니다. (TweenService 페이드)
 -- ========================================
 
 local zone = script.Parent
 local TweenService = game:GetService("TweenService")
 
--- 💡 BGM 사운드 생성 (SoundService에 넣으면 공간 위치 없이 전체 재생)
-local bgm = Instance.new("Sound")
-bgm.Name = "ForestBGM"
-bgm.SoundId = "rbxassetid://1843046175"  -- 🎵 숲/자연 BGM (원하는 ID로 교체 가능)
-bgm.Volume = 0       -- 처음엔 볼륨 0으로 시작 (페이드인 효과)
-bgm.Looped = true    -- 반복 재생
-bgm.Parent = game:GetService("SoundService")
+-- ✅ 라벨 GUI 만들기 (구역 위에 표시)
+local function makeLabel(parent, titleText, descText, titleColor, yOffset)
+	local gui = Instance.new("BillboardGui")
+	gui.Size = UDim2.new(0, 220, 0, 65)
+	gui.StudsOffset = Vector3.new(0, yOffset or 4, 0)
+	gui.AlwaysOnTop = false
+	gui.Parent = parent
 
--- 💡 상태 추적 변수
-local inZone = false  -- 구역 안에 있는지 여부
+	local bg = Instance.new("Frame")
+	bg.Size = UDim2.new(1, 0, 1, 0)
+	bg.BackgroundColor3 = Color3.fromRGB(10, 20, 15)
+	bg.BackgroundTransparency = 0.15
+	bg.BorderSizePixel = 0
+	bg.Parent = gui
 
--- 💡 BGM 페이드인 함수 (볼륨 0 → 0.5, 2초)
-local function fadeIn()
-	bgm:Play()
-	local tween = TweenService:Create(bgm, TweenInfo.new(2), {Volume = 0.5})
-	tween:Play()
-	print("🌲 숲 구역 진입! BGM 페이드인 시작")
+	Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 12)
+
+	local title = Instance.new("TextLabel")
+	title.Size = UDim2.new(1, 0, 0.55, 0)
+	title.Position = UDim2.new(0, 0, 0, 0)
+	title.Text = titleText
+	title.TextScaled = true
+	title.TextColor3 = titleColor or Color3.fromRGB(100, 255, 120)
+	title.BackgroundTransparency = 1
+	title.Font = Enum.Font.GothamBold
+	title.Parent = bg
+
+	local desc = Instance.new("TextLabel")
+	desc.Size = UDim2.new(1, 0, 0.45, 0)
+	desc.Position = UDim2.new(0, 0, 0.55, 0)
+	desc.Text = descText
+	desc.TextScaled = true
+	desc.TextColor3 = Color3.fromRGB(180, 255, 180)
+	desc.BackgroundTransparency = 1
+	desc.Font = Enum.Font.Gotham
+	desc.Parent = bg
+
+	return bg
 end
 
--- 💡 BGM 페이드아웃 함수 (볼륨 0.5 → 0, 1.5초 후 정지)
+makeLabel(zone, "숲 BGM 구역", "들어오면 음악이 켜져요", Color3.fromRGB(80, 220, 100), 6)
+
+-- BGM 사운드 생성 (SoundService = 공간 위치 없이 전체 재생)
+local bgm = Instance.new("Sound")
+bgm.Name = "ForestBGM"
+bgm.SoundId = "rbxassetid://1843046175"  -- 원하는 BGM ID로 교체 가능
+bgm.Volume = 0
+bgm.Looped = true
+bgm.Parent = game:GetService("SoundService")
+
+local inZone = false
+
+local function fadeIn()
+	bgm:Play()
+	TweenService:Create(bgm, TweenInfo.new(2), {Volume = 0.5}):Play()
+	print("[숲 BGM] 페이드인 시작")
+end
+
 local function fadeOut()
 	local tween = TweenService:Create(bgm, TweenInfo.new(1.5), {Volume = 0})
 	tween:Play()
 	tween.Completed:Connect(function()
 		bgm:Stop()
-		bgm.Volume = 0  -- 다음 페이드인을 위해 초기화
+		bgm.Volume = 0
 	end)
-	print("🌲 숲 구역 이탈! BGM 페이드아웃")
+	print("[숲 BGM] 페이드아웃")
 end
 
--- 💡 구역에 들어오면 (캐릭터의 아무 부위나 닿아도 발동)
 zone.Touched:Connect(function(hit)
-	local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-	if humanoid and not inZone then
+	if hit.Parent:FindFirstChildOfClass("Humanoid") and not inZone then
 		inZone = true
 		fadeIn()
 	end
 end)
 
--- 💡 구역에서 나가면
 zone.TouchEnded:Connect(function(hit)
-	local humanoid = hit.Parent:FindFirstChildOfClass("Humanoid")
-	if humanoid and inZone then
+	if hit.Parent:FindFirstChildOfClass("Humanoid") and inZone then
 		inZone = false
 		fadeOut()
 	end
