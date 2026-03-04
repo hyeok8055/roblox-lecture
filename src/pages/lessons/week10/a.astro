@@ -314,9 +314,109 @@ goalPart.Touched:Connect(function(hit)
         pitchTween:Play()
     end
 end)`;
+
+// 퀴즈 5: RemoteFunction 구매 요청
+const shopBlanks = JSON.stringify([
+    { id: "b1", correct: "\"PurchaseItem\"", options: ["\"PurchaseItem\"", "\"BuyItem\"", "\"ShopEvent\"", "\"Purchase\""] },
+    { id: "b2", correct: "purchaseRF:InvokeServer(item.id)", options: ["purchaseRF:InvokeServer(item.id)", "purchaseRF:FireServer(item.id)", "purchaseRF:Send(item.id)", "purchaseRF:Call(item.id)"] },
+    { id: "b3", correct: "success", options: ["success", "result", "ok", "status"] },
+    { id: "b4", correct: "msg", options: ["msg", "message", "text", "info"] }
+]);
+const shopTemplate = `-- ========================================
+-- 🏪 상점 구매 버튼 (LocalScript)
+-- ========================================
+-- 💡 RemoteFunction = 클라이언트→서버 요청 후 결과 받기
+-- 💡 InvokeServer = 서버에 물어보고 답장 기다리기
+-- ========================================
+
+-- 💡 서버에서 만들어놓은 RemoteFunction 가져오기
+local purchaseRF = ReplicatedStorage:WaitForChild([b1])
+
+-- 💡 구매 버튼 클릭!
+buyBtn.MouseButton1Click:Connect(function()
+    buyBtn.Text = "..."   -- 💡 처리 중 표시
+    buyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+
+    -- 💡 서버에 구매 요청! 결과가 올 때까지 기다림
+    local [b3], [b4] = [b2]
+
+    -- 💡 성공/실패 메시지 표시
+    if success then
+        resultLabel.Text = "✓ " .. msg
+    else
+        resultLabel.Text = "✗ " .. msg
+    end
+
+    task.wait(0.5)
+    buyBtn.Text = "구매"   -- 💡 버튼 복원
+end)`;
+const shopFullCode = `local purchaseRF = ReplicatedStorage:WaitForChild("PurchaseItem")
+
+buyBtn.MouseButton1Click:Connect(function()
+    buyBtn.Text = "..."
+    buyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 70)
+    local success, msg = purchaseRF:InvokeServer(item.id)
+    if success then
+        resultLabel.Text = "✓ " .. msg
+    else
+        resultLabel.Text = "✗ " .. msg
+    end
+    task.wait(0.5)
+    buyBtn.Text = "구매"
+    buyBtn.BackgroundColor3 = Color3.fromRGB(40, 90, 200)
+end)`;
+
+// 퀴즈 6: 스택 효과 시스템
+const stackBlanks = JSON.stringify([
+    { id: "b1", correct: "task.cancel(effect.thread)", options: ["task.cancel(effect.thread)", "effect.thread:Stop()", "thread.cancel()", "task.stop(effect.thread)"] },
+    { id: "b2", correct: "effect.stacks + 1", options: ["effect.stacks + 1", "effect.stacks", "stacks + 1", "effect.stacks * 2"] },
+    { id: "b3", correct: "16 * (1 + effect.stacks)", options: ["16 * (1 + effect.stacks)", "16 + effect.stacks", "16 * effect.stacks", "16 + (effect.stacks * 16)"] },
+    { id: "b4", correct: "task.delay(300, function()", options: ["task.delay(300, function()", "task.wait(300)", "wait(300)", "task.spawn(300, function()"] }
+]);
+const stackTemplate = `-- ========================================
+-- 🔥 스택 효과 시스템 (5분 중첩)
+-- ========================================
+-- 💡 stacks = 쌓인 횟수 (구매마다 +1)
+-- 💡 thread = 5분 타이머 (새 구매 시 리셋!)
+-- ========================================
+
+local effect = getEffect(player, itemId)
+
+-- 💡 기존 타이머가 있으면 취소해서 리셋!
+if effect.thread then
+    [b1]   -- 기존 타이머 취소
+    effect.thread = nil
+end
+
+-- 💡 스택 1 추가
+effect.stacks = [b2]
+
+-- 💡 스택 수 × 기본값으로 능력치 설정
+-- 예) 2중첩 → WalkSpeed = 16 × (1 + 2) = 48
+humanoid.WalkSpeed = [b3]
+
+-- 💡 5분(300초) 후 효과 초기화 타이머
+effect.thread = [b4]
+    effect.stacks = 0        -- 스택 리셋
+    humanoid.WalkSpeed = 16  -- 원래 속도로
+end)`;
+const stackFullCode = `local effect = getEffect(player, itemId)
+if effect.thread then
+    task.cancel(effect.thread)
+    effect.thread = nil
+end
+effect.stacks = effect.stacks + 1
+humanoid.WalkSpeed = 16 * (1 + effect.stacks)
+effect.thread = task.delay(300, function()
+    effect.stacks = 0
+    humanoid.WalkSpeed = 16
+end)`;
+
+const shopQuiz5Options = JSON.stringify(["RemoteFunction", "RemoteEvent", "BindableFunction", "BindableEvent"]);
+const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.kill()", "task.clear()"]);
 ---
 
-<LessonLayout title="고급 사운드 시스템" lessonNumber={10} totalSlides={15}>
+<LessonLayout title="고급 사운드 시스템" lessonNumber={10} totalSlides={19}>
 
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
@@ -1007,7 +1107,115 @@ end)`;
         </div>
     </section>
 
-    <!-- 슬라이드 15: 마무리 -->
+    <!-- 슬라이드 15: 코인 상점 시스템 개요 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">보너스 파트</span>
+            <h2 class="title-section mb-2">🏪 코인 상점 시스템</h2>
+            <p class="text-gray-400 mb-8">지금까지 모은 코인으로 아이템을 사는 상점을 만들어 보자!</p>
+
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="lesson-card text-center">
+                    <div class="text-3xl mb-2">💨</div>
+                    <div class="font-bold text-neon-sky">속도 강화</div>
+                    <div class="text-sm text-gray-400 mt-1">10코인 / 5분</div>
+                    <div class="text-xs text-neon-mint mt-1">WalkSpeed +16씩 중첩</div>
+                </div>
+                <div class="lesson-card text-center">
+                    <div class="text-3xl mb-2">🚀</div>
+                    <div class="font-bold text-neon-gold">점프 강화</div>
+                    <div class="text-sm text-gray-400 mt-1">15코인 / 5분</div>
+                    <div class="text-xs text-neon-mint mt-1">JumpPower +50씩 중첩</div>
+                </div>
+                <div class="lesson-card text-center">
+                    <div class="text-3xl mb-2">❤️</div>
+                    <div class="font-bold" style="color: #FF6B6B;">체력 회복</div>
+                    <div class="text-sm text-gray-400 mt-1">8코인 / 즉시</div>
+                    <div class="text-xs text-neon-mint mt-1">MaxHealth까지 즉시 회복</div>
+                </div>
+            </div>
+
+            <div class="lesson-card mb-6">
+                <p class="font-bold text-neon-gold mb-3">🔑 핵심 구조: Client ↔ Server</p>
+                <div class="flex items-center gap-4 justify-center text-sm">
+                    <div class="p-3 rounded-lg bg-neon-sky/10 border border-neon-sky/30 text-center">
+                        <div class="font-bold text-neon-sky">클라이언트</div>
+                        <div class="text-gray-400 text-xs mt-1">구매 버튼 클릭</div>
+                        <div class="text-gray-400 text-xs">InvokeServer(itemId)</div>
+                    </div>
+                    <div class="text-2xl text-neon-gold">⟷</div>
+                    <div class="p-3 rounded-lg bg-neon-coral/10 border border-neon-coral/30 text-center">
+                        <div class="font-bold" style="color:#FF6B6B">서버</div>
+                        <div class="text-gray-400 text-xs mt-1">코인 검증 + 차감</div>
+                        <div class="text-gray-400 text-xs">효과 적용 후 반환</div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 text-center mt-3">RemoteFunction = 요청하고 답장 받기 (RemoteEvent는 단방향, RemoteFunction은 양방향!)</p>
+            </div>
+
+            <HintBox type="tip" title="왜 서버에서 검증할까?">
+                클라이언트에서 처리하면 핵(치팅)으로 코인 없이도 구매 가능해져. 서버가 최종 판단!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 16: RemoteFunction 구매 요청 코드 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🏪 구매 버튼 (RemoteFunction 클라이언트)"
+                setup="StarterGui > ShopGui > LocalScript | ReplicatedStorage > PurchaseItem (RemoteFunction)"
+                concepts='["RemoteFunction:InvokeServer(args) — 서버에 요청 후 결과 기다리기", "local success, msg = rf:InvokeServer() — 두 값 반환 받기", "RemoteEvent는 단방향 / RemoteFunction은 양방향(답장 O)", "buyBtn.Text = ... — 처리 중 비활성화 패턴"]'
+                blanks={shopBlanks}
+                template={shopTemplate}
+                full-code={shopFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 17: 스택 효과 시스템 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="🔥 스택 효과 시스템 (5분 중첩)"
+                setup="ServerScriptService > ShopHandler (Script) | activeEffects 테이블로 플레이어별 스택 추적"
+                concepts='["task.cancel(thread) — 실행 중인 task.delay 타이머 취소", "effect.stacks — 구매 횟수 누적 카운터", "WalkSpeed = 16 × (1 + stacks) — 스택에 비례한 값 계산", "task.delay(300, fn) — 300초(5분) 후 자동 초기화"]'
+                blanks={stackBlanks}
+                template={stackTemplate}
+                full-code={stackFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 18: 퀴즈 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="w-full max-w-2xl space-y-6">
+                <div class="text-center mb-4">
+                    <span class="badge badge-quiz mb-3">확인 퀴즈</span>
+                    <h2 class="title-section">상점 시스템 마무리 점검</h2>
+                </div>
+
+                <quiz-question
+                    question="클라이언트에서 서버에 '요청'하고 '결과를 받아올 때' 사용하는 것은?"
+                    correct="A"
+                    options={shopQuiz5Options}
+                    correct-explanation="RemoteFunction은 InvokeServer로 서버에 요청하고 서버의 return값을 받을 수 있어요."
+                    wrong-explanation="RemoteEvent는 단방향 (결과를 받을 수 없음). RemoteFunction이 양방향 통신!"
+                ></quiz-question>
+
+                <quiz-question
+                    question="실행 중인 task.delay 타이머를 취소하는 올바른 방법은?"
+                    correct="A"
+                    options={shopQuiz6Options}
+                    correct-explanation="task.cancel(thread)으로 실행 중인 지연 작업을 취소할 수 있어요. 스택 리셋 타이머에 활용!"
+                    wrong-explanation="task.stop, task.kill, task.clear는 존재하지 않는 함수예요."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 19: 마무리 -->
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
             <div class="text-center animate-in">
@@ -1052,6 +1260,20 @@ end)`;
                         <div>
                             <div class="font-bold">피치 업 효과</div>
                             <div class="text-sm text-gray-400">TweenService로 승리 효과음 완성</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">RemoteFunction 구매 시스템</div>
+                            <div class="text-sm text-gray-400">클라이언트 요청 → 서버 검증 → 결과 반환</div>
+                        </div>
+                    </div>
+                    <div class="lesson-card flex items-start gap-3">
+                        <span class="text-neon-mint text-xl">✅</span>
+                        <div>
+                            <div class="font-bold">스택 효과 + 타이머 리셋</div>
+                            <div class="text-sm text-gray-400">task.cancel로 중첩 구매 5분 타이머 갱신</div>
                         </div>
                     </div>
                 </div>
