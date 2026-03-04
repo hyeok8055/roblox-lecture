@@ -4,7 +4,7 @@ import HintBox from '../../../components/astro/HintBox.astro';
 
 // 확인 퀴즈 옵션
 const quiz1Options = JSON.stringify(["TweenService", "SoundService", "RunService", "Players"]);
-const quiz2Options = JSON.stringify(["TouchEnded", "Touched", "MouseClick", "Triggered"]);
+const quiz2Options = JSON.stringify(["Touched", "TouchEnded", "MouseClick", "Triggered"]);
 const quiz3Options = JSON.stringify(["RollOffMaxDistance", "Volume", "PlaybackSpeed", "TimePosition"]);
 const quiz4Options = JSON.stringify(["speed / 14", "speed * 2", "speed / 2", "speed + 1"]);
 
@@ -376,7 +376,7 @@ end)`;
                             TweenService:Create(<br>
                             &nbsp;&nbsp;<span class="text-neon-sky">대상 오브젝트</span>,<br>
                             &nbsp;&nbsp;<span class="text-neon-gold">TweenInfo.new(시간)</span>,<br>
-                            &nbsp;&nbsp;<span class="text-neon-mint">{바꿀속성 = 목표값}</span><br>
+                            &nbsp;&nbsp;<span class="text-neon-mint">{'{'} 바꿀속성 = 목표값 {'}'}</span><br>
                             ):Play()
                         </div>
                     </div>
@@ -430,7 +430,7 @@ end)`;
                 name="🎵 BGM 페이드인 (TweenService 볼륨)"
                 setup="SoundService > Sound('BGM', SoundId 설정, Looped=true) | StarterPlayerScripts > LocalScript"
                 concepts='["TweenService:Create(대상, TweenInfo, {속성=값})", "TweenInfo.new(시간) — 몇 초 동안 변화할지", "Volume — 볼륨 값 (0=무음, 1=최대)", "tween:Play() — Tween 시작"]'
-                blanks={JSON.stringify(fadeBlanks)}
+                blanks={fadeBlanks}
                 template={fadeTemplate}
                 full-code={fadeFullCode}
             ></roblox-quiz-example>
@@ -514,7 +514,7 @@ end)`;
                 name="🗺️ 구역별 BGM 자동 전환"
                 setup="SoundService > ForestBGM, TownBGM | Workspace > ForestZone (CanCollide=false, Anchored=true, Transparency=0.8) | Script"
                 concepts='["currentBGM 변수 — 현재 재생 중인 사운드 추적", "~= 연산자 — 같지 않을 때 (not equal)", "Touched 이벤트 — 캐릭터가 파트에 닿을 때", "TweenService:Create — 볼륨 서서히 전환"]'
-                blanks={JSON.stringify(zoneBlanks)}
+                blanks={zoneBlanks}
                 template={zoneTemplate}
                 full-code={zoneFullCode}
             ></roblox-quiz-example>
@@ -621,8 +621,8 @@ end)`;
             <roblox-quiz-example
                 name="🌊 3D 공간 사운드 (폭포 효과음)"
                 setup="Workspace > Waterfall (Part, Anchored=true) > Script"
-                concepts='["Instance.new(\"Sound\") — 코드로 Sound 오브젝트 생성", "sound.Parent = 파트 — 파트에 붙여서 3D 위치 사운드!", "RollOffMaxDistance — 이 거리 밖에선 안 들림 (스터드 단위)", "sound:Play() — 재생 시작"]'
-                blanks={JSON.stringify(spatialBlanks)}
+                concepts={JSON.stringify(["Instance.new(\"Sound\") — 코드로 Sound 오브젝트 생성", "sound.Parent = 파트 — 파트에 붙여서 3D 위치 사운드!", "RollOffMaxDistance — 이 거리 밖에선 안 들림 (스터드 단위)", "sound:Play() — 재생 시작"])}
+                blanks={spatialBlanks}
                 template={spatialTemplate}
                 full-code={spatialFullCode}
             ></roblox-quiz-example>
@@ -717,7 +717,7 @@ end)`;
                 name="👟 달릴수록 빨라지는 발소리"
                 setup="StarterCharacterScripts > LocalScript | HumanoidRootPart > Sound('Footstep', SoundId 설정, Looped=true)"
                 concepts='["Humanoid.Running — 이동 속도 변화를 실시간 감지", "PlaybackSpeed — 사운드 재생 속도 (=피치)", "speed / 14 — 속도를 발소리 빠르기로 변환", "footstep.IsPlaying — 현재 재생 중인지 확인"]'
-                blanks={JSON.stringify(footstepBlanks)}
+                blanks={footstepBlanks}
                 template={footstepTemplate}
                 full-code={footstepFullCode}
             ></roblox-quiz-example>
@@ -806,7 +806,7 @@ end)`;
                 name="🏆 승리 사운드 피치 업 효과"
                 setup="SoundService > WinSound (SoundId 설정) | Workspace > GoalPart (Anchored) > Script"
                 concepts='["winSound:Play() — 사운드 재생 시작", "TweenInfo.new(2, Enum.EasingStyle.Quad) — 2초, Quad 이징", "{PlaybackSpeed = 2.0} — 목표 PlaybackSpeed 설정", "pitchTween:Play() — Tween 시작으로 피치 점점 높이기"]'
-                blanks={JSON.stringify(pitchBlanks)}
+                blanks={pitchBlanks}
                 template={pitchTemplate}
                 full-code={pitchFullCode}
             ></roblox-quiz-example>
@@ -934,7 +934,7 @@ end)`;
                                 sound.Volume = 0 / sound:Play()<br>
                                 TweenService:Create(sound,<br>
                                 &nbsp;&nbsp;TweenInfo.new(2),<br>
-                                &nbsp;&nbsp;{'{'}{'}'}Volume = 0.5{'}'}):Play()
+                                &nbsp;&nbsp;{'{'}Volume = 0.5{'}'}):Play()
                             </div>
                         </div>
                         <div class="lesson-card text-sm">
