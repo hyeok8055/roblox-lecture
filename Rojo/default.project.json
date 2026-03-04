@@ -15,9 +15,6 @@
     "Workspace": {
       "수업자료": {
         "$className": "Folder",
-        "8주차": {
-          "$path": "src/workspace/수업자료/8주차"
-        },
         "10주차": {
           "$path": "src/workspace/수업자료/10주차"
         }
