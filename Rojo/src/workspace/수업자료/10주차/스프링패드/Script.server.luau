@@ -15,6 +15,7 @@ pad.Touched:Connect(function(hit)
 
 	debounce = true
 
+	humanoid.UseJumpPower = true  -- JumpPower 모드 활성화
 	humanoid.JumpPower = 150
 	humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
 	print("[스프링 패드] 점프파워 150!")

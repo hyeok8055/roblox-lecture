@@ -105,6 +105,7 @@ local function applyEffect(player, itemId)
 
 	elseif itemId == "jump" then
 		-- 💡 JumpPower: 기본 50, 1중첩=100, 2중첩=150, 3중첩=200...
+		humanoid.UseJumpPower = true  -- JumpPower 모드 활성화
 		humanoid.JumpPower = 50 + (effect.stacks * 50)
 	end
 
