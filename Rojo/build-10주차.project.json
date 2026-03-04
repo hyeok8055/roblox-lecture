@@ -1,0 +1,15 @@
+{
+  "name": "10주차_사운드_기믹",
+  "tree": {
+    "$className": "DataModel",
+
+    "Workspace": {
+      "수업자료": {
+        "$className": "Folder",
+        "10주차": {
+          "$path": "src/workspace/수업자료/10주차"
+        }
+      }
+    }
+  }
+}
