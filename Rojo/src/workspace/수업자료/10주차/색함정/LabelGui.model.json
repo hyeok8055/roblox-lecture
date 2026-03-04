@@ -1,0 +1,53 @@
+{
+  "ClassName": "BillboardGui",
+  "Properties": {
+    "Size": { "UDim2": [[0, 200], [0, 75]] },
+    "StudsOffset": { "Vector3": [0, 3, 0] },
+    "AlwaysOnTop": true
+  },
+  "Children": [
+    {
+      "Name": "Background",
+      "ClassName": "Frame",
+      "Properties": {
+        "Size": { "UDim2": [[1, 0], [1, 0]] },
+        "BackgroundColor3": { "Color3": [0.18, 0.02, 0.02] },
+        "BackgroundTransparency": 0.1,
+        "BorderSizePixel": 0
+      },
+      "Children": [
+        {
+          "Name": "Corner",
+          "ClassName": "UICorner",
+          "Properties": { "CornerRadius": { "UDim": [0, 14] } }
+        },
+        {
+          "Name": "Title",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "Size": { "UDim2": [[1, 0], [0.42, 0]] },
+            "Position": { "UDim2": [[0, 0], [0, 0]] },
+            "Text": "색 함정",
+            "TextScaled": true,
+            "TextColor3": { "Color3": [1.0, 1.0, 1.0] },
+            "BackgroundTransparency": 1,
+            "Font": "GothamBold"
+          }
+        },
+        {
+          "Name": "Status",
+          "ClassName": "TextLabel",
+          "Properties": {
+            "Size": { "UDim2": [[1, 0], [0.58, 0]] },
+            "Position": { "UDim2": [[0, 0], [0.42, 0]] },
+            "Text": "⚠ 위험!",
+            "TextScaled": true,
+            "TextColor3": { "Color3": [1.0, 0.25, 0.25] },
+            "BackgroundTransparency": 1,
+            "Font": "GothamBlack"
+          }
+        }
+      ]
+    }
+  ]
+}
