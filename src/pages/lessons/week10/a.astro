@@ -6,7 +6,7 @@ import HintBox from '../../../components/astro/HintBox.astro';
 const quiz1Options = JSON.stringify(["TweenService", "SoundService", "RunService", "Players"]);
 const quiz2Options = JSON.stringify(["Touched", "TouchEnded", "MouseClick", "Triggered"]);
 const quiz3Options = JSON.stringify(["RollOffMaxDistance", "Volume", "PlaybackSpeed", "TimePosition"]);
-const quiz4Options = JSON.stringify(["speed / 14", "speed * 2", "speed / 2", "speed + 1"]);
+const quiz4Options = JSON.stringify(["speed / 16", "speed / 14", "speed * 2", "speed + 1"]);
 
 // =========================================
 // 드롭다운 퀴즈 데이터 (5개)
@@ -200,120 +200,104 @@ sound:Play()`;
 const footstepBlanks = JSON.stringify([
     { id: "b1", correct: "\"Humanoid\"", options: ["\"Humanoid\"", "\"HumanoidRootPart\"", "\"Character\"", "\"Player\""] },
     { id: "b2", correct: "humanoid.Running", options: ["humanoid.Running", "humanoid.Touched", "humanoid.Walking", "character.Running"] },
-    { id: "b3", correct: "speed / 14", options: ["speed / 14", "speed * 2", "speed / 2", "speed + 1"] },
-    { id: "b4", correct: "0", options: ["0", "1", "nil", "false"] }
+    { id: "b3", correct: "speed / 16", options: ["speed / 16", "speed / 14", "speed * 2", "speed + 1"] },
+    { id: "b4", correct: "footstep:Stop()", options: ["footstep:Stop()", "footstep.PlaybackSpeed = 0", "footstep.Volume = 0", "footstep:Pause()"] }
 ]);
 const footstepTemplate = `-- ========================================
 -- 👟 달릴수록 빨라지는 발소리!
 -- ========================================
 -- 📦 준비:
 --   StarterCharacterScripts > LocalScript
---   HumanoidRootPart 안에 Sound("Footstep") 추가
---   Sound에 발소리 에셋ID 설정, Looped = true
+--   코드 안에서 Sound를 직접 생성
 -- 💡 Humanoid.Running = 이동 속도가 바뀔 때마다 발동!
 -- 💡 PlaybackSpeed = 사운드 재생 속도 (1 = 정상, 2 = 2배 빠름)
 -- ========================================
 
--- 💡 캐릭터가 스폰될 때 실행 (LocalScript는 캐릭터 안에서 시작)
 local character = script.Parent
 local humanoid = character:WaitForChild([b1])
-
--- 💡 캐릭터의 몸 중심 파트에서 발소리 찾기
 local rootPart = character:WaitForChild("HumanoidRootPart")
-local footstep = rootPart:WaitForChild("Footstep")
+local footstep = Instance.new("Sound")
+footstep.SoundId = "rbxasset://sounds/action_footsteps_plastic.mp3"
+footstep.Looped = true
+footstep.Parent = rootPart
 
--- 💡 Humanoid.Running: 이동 속도(speed)를 계속 알려줌!
 [b2]:Connect(function(speed)
-    if speed > 0 then
-        -- 💡 속도에 비례해서 발소리 속도 설정 (16 / 14 ≈ 1.14배)
+    if speed > 1 then
         footstep.PlaybackSpeed = [b3]
         if not footstep.IsPlaying then
             footstep:Play()
         end
     else
-        -- 💡 멈추면 발소리 속도를 0으로 (정지)
-        footstep.PlaybackSpeed = [b4]
-        footstep:Stop()
+        [b4]
     end
 end)`;
 const footstepFullCode = `-- 👟 발소리 속도 동기화 (StarterCharacterScripts > LocalScript)
--- 📦 HumanoidRootPart > Sound("Footstep", Looped=true)
 local character = script.Parent
 local humanoid = character:WaitForChild("Humanoid")
 local rootPart = character:WaitForChild("HumanoidRootPart")
-local footstep = rootPart:WaitForChild("Footstep")
+local footstep = Instance.new("Sound")
+footstep.SoundId = "rbxasset://sounds/action_footsteps_plastic.mp3"
+footstep.Looped = true
+footstep.Parent = rootPart
 
 humanoid.Running:Connect(function(speed)
-    if speed > 0 then
-        footstep.PlaybackSpeed = speed / 14
+    if speed > 1 then
+        footstep.PlaybackSpeed = speed / 16
         if not footstep.IsPlaying then footstep:Play() end
     else
-        footstep.PlaybackSpeed = 0
         footstep:Stop()
     end
 end)`;
 
-// 퀴즈 5: 승리 효과음 피치 업 (PlaybackSpeed TweenService)
+// 퀴즈 5: 콤보 코인 피치 업 (PlaybackSpeed)
 const pitchBlanks = JSON.stringify([
-    { id: "b1", correct: "winSound:Play()", options: ["winSound:Play()", "winSound:Start()", "winSound:Resume()", "winSound:Begin()"] },
-    { id: "b2", correct: "TweenInfo.new(2, Enum.EasingStyle.Quad)", options: ["TweenInfo.new(2, Enum.EasingStyle.Quad)", "TweenInfo.new(2)", "TweenInfo.new(2, Linear)", "Info.new(2, Quad)"] },
-    { id: "b3", correct: "{PlaybackSpeed = 2.0}", options: ["{PlaybackSpeed = 2.0}", "{Speed = 2.0}", "{Pitch = 2.0}", "{Volume = 2.0}"] },
-    { id: "b4", correct: "pitchTween:Play()", options: ["pitchTween:Play()", "pitchTween:Start()", "pitchTween:Run()", "pitchTween:Begin()"] }
+    { id: "b1", correct: "character:FindFirstChild(\"HumanoidRootPart\")", options: ["character:FindFirstChild(\"HumanoidRootPart\")", "character:FindFirstChild(\"Head\")", "workspace:FindFirstChild(\"HumanoidRootPart\")", "player:FindFirstChild(\"HumanoidRootPart\")"] },
+    { id: "b2", correct: "os.clock()", options: ["os.clock()", "tick(1.5)", "time.wait()", "task.time()"] },
+    { id: "b3", correct: "1 + ((state.count - 1) * 0.12)", options: ["1 + ((state.count - 1) * 0.12)", "state.count * 2", "0.12 + state.count", "state.count / 0.12"] },
+    { id: "b4", correct: "sound:Play()", options: ["sound:Play()", "sound:Start()", "sound:Resume()", "sound:Begin()"] }
 ]);
 const pitchTemplate = `-- ========================================
--- 🏆 승리 시 피치가 점점 올라가는 효과음!
+-- 🪙 콤보 코인 피치 업 효과!
 -- ========================================
--- 📦 준비: SoundService > WinSound (승리 효과음 에셋ID)
---         ServerScriptService > Script
--- 💡 PlaybackSpeed = 1.0(기본) → 2.0(2배 높은 음)
--- 💡 TweenService로 부드럽게 피치 올리기
+-- 📦 준비: Workspace > 콤보 코인 묶음 + Script
+-- 💡 짧은 시간 안에 코인을 연속으로 먹으면 count 증가
+-- 💡 count에 비례해 PlaybackSpeed를 조금씩 올리기
 -- ========================================
 
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
+local state = { lastPickupTime = 0, count = 0 }
+local character = player.Character
+local rootPart = [b1]
+local now = [b2]
 
--- 💡 승리 효과음 가져오기
-local winSound = SoundService:WaitForChild("WinSound")
+if now - state.lastPickupTime <= 1.5 then
+    state.count += 1
+else
+    state.count = 1
+end
+state.lastPickupTime = now
 
--- 💡 플레이어가 골인 파트에 닿으면!
-local goalPart = workspace:WaitForChild("GoalPart")
-goalPart.Touched:Connect(function(hit)
-    if game.Players:GetPlayerFromCharacter(hit.Parent) then
-        -- 💡 피치를 0.8에서 시작 (약간 낮게)
-        winSound.PlaybackSpeed = 0.8
-        -- 💡 승리 효과음 재생!
-        [b1]
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxasset://sounds/action_get_up.mp3"
+sound.Parent = rootPart
+sound.PlaybackSpeed = math.clamp([b3], 1, 2)
+[b4]`;
+const pitchFullCode = `-- 🪙 콤보 코인 피치 업 효과
+-- 📦 Workspace > 콤보 코인 묶음 + Script
+local state = { lastPickupTime = 0, count = 0 }
+local now = os.clock()
 
-        -- 💡 Quad 이징: 처음엔 천천히, 나중엔 빠르게
-        local tweenInfo = [b2]
+if now - state.lastPickupTime <= 1.5 then
+    state.count += 1
+else
+    state.count = 1
+end
+state.lastPickupTime = now
 
-        -- 💡 PlaybackSpeed를 2.0까지 올려서 피치 업 효과!
-        local pitchTween = TweenService:Create(winSound, tweenInfo, [b3])
-        -- 💡 Tween 시작!
-        [b4]
-
-        print("🏆 승리! 피치 업 효과 재생!")
-    end
-end)`;
-const pitchFullCode = `-- 🏆 승리 사운드 피치 업 효과
--- 📦 SoundService > WinSound + Script (ServerScriptService)
-local TweenService = game:GetService("TweenService")
-local SoundService = game:GetService("SoundService")
-local winSound = SoundService:WaitForChild("WinSound")
-local goalPart = workspace:WaitForChild("GoalPart")
-
-goalPart.Touched:Connect(function(hit)
-    if game.Players:GetPlayerFromCharacter(hit.Parent) then
-        winSound.PlaybackSpeed = 0.8
-        winSound:Play()
-        local pitchTween = TweenService:Create(
-            winSound,
-            TweenInfo.new(2, Enum.EasingStyle.Quad),
-            {PlaybackSpeed = 2.0}
-        )
-        pitchTween:Play()
-    end
-end)`;
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxasset://sounds/action_get_up.mp3"
+sound.PlaybackSpeed = math.clamp(1 + ((state.count - 1) * 0.12), 1, 2)
+sound.Parent = player.Character.HumanoidRootPart
+sound:Play()`;
 
 // 퀴즈 5: RemoteFunction 구매 요청
 const shopBlanks = JSON.stringify([
@@ -627,89 +611,109 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
             <span class="badge badge-lua mb-4">개념 3</span>
             <h2 class="title-section mb-6">🌊 3D 공간 사운드 (Spatial Audio)</h2>
 
-            <div class="grid grid-cols-2 gap-6 mb-6">
-                <div>
-                    <p class="text-gray-300 mb-4">
-                        Sound를 <strong class="text-neon-mint">파트의 자식으로</strong> 넣으면
-                        그 파트의 위치에서 소리가 난다.
-                        플레이어가 가까이 갈수록 크게, 멀어질수록 작게 들린다.
-                    </p>
-                    <div class="info-box mb-4">
-                        <p class="font-bold mb-2">📌 핵심 속성</p>
-                        <table class="text-sm w-full">
-                            <thead>
-                                <tr class="border-b border-white/10">
-                                    <th class="text-left py-1 text-neon-sky">속성</th>
-                                    <th class="text-left py-1 text-neon-gold">기본값</th>
-                                    <th class="text-left py-1">설명</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-1 font-mono">RollOffMinDistance</td>
-                                    <td class="py-1 text-neon-gold">10</td>
-                                    <td class="py-1 text-gray-400">이 거리 안에선 최대 볼륨</td>
-                                </tr>
-                                <tr class="border-b border-white/5">
-                                    <td class="py-1 font-mono">RollOffMaxDistance</td>
-                                    <td class="py-1 text-neon-gold">10000</td>
-                                    <td class="py-1 text-gray-400">이 거리 밖에선 안 들림</td>
-                                </tr>
-                                <tr>
-                                    <td class="py-1 font-mono">RollOffMode</td>
-                                    <td class="py-1 text-neon-gold">InverseTapered</td>
-                                    <td class="py-1 text-gray-400">거리에 따른 볼륨 감소 방식</td>
-                                </tr>
-                            </tbody>
-                        </table>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
+                <div class="space-y-4">
+                    <div class="rounded-3xl overflow-hidden border border-white/10 shadow-2xl" style="background: radial-gradient(circle at top left, rgba(37,135,190,0.45), rgba(14,24,40,0.96) 60%), linear-gradient(145deg, rgba(16,20,32,1), rgba(9,14,24,1));">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm uppercase tracking-[0.22em] text-neon-sky/80">Spatial Scene</p>
+                                    <p class="font-bold text-xl">소리는 위치를 가지면 분위기가 된다</p>
+                                </div>
+                                <div class="rounded-full border border-neon-mint/30 px-3 py-1 text-xs font-bold text-neon-mint bg-black/20">
+                                    waterfall / campfire / city
+                                </div>
+                            </div>
+
+                            <p class="text-gray-300 leading-relaxed mb-4">
+                                <strong class="text-neon-mint">SoundService</strong>에 두면 어디서나 같은 크기로 들리고,
+                                <strong class="text-neon-gold">파트나 Attachment</strong>에 붙이면 그 위치를 기준으로 가까울수록 크게 들린다.
+                                그래서 배경음은 전역, 환경음은 위치 기반으로 나누는 게 좋다.
+                            </p>
+
+                            <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+                                <div class="relative h-44 overflow-hidden rounded-2xl bg-gradient-to-b from-sky-900/40 via-slate-900/40 to-black/40">
+                                    <div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-r from-emerald-900/40 via-emerald-700/30 to-slate-800/40"></div>
+                                    <div class="absolute left-8 top-7 text-5xl">🌊</div>
+                                    <div class="absolute left-7 top-20 text-xs font-bold text-neon-sky">폭포 파트</div>
+                                    <div class="absolute right-10 bottom-8 text-4xl">🧍</div>
+                                    <div class="absolute right-8 bottom-4 text-xs font-bold text-white/80">플레이어</div>
+                                    <div class="absolute left-8 top-10 w-28 h-28 rounded-full border border-neon-mint/50"></div>
+                                    <div class="absolute left-2 top-0 w-40 h-40 rounded-full border border-neon-gold/30"></div>
+                                    <div class="absolute -left-8 -top-10 w-56 h-56 rounded-full border border-white/10"></div>
+                                    <div class="absolute left-36 top-8 rounded-full bg-neon-mint/15 px-2 py-1 text-[11px] text-neon-mint">0~5: 최대 볼륨</div>
+                                    <div class="absolute left-44 top-24 rounded-full bg-neon-gold/10 px-2 py-1 text-[11px] text-neon-gold">중간 거리: 점점 감소</div>
+                                    <div class="absolute right-6 top-10 rounded-full bg-black/30 px-2 py-1 text-[11px] text-gray-300">60+: 거의 안 들림</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+                    <div class="info-box">
+                        <p class="font-bold mb-2">📌 핵심 속성</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <code class="text-neon-mint">RollOffMinDistance</code>
+                                <span class="text-right text-gray-300">이 거리 안에서는 최대 볼륨 유지</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <code class="text-neon-gold">RollOffMaxDistance</code>
+                                <span class="text-right text-gray-300">이 거리 밖에서는 거의 안 들림</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <code class="text-neon-sky">RollOffMode</code>
+                                <span class="text-right text-gray-300">거리에 따라 줄어드는 곡선을 정한다</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="lesson-card border border-neon-coral/20">
+                        <p class="font-bold text-neon-coral mb-3">왜 어떤 imported asset는 멀리서도 들릴까?</p>
+                        <div class="grid grid-cols-1 gap-3 text-sm">
+                            <div class="rounded-2xl bg-black/20 px-4 py-3">
+                                <p class="font-bold text-neon-gold mb-1">1. Sound 부모가 잘못된 경우</p>
+                                <p class="text-gray-300">SoundService나 Workspace에 있으면 위치 기반이 아니라 전역처럼 들린다.</p>
+                            </div>
+                            <div class="rounded-2xl bg-black/20 px-4 py-3">
+                                <p class="font-bold text-neon-mint mb-1">2. 큰 Part에 바로 붙인 경우</p>
+                                <p class="text-gray-300">큰 파트 표면 전체에서 나는 것처럼 느껴져서 범위가 과하게 넓어질 수 있다.</p>
+                            </div>
+                            <div class="rounded-2xl bg-black/20 px-4 py-3">
+                                <p class="font-bold text-neon-sky mb-1">3. Attachment를 안 쓴 경우</p>
+                                <p class="text-gray-300">작은 기준점 Attachment에 붙이면 소리 위치를 더 안정적으로 제어할 수 있다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="lesson-card border border-neon-mint/25">
+                            <p class="font-bold text-neon-mint mb-2">✅ 추천</p>
+                            <div class="font-mono text-xs space-y-1 text-gray-300">
+                                <div>Model</div>
+                                <div class="ml-3">└─ BasePart</div>
+                                <div class="ml-7">└─ Attachment</div>
+                                <div class="ml-11">└─ Sound</div>
+                            </div>
+                        </div>
+                        <div class="lesson-card border border-neon-coral/25">
+                            <p class="font-bold text-neon-coral mb-2">⚠ 피하기</p>
+                            <div class="font-mono text-xs space-y-1 text-gray-300">
+                                <div>Workspace</div>
+                                <div class="ml-3">└─ 큰 장식 파트</div>
+                                <div class="ml-7">└─ Sound</div>
+                                <div class="ml-7 text-gray-500">범위가 예상과 다를 수 있음</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <HintBox type="tip" title="SoundService vs 파트 자식 Sound">
                         <ul class="text-sm space-y-1">
-                            <li>• <strong>SoundService</strong>: 어디서든 같은 볼륨 → BGM에 적합</li>
-                            <li>• <strong>파트 자식</strong>: 위치 기반 3D 소리 → 환경음에 적합</li>
+                            <li>• <strong>SoundService</strong>: 어디서든 같은 볼륨이라 BGM에 적합</li>
+                            <li>• <strong>Attachment 자식 Sound</strong>: 위치 기반 3D 사운드라 폭포, 모닥불, 기계음에 적합</li>
                         </ul>
                     </HintBox>
-                </div>
-                <div>
-                    <p class="font-bold text-neon-gold mb-3">📡 거리별 볼륨 변화</p>
-                    <div class="bg-black/40 rounded-xl p-4">
-                        <div class="relative h-32 mb-2">
-                            <!-- 간단한 거리 시각화 -->
-                            <div class="absolute bottom-0 left-1/2 transform -translate-x-1/2">
-                                <div class="text-2xl">🌊</div>
-                                <div class="text-xs text-center text-neon-coral">소스</div>
-                            </div>
-                            <!-- 거리 링 시각화 -->
-                            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-12 h-6 border border-neon-mint/60 rounded-full"></div>
-                            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-24 h-12 border border-neon-gold/40 rounded-full"></div>
-                            <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-40 h-20 border border-neon-sky/20 rounded-full"></div>
-                            <div class="absolute top-0 left-2 text-xs text-neon-mint">Min(5스터드)<br>최대 볼륨</div>
-                            <div class="absolute top-0 right-0 text-xs text-gray-500">Max(60스터드)<br>무음</div>
-                        </div>
-                        <div class="space-y-1 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-neon-mint">0~5 스터드</span>
-                                <span>🔊🔊🔊 최대</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-neon-gold">~30 스터드</span>
-                                <span>🔊🔊 중간</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">60+ 스터드</span>
-                                <span>🔇 안 들림</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-4 lesson-card">
-                        <p class="text-sm font-bold mb-2">🎮 활용 예시</p>
-                        <ul class="text-sm space-y-1 text-gray-300">
-                            <li>🌊 폭포 → 가까이 갈수록 물소리 커짐</li>
-                            <li>🔥 모닥불 → 주변 탁탁거리는 소리</li>
-                            <li>🚪 문 → 문 근처에서만 삐걱 소리</li>
-                            <li>💎 보물 → 근처에서만 반짝 효과음</li>
-                        </ul>
-                    </div>
                 </div>
             </div>
         </div>
@@ -735,75 +739,120 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
             <span class="badge badge-lua mb-4">개념 4</span>
             <h2 class="title-section mb-6">👟 달릴수록 빨라지는 발소리</h2>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-gray-300 mb-4">
-                        <code class="text-neon-mint">Humanoid.Running</code> 이벤트는
-                        캐릭터의 이동 속도(speed)를 계속 알려준다.
-                        이 값으로 <code class="text-neon-gold">PlaybackSpeed</code>를 조절하면
-                        속도에 맞게 발소리 빠르기가 바뀐다!
-                    </p>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div class="space-y-4">
+                    <div class="rounded-3xl overflow-hidden border border-white/10 shadow-2xl" style="background: radial-gradient(circle at top left, rgba(74,181,113,0.28), rgba(15,22,34,0.95) 55%), linear-gradient(145deg, rgba(18,22,30,1), rgba(10,14,22,1));">
+                        <div class="p-5">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-sm uppercase tracking-[0.22em] text-neon-mint/80">Movement Audio</p>
+                                    <p class="font-bold text-xl">WalkSpeed가 올라가면 발소리도 빨라진다</p>
+                                </div>
+                                <div class="rounded-full border border-neon-sky/30 px-3 py-1 text-xs font-bold text-neon-sky bg-black/20">
+                                    speed / 16
+                                </div>
+                            </div>
 
-                    <div class="info-box mb-4">
-                        <p class="font-bold mb-2">📌 Humanoid.Running</p>
-                        <ul class="text-sm space-y-2">
-                            <li>• 캐릭터가 움직일 때마다 <code>speed</code> 값을 전달</li>
-                            <li>• 기본 이동속도: <code class="text-neon-gold">WalkSpeed = 16</code></li>
-                            <li>• 멈추면 <code>speed = 0</code> 으로 발동</li>
-                        </ul>
+                            <p class="text-gray-300 leading-relaxed mb-4">
+                                <code class="text-neon-mint">Humanoid.Running</code>은 캐릭터가 움직일 때마다 현재 속도를 알려 준다.
+                                이 값을 기본 <code class="text-neon-gold">WalkSpeed = 16</code>과 비교해서
+                                <code class="text-neon-sky">PlaybackSpeed</code>를 바꾸면 속도와 발소리가 자연스럽게 맞는다.
+                            </p>
+
+                            <div class="grid grid-cols-3 gap-3">
+                                <div class="rounded-2xl border border-white/10 bg-black/20 p-3 text-center">
+                                    <div class="text-3xl mb-2">🚶</div>
+                                    <p class="text-xs text-gray-400">천천히</p>
+                                    <p class="font-bold text-neon-gold">8 / 16 = 0.5</p>
+                                </div>
+                                <div class="rounded-2xl border border-white/10 bg-black/20 p-3 text-center">
+                                    <div class="text-3xl mb-2">🏃</div>
+                                    <p class="text-xs text-gray-400">기본 속도</p>
+                                    <p class="font-bold text-neon-mint">16 / 16 = 1.0</p>
+                                </div>
+                                <div class="rounded-2xl border border-white/10 bg-black/20 p-3 text-center">
+                                    <div class="text-3xl mb-2">💨</div>
+                                    <p class="text-xs text-gray-400">빠르게</p>
+                                    <p class="font-bold text-neon-sky">28 / 16 = 1.75</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="info-box">
-                        <p class="font-bold mb-2">📌 PlaybackSpeed</p>
-                        <ul class="text-sm space-y-2">
-                            <li>• <code>1.0</code> = 정상 속도</li>
-                            <li>• <code>2.0</code> = 2배 빠르게 (피치도 높아짐)</li>
-                            <li>• <code>0</code> = 정지 (볼륨은 그대로)</li>
-                        </ul>
+                        <p class="font-bold mb-2">📌 Humanoid.Running 핵심</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <code class="text-neon-mint">speed</code>
+                                <span class="text-right text-gray-300">현재 이동 속도가 숫자로 들어온다</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <code class="text-neon-gold">WalkSpeed = 16</code>
+                                <span class="text-right text-gray-300">기본 캐릭터 속도를 비교 기준으로 쓴다</span>
+                            </div>
+                            <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                <code class="text-neon-sky">speed &lt;= 1</code>
+                                <span class="text-right text-gray-300">거의 멈춘 상태라 발소리를 끈다</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <p class="font-bold text-neon-gold mb-3">🧮 speed / 14 계산 이유</p>
-                    <div class="bg-black/40 rounded-xl p-4 text-sm mb-4">
-                        <div class="space-y-2">
-                            <div class="flex justify-between items-center border-b border-white/10 pb-2">
-                                <span class="text-gray-400">이동속도 (speed)</span>
-                                <span class="text-neon-gold">PlaybackSpeed</span>
+
+                <div class="space-y-4">
+                    <div class="lesson-card border border-neon-gold/20">
+                        <p class="font-bold text-neon-gold mb-3">🧩 발소리 동작 흐름</p>
+                        <div class="grid grid-cols-1 gap-3 text-sm">
+                            <div class="rounded-2xl bg-black/20 px-4 py-3">
+                                <p class="font-bold text-neon-mint mb-1">1. LocalScript 시작</p>
+                                <p class="text-gray-300">캐릭터가 생기면 <code>Humanoid</code>와 <code>HumanoidRootPart</code>를 찾는다.</p>
                             </div>
-                            <div class="flex justify-between">
-                                <span>0 (정지)</span>
-                                <span class="text-neon-coral">0 → 발소리 중단</span>
+                            <div class="rounded-2xl bg-black/20 px-4 py-3">
+                                <p class="font-bold text-neon-gold mb-1">2. Sound를 코드로 생성</p>
+                                <p class="text-gray-300"><code>Week10FootstepLoop</code>를 직접 만들어 루트 파트에 붙인다.</p>
                             </div>
-                            <div class="flex justify-between">
-                                <span>14 (조금 느림)</span>
-                                <span class="text-neon-gold">14/14 = <strong>1.0</strong></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>16 (기본)</span>
-                                <span class="text-neon-mint">16/14 ≈ <strong>1.14</strong></span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>32 (빠름)</span>
-                                <span class="text-neon-sky">32/14 ≈ <strong>2.28</strong></span>
+                            <div class="rounded-2xl bg-black/20 px-4 py-3">
+                                <p class="font-bold text-neon-sky mb-1">3. speed / 16으로 비율 계산</p>
+                                <p class="text-gray-300">속도가 빨라질수록 재생 속도와 피치가 함께 올라간다.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="lesson-card">
-                        <p class="text-sm font-bold mb-2">📁 Explorer 구조</p>
-                        <div class="font-mono text-xs space-y-1">
-                            <div>📁 StarterCharacterScripts</div>
-                            <div class="ml-4">📄 <span class="text-neon-sky">LocalScript</span></div>
-                            <div>📁 Character (자동 생성)</div>
-                            <div class="ml-4">📁 HumanoidRootPart</div>
-                            <div class="ml-8">🔊 Footstep <span class="text-gray-500">(발소리 Sound)</span></div>
-                            <div class="ml-4">🧍 Humanoid</div>
+                    <div class="rounded-3xl border border-white/10 bg-black/30 p-5">
+                        <div class="flex items-end gap-4 h-36">
+                            <div class="flex-1 text-center">
+                                <div class="mx-auto mb-3 flex h-20 w-20 items-end justify-center rounded-2xl bg-white/5">
+                                    <div class="w-10 rounded-t-2xl bg-gradient-to-t from-neon-coral/40 to-neon-coral" style="height: 26%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400">정지</p>
+                                <p class="font-bold text-neon-coral">Stop()</p>
+                            </div>
+                            <div class="flex-1 text-center">
+                                <div class="mx-auto mb-3 flex h-20 w-20 items-end justify-center rounded-2xl bg-white/5">
+                                    <div class="w-10 rounded-t-2xl bg-gradient-to-t from-neon-gold/40 to-neon-gold" style="height: 48%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400">보통 걷기</p>
+                                <p class="font-bold text-neon-gold">0.8 ~ 1.0</p>
+                            </div>
+                            <div class="flex-1 text-center">
+                                <div class="mx-auto mb-3 flex h-20 w-20 items-end justify-center rounded-2xl bg-white/5">
+                                    <div class="w-10 rounded-t-2xl bg-gradient-to-t from-neon-mint/40 to-neon-mint" style="height: 68%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400">기본 달리기</p>
+                                <p class="font-bold text-neon-mint">1.0</p>
+                            </div>
+                            <div class="flex-1 text-center">
+                                <div class="mx-auto mb-3 flex h-20 w-20 items-end justify-center rounded-2xl bg-white/5">
+                                    <div class="w-10 rounded-t-2xl bg-gradient-to-t from-neon-sky/40 to-neon-sky" style="height: 90%"></div>
+                                </div>
+                                <p class="text-xs text-gray-400">스피드 패드</p>
+                                <p class="font-bold text-neon-sky">1.5+</p>
+                            </div>
                         </div>
                     </div>
 
-                    <HintBox type="tip" title="발소리 에셋 찾기">
-                        Roblox 라이브러리에서 "footstep sound"로 검색하거나,
-                        에셋 ID: <code>5853037813</code> (자갈 발소리) 같은 무료 에셋 활용
+                    <HintBox type="tip" title="이번 예제 구현 포인트">
+                        Explorer에 Sound를 미리 넣어 두지 않고, LocalScript가 <code>HumanoidRootPart</code>에 발소리 Sound를 만들어 붙인다.
+                        그래서 캐릭터가 다시 스폰되어도 같은 로직으로 반복 적용된다.
                     </HintBox>
                 </div>
             </div>
@@ -815,8 +864,8 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
                 name="👟 달릴수록 빨라지는 발소리"
-                setup="StarterCharacterScripts > LocalScript | HumanoidRootPart > Sound('Footstep', SoundId 설정, Looped=true)"
-                concepts='["Humanoid.Running — 이동 속도 변화를 실시간 감지", "PlaybackSpeed — 사운드 재생 속도 (=피치)", "speed / 14 — 속도를 발소리 빠르기로 변환", "footstep.IsPlaying — 현재 재생 중인지 확인"]'
+                setup="StarterCharacterScripts > LocalScript | 코드로 HumanoidRootPart에 Sound 생성"
+                concepts='["Humanoid.Running — 이동 속도 변화를 실시간 감지", "PlaybackSpeed — 사운드 재생 속도 (=피치)", "speed / 16 — 기본 WalkSpeed 기준 비율 계산", "footstep:Stop() — 멈출 때 재생 중지"]'
                 blanks={footstepBlanks}
                 template={footstepTemplate}
                 full-code={footstepFullCode}
@@ -828,71 +877,145 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-12">
             <span class="badge badge-lua mb-4">개념 5</span>
-            <h2 class="title-section mb-6">🏆 승리 사운드 피치 업 효과</h2>
+            <h2 class="title-section mb-6">🪙 콤보 코인 피치 업 효과</h2>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-gray-300 mb-4">
-                        마리오가 코인을 먹거나 골인할 때 효과음이 점점 높아지는 느낌 알지?
-                        <code class="text-neon-mint">PlaybackSpeed</code>를 TweenService로
-                        0.8 → 2.0까지 올리면 피치가 점점 높아지는 효과를 낼 수 있다!
-                    </p>
-
-                    <div class="info-box mb-4">
-                        <p class="font-bold mb-2">🎵 PlaybackSpeed와 피치 관계</p>
-                        <ul class="text-sm space-y-2">
-                            <li>• <code class="text-neon-gold">0.5</code> = 1옥타브 낮음 (느리고 낮음)</li>
-                            <li>• <code class="text-neon-mint">1.0</code> = 기본 (원본 사운드)</li>
-                            <li>• <code class="text-neon-sky">2.0</code> = 1옥타브 높음 (빠르고 높음)</li>
-                        </ul>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <div class="space-y-4">
+                    <div class="lesson-card border border-neon-gold/25 overflow-hidden">
+                        <div class="rounded-2xl p-5" style="background: linear-gradient(135deg, rgba(250,180,60,0.16), rgba(255,255,255,0.02));">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-12 h-12 rounded-full flex items-center justify-center text-2xl shadow-lg" style="background: radial-gradient(circle at 30% 30%, #ffe8a3, #f4a825 70%, #b36f00 100%);">
+                                    🪙
+                                </div>
+                                <div>
+                                    <p class="text-sm uppercase tracking-[0.25em] text-neon-gold/80">Combo Audio Demo</p>
+                                    <p class="font-bold text-xl">짧게 연속 획득할수록 소리가 높아진다</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300 leading-relaxed">
+                                이번 예제는 코인을 5개 연속 배치해 두고,
+                                <code class="text-neon-mint">PlaybackSpeed</code>를 콤보 수에 맞춰 조금씩 올린다.
+                                그래프보다 실제 게임 흐름에 가깝게 보여 주는 편이 수업에서 훨씬 직관적이다.
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="info-box">
-                        <p class="font-bold mb-2">📌 EasingStyle 종류</p>
-                        <ul class="text-sm space-y-1">
-                            <li>• <code>Linear</code>: 일정하게 변화</li>
-                            <li>• <code>Quad</code>: 처음 빠르고 나중에 천천히</li>
-                            <li>• <code>Bounce</code>: 튕기는 효과</li>
-                            <li>• <code>Elastic</code>: 스프링 효과</li>
-                        </ul>
-                    </div>
-                </div>
-                <div>
-                    <p class="font-bold text-neon-gold mb-3">🎵 피치 변화 시각화</p>
-                    <div class="bg-black/40 rounded-xl p-4 mb-4">
-                        <div class="flex items-end justify-between h-24 mb-2">
-                            <div class="text-xs text-gray-500 -rotate-90 mr-2">피치</div>
-                            <!-- 피치 그래프 바들 -->
-                            <div class="flex items-end gap-1 flex-1">
-                                <div class="w-4 bg-neon-coral/60 rounded-t" style="height: 20%"></div>
-                                <div class="w-4 bg-neon-coral/60 rounded-t" style="height: 30%"></div>
-                                <div class="w-4 bg-neon-gold/60 rounded-t" style="height: 45%"></div>
-                                <div class="w-4 bg-neon-gold/60 rounded-t" style="height: 60%"></div>
-                                <div class="w-4 bg-neon-mint/60 rounded-t" style="height: 75%"></div>
-                                <div class="w-4 bg-neon-mint/60 rounded-t" style="height: 88%"></div>
-                                <div class="w-4 bg-neon-sky/60 rounded-t" style="height: 100%"></div>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="lesson-card border border-neon-mint/25">
+                            <p class="font-bold text-neon-mint mb-2">왜 코인이 좋은 예제인가</p>
+                            <div class="grid grid-cols-3 gap-3 text-sm">
+                                <div class="rounded-2xl px-3 py-3 bg-black/20">
+                                    <p class="font-bold text-neon-gold">반복 테스트</p>
+                                    <p class="text-gray-300 mt-1">같은 자리에서 바로 여러 번 들어볼 수 있다</p>
+                                </div>
+                                <div class="rounded-2xl px-3 py-3 bg-black/20">
+                                    <p class="font-bold text-neon-sky">체감 쉬움</p>
+                                    <p class="text-gray-300 mt-1">짧은 효과음이라 피치 변화가 잘 들린다</p>
+                                </div>
+                                <div class="rounded-2xl px-3 py-3 bg-black/20">
+                                    <p class="font-bold text-neon-coral">기존 시스템 연결</p>
+                                    <p class="text-gray-300 mt-1">leaderstats.Coins와 자연스럽게 이어진다</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="flex justify-between text-xs text-gray-500">
-                            <span>시작(0.8)</span>
-                            <span>→ 시간 →</span>
-                            <span>끝(2.0)</span>
+
+                        <div class="info-box">
+                            <p class="font-bold mb-2">📌 콤보 계산 핵심</p>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                    <code class="text-neon-mint">os.clock()</code>
+                                    <span class="text-right text-gray-300">직전 획득과 지금 사이의 시간을 비교한다</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                    <code class="text-neon-gold">COMBO_WINDOW</code>
+                                    <span class="text-right text-gray-300">1.5초 안이면 같은 콤보로 이어진다</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                    <code class="text-neon-sky">state.count</code>
+                                    <span class="text-right text-gray-300">현재 몇 콤보인지 기록한다</span>
+                                </div>
+                                <div class="flex items-center justify-between gap-3 rounded-xl bg-black/20 px-3 py-2">
+                                    <code class="text-neon-coral">math.clamp()</code>
+                                    <span class="text-right text-gray-300">PlaybackSpeed 상한을 고정한다</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div class="rounded-3xl p-5 border border-white/10 shadow-2xl overflow-hidden" style="background: radial-gradient(circle at top left, rgba(43,76,120,0.45), rgba(12,18,30,0.95) 58%), linear-gradient(135deg, rgba(16,20,28,1), rgba(23,31,48,1));">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.22em] text-neon-sky/80">Coin Flow</p>
+                                <p class="font-bold text-lg">Coin1 → Coin5를 먹으며 피치가 단계적으로 상승</p>
+                            </div>
+                            <div class="px-3 py-1 rounded-full text-xs font-bold border border-neon-gold/30 text-neon-gold bg-black/20">
+                                COMBO WINDOW = 1.5s
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-5 gap-3 mb-4">
+                            <div class="rounded-2xl p-3 text-center border border-neon-coral/25 bg-black/25">
+                                <div class="mx-auto mb-2 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg" style="background: radial-gradient(circle at 30% 30%, #fff1b8, #f7b733 70%, #ba7b00 100%);">🪙</div>
+                                <p class="text-xs text-gray-400">Coin1</p>
+                                <p class="font-bold text-neon-coral">1.00</p>
+                            </div>
+                            <div class="rounded-2xl p-3 text-center border border-neon-gold/25 bg-black/25">
+                                <div class="mx-auto mb-2 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg" style="background: radial-gradient(circle at 30% 30%, #fff1b8, #f7b733 70%, #ba7b00 100%);">🪙</div>
+                                <p class="text-xs text-gray-400">Coin2</p>
+                                <p class="font-bold text-neon-gold">1.12</p>
+                            </div>
+                            <div class="rounded-2xl p-3 text-center border border-neon-gold/25 bg-black/25">
+                                <div class="mx-auto mb-2 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg" style="background: radial-gradient(circle at 30% 30%, #fff1b8, #f7b733 70%, #ba7b00 100%);">🪙</div>
+                                <p class="text-xs text-gray-400">Coin3</p>
+                                <p class="font-bold text-neon-gold">1.24</p>
+                            </div>
+                            <div class="rounded-2xl p-3 text-center border border-neon-mint/25 bg-black/25">
+                                <div class="mx-auto mb-2 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg" style="background: radial-gradient(circle at 30% 30%, #fff1b8, #f7b733 70%, #ba7b00 100%);">🪙</div>
+                                <p class="text-xs text-gray-400">Coin4</p>
+                                <p class="font-bold text-neon-mint">1.36</p>
+                            </div>
+                            <div class="rounded-2xl p-3 text-center border border-neon-sky/25 bg-black/25">
+                                <div class="mx-auto mb-2 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg" style="background: radial-gradient(circle at 30% 30%, #fff1b8, #f7b733 70%, #ba7b00 100%);">🪙</div>
+                                <p class="text-xs text-gray-400">Coin5</p>
+                                <p class="font-bold text-neon-sky">1.48</p>
+                            </div>
+                        </div>
+
+                        <div class="rounded-2xl border border-white/10 bg-black/25 px-4 py-4">
+                            <div class="flex items-end gap-3 h-28">
+                                <div class="flex-1 rounded-t-2xl bg-gradient-to-t from-neon-coral/40 to-neon-coral" style="height: 38%"></div>
+                                <div class="flex-1 rounded-t-2xl bg-gradient-to-t from-neon-gold/40 to-neon-gold" style="height: 46%"></div>
+                                <div class="flex-1 rounded-t-2xl bg-gradient-to-t from-neon-gold/40 to-neon-gold" style="height: 55%"></div>
+                                <div class="flex-1 rounded-t-2xl bg-gradient-to-t from-neon-mint/40 to-neon-mint" style="height: 67%"></div>
+                                <div class="flex-1 rounded-t-2xl bg-gradient-to-t from-neon-sky/40 to-neon-sky" style="height: 80%"></div>
+                            </div>
+                            <div class="flex justify-between mt-3 text-xs text-gray-400">
+                                <span>첫 코인</span>
+                                <span>빠르게 연속 획득</span>
+                                <span>후반 콤보</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="space-y-2">
-                        <div class="lesson-card border border-neon-coral/30 text-sm">
-                            <span class="text-neon-coral font-bold">시작:</span> PlaybackSpeed = 0.8 (낮은 음)
+                    <div class="grid grid-cols-3 gap-3 text-sm">
+                        <div class="lesson-card border border-neon-coral/25">
+                            <p class="font-bold text-neon-coral mb-1">1콤보</p>
+                            <p class="text-gray-300">기본 코인 소리 그대로 재생</p>
                         </div>
-                        <div class="text-center text-gray-400">⬇️ 2초간 TweenService</div>
-                        <div class="lesson-card border border-neon-mint/30 text-sm">
-                            <span class="text-neon-mint font-bold">끝:</span> PlaybackSpeed = 2.0 (높은 음)
+                        <div class="lesson-card border border-neon-gold/25">
+                            <p class="font-bold text-neon-gold mb-1">3콤보</p>
+                            <p class="text-gray-300">조금 높아져서 변화가 들리기 시작</p>
+                        </div>
+                        <div class="lesson-card border border-neon-mint/25">
+                            <p class="font-bold text-neon-mint mb-1">5콤보+</p>
+                            <p class="text-gray-300">학생도 바로 눈치챌 정도로 높아짐</p>
                         </div>
                     </div>
 
-                    <HintBox type="tip" title="코인 효과음에도 응용!">
-                        코인을 많이 먹을수록 피치가 올라가게:
-                        연속으로 먹을 때마다 PlaybackSpeed += 0.1
+                    <HintBox type="tip" title="실습은 콤보 코인으로 진행">
+                        승리 사운드 예시는 빼고, 코인 5개를 한 줄로 배치한 뒤 빠르게 먹으며 피치 변화가 귀에 들리는지 확인한다.
                     </HintBox>
                 </div>
             </div>
@@ -903,9 +1026,9 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
     <section class="slide">
         <div class="max-w-4xl mx-auto px-6 py-8">
             <roblox-quiz-example
-                name="🏆 승리 사운드 피치 업 효과"
-                setup="SoundService > WinSound (SoundId 설정) | Workspace > GoalPart (Anchored) > Script"
-                concepts='["winSound:Play() — 사운드 재생 시작", "TweenInfo.new(2, Enum.EasingStyle.Quad) — 2초, Quad 이징", "{PlaybackSpeed = 2.0} — 목표 PlaybackSpeed 설정", "pitchTween:Play() — Tween 시작으로 피치 점점 높이기"]'
+                name="🪙 콤보 코인 피치 업 효과"
+                setup="Workspace > 콤보코인_피치업 (Coin1~Coin5) > Script | Player > leaderstats > Coins"
+                concepts='["os.clock() — 마지막 획득 시각과 현재 시각 비교", "COMBO_WINDOW = 1.5 — 연속 획득으로 인정할 시간", "PlaybackSpeed = 1 + ((count - 1) * 0.12) — 콤보 수만큼 피치 올리기", "HumanoidRootPart에 Sound 생성 후 Play() — 플레이어 위치에서 효과음 재생"]'
                 blanks={pitchBlanks}
                 template={pitchTemplate}
                 full-code={pitchFullCode}
@@ -948,8 +1071,8 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
                     question="Humanoid.Running에서 발소리 PlaybackSpeed를 이동 속도에 맞추려면 어떻게 계산할까? (기본 속도 = 16)"
                     correct="A"
                     options={quiz4Options}
-                    correct-explanation="맞아! speed / 14를 쓰면 기본 이동속도(16)일 때 PlaybackSpeed ≈ 1.14가 돼서 살짝 빠른 발소리가 나. 자연스럽게 속도에 비례해!"
-                    wrong-explanation="speed / 14야! 14로 나누면 속도에 딱 맞는 발소리 빠르기가 나와."
+                    correct-explanation="맞아! 지금 예제는 speed / 16을 써서 기본 WalkSpeed 16일 때 PlaybackSpeed가 1배가 되도록 맞췄어."
+                    wrong-explanation="이번 실습 코드는 speed / 16을 사용해. 기본 WalkSpeed 16을 기준으로 비율을 맞추는 방식이야."
                 ></quiz-question>
             </div>
         </div>
@@ -1002,11 +1125,11 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
                     <div class="text-2xl mb-2">🏆</div>
                     <h3 class="font-bold text-neon-coral mb-2">콤보 코인 효과음</h3>
                     <p class="text-sm text-gray-300 mb-3">
-                        코인을 연속으로 먹을수록 효과음 피치가 점점 올라감.
-                        마리오 스타 코인처럼 시간 내 못 먹으면 피치 리셋!
+                        코인 한 개가 아니라 코인 여러 개를 빠르게 먹으면서
+                        같은 효과음의 PlaybackSpeed를 점점 올려 보는 실습.
                     </p>
                     <div class="text-xs text-gray-500">
-                        사용: PlaybackSpeed += 0.1 per coin
+                        사용: 짧은 시간 안 연속 획득 + PlaybackSpeed 누적 증가
                     </div>
                 </div>
             </div>
@@ -1051,7 +1174,7 @@ const shopQuiz6Options = JSON.stringify(["task.cancel()", "task.stop()", "task.k
                             <div class="font-mono text-xs bg-black/30 p-2 rounded">
                                 humanoid.Running:Connect(<br>
                                 &nbsp;&nbsp;function(speed)<br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;footstep.PlaybackSpeed = speed/14<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;footstep.PlaybackSpeed = speed/16<br>
                                 end)
                             </div>
                         </div>

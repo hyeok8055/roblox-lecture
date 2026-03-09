@@ -514,7 +514,7 @@ endPad.Touched:Connect(function(hit)
 end)`;
 ---
 
-<LessonLayout title="타워/점프맵 핵심 기믹 6가지" lessonNumber={10} totalSlides={16}>
+<LessonLayout title="타워/점프맵 핵심 기믹 6가지 + 보너스" lessonNumber={10} totalSlides={18}>
     <!-- 슬라이드 1: 인트로 -->
     <section class="slide active">
         <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
@@ -526,7 +526,7 @@ end)`;
                 </h1>
                 <p class="text-xl text-ink-light max-w-lg mx-auto mb-8">
                     Tower of Hell 같은 고퀄 맵을 만드는<br>
-                    핵심 메커니즘을 전부 배워요!
+                    핵심 메커니즘 6개와 보너스 2개를 배워요!
                 </p>
                 <div class="flex gap-3 justify-center flex-wrap">
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
@@ -547,6 +547,12 @@ end)`;
                     <div class="px-4 py-2 bg-ink-pale rounded-full text-sm">
                         <span class="font-bold">⏱️ 타이머 챌린지</span>
                     </div>
+                    <div class="px-4 py-2 bg-amber-50 rounded-full text-sm">
+                        <span class="font-bold">🧱 자동 계단 생성</span>
+                    </div>
+                    <div class="px-4 py-2 bg-rose-50 rounded-full text-sm">
+                        <span class="font-bold">💣 대포알 발사기</span>
+                    </div>
                 </div>
                 <div class="mt-12 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-2xl max-w-md mx-auto">
                     <div class="text-3xl mb-2">🎯</div>
@@ -557,6 +563,7 @@ end)`;
                         <li>✓ Workspace.Gravity로 저중력 구역</li>
                         <li>✓ JumpPower로 스프링 패드 제작</li>
                         <li>✓ 색깔 함정 & 타이머 챌린지</li>
+                        <li>✓ 보너스: 반복문 계단 + 대포알 장애물</li>
                     </ul>
                 </div>
             </div>
@@ -1156,6 +1163,23 @@ end)`;
                     </div>
                 </div>
 
+                <div class="lesson-card border-2 border-rose-200">
+                    <div class="text-center mb-3">
+                        <div class="text-3xl mb-2">🎁</div>
+                        <div class="font-bold text-rose-700">보너스 미션</div>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4 text-sm text-ink-light">
+                        <div class="bg-white/60 rounded-xl p-4">
+                            <div class="font-bold mb-2">🧱 반복 계단 생성기</div>
+                            <p>클릭시작파트와 E시작파트를 따로 두고, 트리거 방식에 따라 다른 계단 패턴을 촤라라락 생성한다.</p>
+                        </div>
+                        <div class="bg-white/60 rounded-xl p-4">
+                            <div class="font-bold mb-2">💣 밀쳐내는 대포알</div>
+                            <p>이름이 맞는 발사대와 발사트리거가 있으면, 에셋 ID나 원본 파트를 기준으로 대포알을 발사하고 자동 발사도 켜고 끌 수 있다.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <HintBox type="tip" title="Tower of Hell 분석">
                     유명한 Tower of Hell은 358개의 섹션으로 구성되어 있고, <strong>체크포인트가 없는</strong> 것이 특징이에요.<br>
                     대신 8분 라운드제로 긴장감을 주죠. 우리 맵에는 체크포인트를 넣어서 더 학습 친화적으로 만들어봐요!
@@ -1164,7 +1188,125 @@ end)`;
         </div>
     </section>
 
-    <!-- 슬라이드 16: 확인 퀴즈 + 마무리 -->
+    <!-- 슬라이드 16: 보너스 - 반복 계단 생성기 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎁 보너스</span>
+                <h2 class="title-section mb-6">🧱 반복문 기반 계단 생성기</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="lesson-card border-2 border-amber-200">
+                    <h3 class="font-bold text-lg mb-3">왜 넣으면 좋은가?</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        점프맵은 계단 하나하나를 손으로 놓다 보면 금방 지루해져요.
+                        이 보너스 예제는 <strong>클릭형 / E형</strong> 트리거를 따로 두고,
+                        같은 루프 로직으로 직선, 지그재그, 나선형 계단을 빠르게 시험할 수 있게 합니다.
+                    </p>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="bg-amber-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">클릭 예제</div>
+                            <div class="text-ink-light">클릭시작파트를 누르면 직선 / 지그재그 계단이 번갈아 생성된다.</div>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">E 예제</div>
+                            <div class="text-ink-light">E시작파트 근처에서 E를 누르면 오른쪽 / 왼쪽 나선 계단이 생성된다.</div>
+                        </div>
+                        <div class="bg-green-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">바꿔 볼 값</div>
+                            <div class="text-ink-light">계단 수, 높이, 옆 이동폭, 회전 각도</div>
+                        </div>
+                        <div class="bg-rose-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">수업 포인트</div>
+                            <div class="text-ink-light">"같은 루프인데 결과 모양이 달라짐"을 보여 주기 좋다.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-2 border-slate-200">
+                    <h3 class="font-bold text-lg mb-3">예제 구조</h3>
+                    <div class="font-mono text-xs space-y-1 bg-ink-pale rounded-xl p-4 mb-4">
+                        <div>📁 Workspace</div>
+                        <div class="ml-4">📂 반복계단생성기</div>
+                        <div class="ml-8">📄 Script</div>
+                        <div class="ml-8">📦 클릭시작파트 + ClickDetector</div>
+                        <div class="ml-8">📦 E시작파트 + ProximityPrompt</div>
+                        <div class="ml-8">📂 클릭생성계단 / E생성계단</div>
+                    </div>
+                    <div class="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs font-mono space-y-1">
+                        <div>clickDetector.MouseClick:Connect(...)</div>
+                        <div>prompt.Triggered:Connect(...)</div>
+                        <div>if preset.pattern == "zigzag" then</div>
+                        <div class="ml-4">sideOffset = ...</div>
+                        <div>end</div>
+                        <div>for stepIndex = 1, preset.stepCount do</div>
+                        <div class="ml-4">createStep(...)</div>
+                        <div>end</div>
+                    </div>
+                    <HintBox type="tip" title="오비 제작 팁">
+                        클릭형 트리거와 E형 트리거를 나눠 두면
+                        "같은 반복문인데 시작 조건과 결과 패턴이 다르다"는 걸 훨씬 설명하기 쉽습니다.
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 17: 보너스 - 밀쳐내는 대포알 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12">
+            <div class="animate-in">
+                <span class="badge badge-roblox mb-4">🎁 보너스</span>
+                <h2 class="title-section mb-6">💣 GUI가 달린 밀쳐내는 대포알 발사기</h2>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="lesson-card border-2 border-rose-200">
+                    <h3 class="font-bold text-lg mb-3">점프맵에서의 역할</h3>
+                    <p class="text-sm text-ink-light mb-4">
+                        단순한 킬 파트보다 조금 더 그럴듯한 장애물이 필요할 때 쓰는 예제예요.
+                        이름이 <strong>발사트리거</strong>인 파트를 밟으면 대포알이 3연발로 날아가고,
+                        닿은 플레이어는 <strong>옆으로 밀려나면서 위로 튕겨</strong> 타이밍을 다시 잡아야 합니다.
+                    </p>
+                    <div class="grid grid-cols-1 gap-3 text-sm">
+                        <div class="bg-rose-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">이름 기반 트리거</div>
+                            <div class="text-ink-light">발사트리거 / 발사대 / 발사체원본 / 자동발사토글 이름만 맞으면 스크립트가 그 파트를 쓴다.</div>
+                        </div>
+                        <div class="bg-orange-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">대포알</div>
+                            <div class="text-ink-light">에셋 ID가 있으면 메시 에셋을, 없으면 발사체원본 파트를 복제해서 발사한다.</div>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-3">
+                            <div class="font-bold mb-1">밀쳐내기</div>
+                            <div class="text-ink-light">HumanoidRootPart에 속도를 넣어 뒤로 날려 버리고, 자동 발사 모드도 ON/OFF 된다.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card border-2 border-slate-200">
+                    <h3 class="font-bold text-lg mb-3">에셋 교체 포인트</h3>
+                    <div class="bg-ink-pale rounded-xl p-4 text-sm text-ink-light mb-4">
+                        스크립트 상단에서 <code>PROJECTILE_ASSET_ID</code>에 숫자를 넣으면 그 에셋을 쏘고,
+                        비워 두면 <code>SOURCE_PART_NAME = "발사체원본"</code> 같은 이름의 파트를 복제해서 발사합니다.
+                        즉 "에셋으로 교체"와 "맵 안의 다른 파트로 교체" 둘 다 됩니다.
+                    </div>
+                    <div class="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs font-mono space-y-1">
+                        <div>local PROJECTILE_ASSET_ID = "1234567890"</div>
+                        <div>local SOURCE_PART_NAME = "발사체원본"</div>
+                        <div>local LAUNCHER_PART_NAME = "발사대"</div>
+                        <div>local TRIGGER_PART_NAME = "발사트리거"</div>
+                        <div>local AUTO_TOGGLE_PART_NAME = "자동발사토글"</div>
+                    </div>
+                    <HintBox type="tip" title="맵 연출 팁">
+                        좁은 발판 위를 점프하는 구간, 타이머 구간, 체크포인트 직전에 대포알을 배치하면
+                        맵 난이도가 확 올라가고 오비 느낌도 훨씬 살아납니다.
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 18: 확인 퀴즈 + 마무리 -->
     <section class="slide">
         <div class="max-w-3xl mx-auto px-6 py-12">
             <div class="animate-in">
@@ -1214,7 +1356,7 @@ end)`;
                     <div class="text-2xl mb-2">🎉</div>
                     <h3 class="font-bold text-lg mb-2">10주차 B 완료!</h3>
                     <p class="text-ink-light text-sm">
-                        타워/점프맵 핵심 기믹 6가지 완벽 정복!<br>
+                        타워/점프맵 핵심 기믹 6가지 + 보너스 2개 정리 완료!<br>
                         다음 시간에는 파티클 & 라이팅으로 게임을 화려하게 꾸며요 ✨
                     </p>
                 </div>

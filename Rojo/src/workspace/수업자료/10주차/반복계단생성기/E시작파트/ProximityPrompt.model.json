@@ -1,0 +1,9 @@
+{
+  "ClassName": "ProximityPrompt",
+  "Properties": {
+    "ActionText": "계단 생성",
+    "ObjectText": "나선 계단",
+    "MaxActivationDistance": 12,
+    "HoldDuration": 0
+  }
+}
