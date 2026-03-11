@@ -336,6 +336,166 @@ const CONCEPT_DICTIONARY: Record<string, ConceptInfo> = {
         emoji: '💡',
         short: '점에서 빛이 나오는 광원',
         detail: '전구 효과 💡 - 파트 주변을 환하게 밝혀요! Brightness(밝기)와 Range(범위)로 조절해요. 마법 구체, 횃불, 가로등 등에 사용! Part나 Handle에 넣으면 빛 효과가 생겨요.'
+    },
+    'Clone': {
+        emoji: '📋',
+        short: '오브젝트 복제 (속성+자식 모두 복사)',
+        detail: '복사기 📋 - template:Clone()으로 원본을 그대로 복사해요! 속성, 자식 오브젝트, 스크립트까지 전부 복사돼요. ServerStorage에 원본을 숨겨두고 Clone으로만 사용하는 패턴이 핵심!'
+    },
+    'GetService': {
+        emoji: '🔑',
+        short: '서비스를 안전하게 가져오기',
+        detail: '만능 열쇠 🔑 - game:GetService("Players")처럼 서비스 이름으로 안전하게 가져와요! game.Players처럼 직접 쓰는 것보다 GetService가 더 안전하고 정확해요.'
+    },
+    'GetChildren': {
+        emoji: '👶',
+        short: '모든 자식을 리스트로 반환',
+        detail: '가족 명단 👶 - folder:GetChildren()으로 바로 아래 자식들을 리스트로 받아요! for _, child in folder:GetChildren() do 패턴으로 모든 자식에게 같은 작업을 할 수 있어요.'
+    },
+    'GetDescendants': {
+        emoji: '🌳',
+        short: '모든 자손을 리스트로 반환',
+        detail: '가계도 🌳 - model:GetDescendants()는 자식의 자식의 자식... 모든 자손을 가져와요! GetChildren은 바로 아래만, GetDescendants는 전체 다! 모든 파트 색 바꾸기 등에 사용.'
+    },
+    'FindFirstChild': {
+        emoji: '🔍',
+        short: '자식 찾기 (없으면 nil, 즉시 반환)',
+        detail: '즉시 검색 🔍 - part:FindFirstChild("Humanoid")로 자식을 찾아요. 있으면 반환, 없으면 nil! 서버 Script에서 주로 사용. WaitForChild와 달리 기다리지 않아요.'
+    },
+    'ServerStorage': {
+        emoji: '🔒',
+        short: '서버 전용 저장소 (해커 접근 불가)',
+        detail: '금고 🔒 - 서버만 접근 가능한 안전한 저장소! Clone 원본(코인, 아이템 등)을 여기에 보관해요. 클라이언트(해커)가 절대 접근할 수 없어서 안전!'
+    },
+    'ReplicatedStorage': {
+        emoji: '📡',
+        short: '서버+클라 공유 저장소',
+        detail: '공유 폴더 📡 - 서버와 클라이언트 모두 접근 가능! RemoteEvent, 공유 모듈, 공유 에셋 등을 넣어요. 클라이언트도 볼 수 있으니 보안이 필요한 건 ServerStorage에!'
+    },
+    'LocalPlayer': {
+        emoji: '👤',
+        short: '내 플레이어 (LocalScript 전용)',
+        detail: '나 자신 👤 - Players.LocalPlayer로 "나"를 가져와요! LocalScript에서만 사용 가능. 서버 Script에서는 PlayerAdded 이벤트로 플레이어를 받아야 해요.'
+    },
+    'task.delay': {
+        emoji: '⏰',
+        short: 'N초 뒤에 함수 실행 (알람)',
+        detail: '알람 시계 ⏰ - task.delay(3, function() ... end)로 3초 뒤에 실행! task.wait과 달리 코드가 멈추지 않고 바로 다음 줄로 넘어가요. Debris 대신 사용 가능!'
+    },
+    'task.defer': {
+        emoji: '⏭️',
+        short: '다음 프레임에 실행',
+        detail: '다음 차례 ⏭️ - task.defer(function() ... end)로 현재 코드가 다 끝난 뒤 실행! 지금 당장이 아니라 "다음 프레임"에 실행하고 싶을 때 사용해요.'
+    },
+    'DelayTime': {
+        emoji: '⏳',
+        short: '트윈 시작 전 대기 시간 (6번째 파라미터)',
+        detail: '대기 시간 ⏳ - TweenInfo의 6번째 파라미터! 트윈이 시작되기 전에 기다리는 시간이에요. repeatCount와 함께 쓰면 매 반복마다 대기!'
+    },
+    'Completed': {
+        emoji: '✅',
+        short: '트윈이 끝났을 때 이벤트',
+        detail: '완료 신호 ✅ - tween.Completed:Connect(function() ... end)로 트윈이 끝났을 때 다음 동작 실행! 문 열기→3초 대기→닫기 같은 체인 패턴에 사용해요.'
+    },
+    'EasingStyle': {
+        emoji: '📈',
+        short: '트윈 가감속 방식 (11종)',
+        detail: '움직임 스타일 📈 - Linear(일정), Quad(부드러운), Bounce(통통), Elastic(고무줄), Back(넘어갔다 돌아옴) 등 11종! Enum.EasingStyle.Bounce처럼 사용해요.'
+    },
+    'Magnitude': {
+        emoji: '📏',
+        short: '벡터의 길이 (거리 계산)',
+        detail: '거리 재기 📏 - (pos1 - pos2).Magnitude로 두 점 사이 거리를 계산해요! if distance < 10 then = "10 스터드 이내"일 때. 근접 감지의 핵심!'
+    },
+    'CFrame.lookAt': {
+        emoji: '👀',
+        short: '목표를 바라보는 CFrame 생성',
+        detail: '바라보기 👀 - CFrame.lookAt(내위치, 목표위치)로 목표를 향해 바라보는 CFrame을 만들어요! NPC가 플레이어를 쳐다보게 할 때, 카메라 방향 설정에 사용!'
+    },
+    'Lerp': {
+        emoji: '🎯',
+        short: '두 값 사이 부드러운 보간',
+        detail: '중간값 찾기 🎯 - a:Lerp(b, 0.5)로 a와 b의 정확히 중간값! 0=시작점, 0.5=중간, 1=끝점. Vector3와 CFrame 모두 Lerp를 지원해요. 부드러운 이동/회전에 핵심!'
+    },
+    'FreeFalling': {
+        emoji: '🪂',
+        short: '캐릭터가 공중에 떠있을 때 이벤트',
+        detail: '낙하 감지 🪂 - humanoid.FreeFalling:Connect(function(active) ... end)로 공중에 떠있는지 감지! active=true면 떨어지는 중. 낙사 감지에 사용: 일정 시간 후 Kill!'
+    },
+    'CharacterAdded': {
+        emoji: '🧑',
+        short: '캐릭터 생성/리스폰 이벤트',
+        detail: '캐릭터 등장 🧑 - player.CharacterAdded:Connect(function(character) ... end)로 캐릭터가 생성될 때마다 실행! 리스폰 포함. Humanoid 참조를 여기서 갱신해야 안전!'
+    },
+    'StateChanged': {
+        emoji: '🔄',
+        short: 'Humanoid 상태 변화 이벤트',
+        detail: '상태 전환 🔄 - humanoid.StateChanged:Connect(function(old, new) ... end)로 달리기↔점프↔낙하 등 상태 변화를 감지해요! Enum.HumanoidStateType으로 비교.'
+    },
+    'HingeConstraint': {
+        emoji: '🔄',
+        short: '경첩처럼 회전시키는 물리 Constraint',
+        detail: '경첩 🔄 - 문, 회전 장애물에 사용! ActuatorType=Motor로 자동 회전, =Servo로 목표 각도 회전. AngularVelocity로 속도, MotorMaxTorque로 힘을 설정해요.'
+    },
+    'WeldConstraint': {
+        emoji: '🔗',
+        short: '두 파트를 하나로 고정',
+        detail: '접착제 🔗 - 두 파트를 완전히 붙여서 하나처럼 움직이게 해요! Part0과 Part1만 설정하면 끝. 가장 간단한 Constraint! 복잡한 모양의 오브젝트를 만들 때 필수.'
+    },
+    'SpringConstraint': {
+        emoji: '🌀',
+        short: '스프링 물리 (탄성 발판)',
+        detail: '용수철 🌀 - Stiffness(강도), Damping(감쇠), FreeLength(자연 길이)로 설정! 탄성 발판, 트램폴린 등에 사용해요. 두 Attachment 사이에 스프링 물리 적용!'
+    },
+    'Attachment': {
+        emoji: '📌',
+        short: '파트를 연결하는 고리',
+        detail: '연결 고리 📌 - 모든 Constraint의 기본! 각 파트에 Attachment를 넣고, Constraint가 두 Attachment를 연결해요. 파트 내 위치와 방향을 지정할 수 있어요.'
+    },
+    'ActuatorType': {
+        emoji: '⚙️',
+        short: 'HingeConstraint 동작 모드',
+        detail: '동작 모드 ⚙️ - None=자유 회전(문), Motor=자동 회전(풍차, 장애물), Servo=목표 각도로 회전(정밀 제어). 오비 회전 장애물은 Motor!'
+    },
+    'AngularVelocity': {
+        emoji: '🔄',
+        short: '초당 회전 속도 (라디안/초)',
+        detail: '회전 속도 🔄 - HingeConstraint의 Motor 모드에서 사용! 양수=시계 방향, 음수=반시계. math.rad(90)이면 초당 90도 회전. 장애물 난이도 조절의 핵심!'
+    },
+    'LinearVelocity': {
+        emoji: '➡️',
+        short: '일정 속도로 이동 (컨베이어 벨트)',
+        detail: '이동 속도 ➡️ - Mover Constraint의 하나! 파트를 일정 속도로 이동시켜요. 컨베이어 벨트, 자동 이동 발판 등에 사용. Attachment에 연결해서 사용!'
+    },
+    'RopeConstraint': {
+        emoji: '🪢',
+        short: '밧줄 (최대 길이 제한)',
+        detail: '밧줄 🪢 - 두 파트를 밧줄로 연결! Length로 최대 길이, Restitution으로 탄성 설정. WinchEnabled=true면 자동으로 당기는 기능! 스윙 장애물에 사용.'
+    },
+    'PrismaticConstraint': {
+        emoji: '🔧',
+        short: '한 축으로만 슬라이딩',
+        detail: '피스톤 🔧 - 한 방향으로만 밀거나 당기는 Constraint! 서랍, 자동문, 엘리베이터 등에 사용. Motor/Servo 모드로 자동 이동 가능!'
+    },
+    'PlayerAdded': {
+        emoji: '🚪',
+        short: '플레이어 접속 이벤트',
+        detail: '입장 감지 🚪 - Players.PlayerAdded:Connect(function(player) ... end)로 새 플레이어가 들어올 때마다 실행! leaderstats 생성, 환영 메시지 등에 사용하는 필수 이벤트!'
+    },
+    'ClickDetector': {
+        emoji: '👆',
+        short: '파트를 클릭하면 실행',
+        detail: '클릭 감지기 👆 - 파트에 ClickDetector를 넣으면 마우스로 클릭할 수 있어요! MouseClick 이벤트로 클릭한 플레이어를 받아요. 문 열기, 버튼 등에 사용!'
+    },
+    'ProximityPrompt': {
+        emoji: '🔔',
+        short: 'E키로 상호작용',
+        detail: 'E키 버튼 🔔 - 파트에 다가가면 "E키를 누르세요" 표시! Triggered 이벤트로 상호작용한 플레이어를 받아요. ClickDetector보다 현대적이고 3D 환경에서 더 자연스러워요.'
+    },
+    'TouchEnded': {
+        emoji: '✋',
+        short: '파트에서 떨어졌을 때 이벤트',
+        detail: '떨어짐 감지 ✋ - part.TouchEnded:Connect(function(otherPart) ... end)로 닿았던 파트가 떨어질 때 실행! Touched의 반대. 특정 영역에서 나갔을 때를 감지해요.'
     }
 };
 

@@ -1,0 +1,2344 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+
+// =========================================
+// 최종 MC 퀴즈 옵션 (슬라이드 24)
+// =========================================
+const mcQ1Options = JSON.stringify(["GetService는 서비스 타입으로 찾아서 더 안전", "game.Players가 더 빠름", "GetService는 구버전 전용", "둘 다 똑같음"]);
+const mcQ2Options = JSON.stringify(["WaitForChild", "FindFirstChild", "GetChildren", "GetDescendants"]);
+const mcQ3Options = JSON.stringify(["서버만 접근 가능해서 해커 접근 불가", "속도가 더 빠르니까", "자동 삭제 되니까", "이름이 예쁘니까"]);
+const mcQ4Options = JSON.stringify(["트윈 시작 전 대기 시간", "트윈의 총 지속 시간", "반복 사이의 대기 시간만", "트윈 종료 후 대기"]);
+const mcQ5Options = JSON.stringify(["캐릭터가 공중에 떠있을 때", "캐릭터가 점프할 때", "캐릭터가 걸을 때", "캐릭터가 죽을 때"]);
+const mcQ6Options = JSON.stringify(["지정한 AngularVelocity로 계속 회전", "특정 각도에서 멈춤", "자유롭게 회전", "아무 동작도 안 함"]);
+const mcQ7Options = JSON.stringify(["task.spawn으로 별도 스레드", "두 개를 이어 붙이기", "while true do를 하나만 쓰기", "task.wait을 없애기"]);
+const mcQ8Options = JSON.stringify(["3초 뒤 part를 자동 삭제", "part를 3개 복제", "3초마다 part 생성", "part 크기를 3배로"]);
+
+// =========================================
+// 드롭다운 퀴즈 데이터 (10개)
+// =========================================
+
+// 퀴즈 1 (슬라이드 3): GetService 빈칸
+const getServiceBlanks = JSON.stringify([
+    { id: "b1", correct: "\"Players\"", options: ["\"Players\"", "\"Workspace\"", "\"Game\"", "\"PlayerService\""] },
+    { id: "b2", correct: "\"TweenService\"", options: ["\"TweenService\"", "\"AnimationService\"", "\"TweenInfo\"", "\"MoveService\""] },
+    { id: "b3", correct: "\"Debris\"", options: ["\"Debris\"", "\"Destroy\"", "\"Delete\"", "\"Garbage\""] }
+]);
+const getServiceTemplate = `-- ========================================
+-- 🔑 GetService로 서비스 가져오기
+-- ========================================
+-- 💡 game:GetService("이름") = 안전한 서비스 접근!
+
+-- 💡 플레이어 관리 서비스
+local Players = game:GetService([b1])
+
+-- 💡 부드러운 애니메이션 서비스
+local TweenService = game:GetService([b2])
+
+-- 💡 N초 뒤 자동 삭제 서비스
+local Debris = game:GetService([b3])
+
+-- 💡 사용 예시:
+-- Debris:AddItem(part, 3)  → 3초 뒤 part 자동 삭제!
+print("서비스 로딩 완료!")`;
+const getServiceFullCode = `-- 🔑 GetService 사용 예시
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+
+-- 사용 예시: 3초 뒤 파트 삭제
+Debris:AddItem(part, 3)
+print("서비스 로딩 완료!")`;
+
+// 퀴즈 2 (슬라이드 5): 아키텍처 빈칸
+const archBlanks = JSON.stringify([
+    { id: "b1", correct: "ServerStorage", options: ["ServerStorage", "Workspace", "ReplicatedStorage", "StarterGui"] },
+    { id: "b2", correct: "ReplicatedStorage", options: ["ReplicatedStorage", "ServerStorage", "StarterGui", "ServerScriptService"] },
+    { id: "b3", correct: "Players.LocalPlayer", options: ["Players.LocalPlayer", "game.Player", "Players:GetPlayer()", "workspace.LocalPlayer"] }
+]);
+const archTemplate = `-- ========================================
+-- 🏗️ 서버/클라 아키텍처
+-- ========================================
+
+-- 💡 코인 원본은 어디에 보관? (서버 전용 = 해커 접근 불가!)
+local coinTemplate = game:GetService("[b1]"):FindFirstChild("Coin")
+
+-- 💡 RemoteEvent는 어디에? (서버+클라 모두 접근 필요!)
+local remote = game:GetService("[b2]"):FindFirstChild("CoinRemote")
+
+-- 💡 LocalScript에서 내 플레이어 가져오기
+local player = game:GetService("Players").[b3]
+
+print(player.Name .. " 접속!")`;
+const archFullCode = `-- 🏗️ 서버/클라 아키텍처
+local coinTemplate = game:GetService("ServerStorage"):FindFirstChild("Coin")
+local remote = game:GetService("ReplicatedStorage"):FindFirstChild("CoinRemote")
+local player = game:GetService("Players").LocalPlayer
+print(player.Name .. " 접속!")`;
+
+// 퀴즈 3 (슬라이드 7): Instance 메서드 빈칸
+const instanceBlanks = JSON.stringify([
+    { id: "b1", correct: "FindFirstChild", options: ["FindFirstChild", "WaitForChild", "GetChildren", "FindFirstChildOfClass"] },
+    { id: "b2", correct: "WaitForChild", options: ["WaitForChild", "FindFirstChild", "GetChildren", "GetDescendants"] },
+    { id: "b3", correct: "GetChildren", options: ["GetChildren", "GetDescendants", "FindFirstChild", "WaitForChild"] }
+]);
+const instanceTemplate = `-- ========================================
+-- 🔍 Instance 메서드 사용 예시
+-- ========================================
+
+-- 💡 서버 Script에서 Humanoid 찾기 (즉시 반환, 없으면 nil)
+local humanoid = hit.Parent:[b1]("Humanoid")
+
+-- 💡 LocalScript에서 GUI 찾기 (로딩될 때까지 기다림!)
+local gui = script.Parent:[b2]("TextLabel", 5)
+
+-- 💡 폴더 안의 모든 자식 반복
+local folder = workspace.Coins
+for _, coin in folder:[b3]() do
+    coin.Touched:Connect(function() end)
+end`;
+const instanceFullCode = `-- 🔍 Instance 메서드 사용 예시
+-- 서버: 즉시 찾기
+local humanoid = hit.Parent:FindFirstChild("Humanoid")
+
+-- 클라: 기다려서 찾기 (5초 타임아웃)
+local gui = script.Parent:WaitForChild("TextLabel", 5)
+
+-- 폴더 반복
+for _, coin in workspace.Coins:GetChildren() do
+    coin.Touched:Connect(function() end)
+end`;
+
+// 퀴즈 4 (슬라이드 9): Clone + Debris 빈칸
+const cloneBlanks = JSON.stringify([
+    { id: "b1", correct: ":Clone()", options: [":Clone()", ":Copy()", ":Duplicate()", "Instance.new()"] },
+    { id: "b2", correct: "coin:Destroy()", options: ["coin:Destroy()", "coin:Remove()", "coin.Parent = nil", "coin:Delete()"] },
+    { id: "b3", correct: "Debris:AddItem", options: ["Debris:AddItem", "Debris:Destroy", "Debris:Remove", "Debris:Delete"] }
+]);
+const cloneTemplate = `-- ========================================
+-- 📋 코인 리스폰 시스템
+-- ========================================
+local ServerStorage = game:GetService("ServerStorage")
+local Debris = game:GetService("Debris")
+local template = ServerStorage:FindFirstChild("Coin")
+
+-- 💡 원본을 복제해서 월드에 배치!
+local coin = template[b1]
+coin.Parent = workspace
+
+-- 💡 수집 시 완전히 삭제
+coin.Touched:Connect(function(hit)
+    if hit.Parent:FindFirstChild("Humanoid") then
+        [b2]
+        -- 💡 이펙트는 3초 뒤 자동 삭제!
+        local effect = Instance.new("Part")
+        effect.Parent = workspace
+        [b3](effect, 3)
+    end
+end)`;
+const cloneFullCode = `-- 📋 코인 리스폰 시스템
+local ServerStorage = game:GetService("ServerStorage")
+local Debris = game:GetService("Debris")
+local template = ServerStorage:FindFirstChild("Coin")
+
+local coin = template:Clone()
+coin.Parent = workspace
+
+coin.Touched:Connect(function(hit)
+    if hit.Parent:FindFirstChild("Humanoid") then
+        coin:Destroy()
+        local effect = Instance.new("Part")
+        effect.Parent = workspace
+        Debris:AddItem(effect, 3)
+    end
+end)`;
+
+// 퀴즈 5 (슬라이드 11): 데이터 타입 빈칸
+const datatypeBlanks = JSON.stringify([
+    { id: "b1", correct: ".Magnitude", options: [".Magnitude", ".Length", ".Distance", ".Size"] },
+    { id: "b2", correct: "CFrame.lookAt", options: ["CFrame.lookAt", "CFrame.new", "CFrame.Angles", "CFrame.fromMatrix"] },
+    { id: "b3", correct: ":Lerp", options: [":Lerp", ":Move", ":Tween", ":Interpolate"] }
+]);
+const datatypeTemplate = `-- ========================================
+-- 📐 Vector3 & CFrame 심화
+-- ========================================
+
+-- 💡 두 파트 사이 거리 계산
+local distance = (partA.Position - partB.Position)[b1]
+if distance &lt; 10 then
+    print("10 스터드 이내!")
+end
+
+-- 💡 NPC가 플레이어를 바라보게!
+npc.CFrame = [b2](npc.Position, player.Position)
+
+-- 💡 부드럽게 중간 지점으로 이동 (0.5 = 정확히 중간)
+local mid = startCF[b3](goalCF, 0.5)`;
+const datatypeFullCode = `-- 📐 Vector3 & CFrame 심화
+-- 거리 계산
+local distance = (partA.Position - partB.Position).Magnitude
+if distance < 10 then
+    print("10 스터드 이내!")
+end
+
+-- NPC 바라보기
+npc.CFrame = CFrame.lookAt(npc.Position, player.Position)
+
+-- 부드러운 보간
+local mid = startCF:Lerp(goalCF, 0.5)`;
+
+// 퀴즈 6 (슬라이드 13): Humanoid 빈칸
+const humanoidBlanks = JSON.stringify([
+    { id: "b1", correct: "Died", options: ["Died", "Dead", "Kill", "Death"] },
+    { id: "b2", correct: "FreeFalling", options: ["FreeFalling", "Falling", "InAir", "Flying"] },
+    { id: "b3", correct: "TakeDamage", options: ["TakeDamage", "Damage", "Hurt", "ReduceHealth"] }
+]);
+const humanoidTemplate = `-- ========================================
+-- 🧠 Humanoid 이벤트 활용
+-- ========================================
+
+-- 💡 사망 시 리스폰 로직
+humanoid.[b1]:Connect(function()
+    print("사망! 3초 뒤 리스폰...")
+    task.wait(3)
+    -- 리스폰 로직
+end)
+
+-- 💡 낙사 감지 (공중에 떠있을 때)
+humanoid.[b2]:Connect(function(active)
+    if active then
+        task.delay(5, function()
+            -- 5초 이상 떨어지면 Kill
+            humanoid.Health = 0
+        end)
+    end
+end)
+
+-- 💡 안전한 데미지 (ForceField 존중)
+humanoid:[b3](25)`;
+const humanoidFullCode = `-- 🧠 Humanoid 이벤트 활용
+humanoid.Died:Connect(function()
+    print("사망! 3초 뒤 리스폰...")
+    task.wait(3)
+end)
+
+humanoid.FreeFalling:Connect(function(active)
+    if active then
+        task.delay(5, function()
+            humanoid.Health = 0
+        end)
+    end
+end)
+
+humanoid:TakeDamage(25)`;
+
+// 퀴즈 7 (슬라이드 15): TweenInfo 6파라미터 빈칸
+const tweenInfoBlanks = JSON.stringify([
+    { id: "b1", correct: "Enum.EasingStyle.Bounce", options: ["Enum.EasingStyle.Bounce", "Enum.EasingStyle.Linear", "Enum.EasingStyle.Quad", "Enum.EasingStyle.Elastic"] },
+    { id: "b2", correct: "-1", options: ["-1", "0", "1", "99"] },
+    { id: "b3", correct: "2", options: ["2", "0", "1", "5"] }
+]);
+const tweenInfoTemplate = `-- ========================================
+-- ⚙️ TweenInfo 6파라미터 완전체
+-- ========================================
+local TweenService = game:GetService("TweenService")
+local part = script.Parent
+
+-- TweenInfo.new(time, style, direction, repeatCount, reverses, delayTime)
+local info = TweenInfo.new(
+    3,                          -- ① 3초 동안
+    [b1],                       -- ② 통통 튀는 스타일!
+    Enum.EasingDirection.Out,   -- ③ 끝에서 효과
+    [b2],                       -- ④ 무한 반복! (-1)
+    true,                       -- ⑤ 왕복 (올라갔다 내려옴)
+    [b3]                        -- ⑥ 시작 전 2초 대기!
+)
+
+local tween = TweenService:Create(part, info, {
+    Position = part.Position + Vector3.new(0, 20, 0)
+})
+tween:Play()`;
+const tweenInfoFullCode = `-- ⚙️ TweenInfo 6파라미터 - 통통 튀는 무한 엘리베이터
+local TweenService = game:GetService("TweenService")
+local part = script.Parent
+
+local info = TweenInfo.new(
+    3,                              -- 3초
+    Enum.EasingStyle.Bounce,        -- 통통
+    Enum.EasingDirection.Out,       -- 끝에서
+    -1,                             -- 무한 반복
+    true,                           -- 왕복
+    2                               -- 2초 대기
+)
+
+local tween = TweenService:Create(part, info, {
+    Position = part.Position + Vector3.new(0, 20, 0)
+})
+tween:Play()`;
+
+// 퀴즈 8 (슬라이드 17): Tween 체인 빈칸
+const tweenChainBlanks = JSON.stringify([
+    { id: "b1", correct: "Completed", options: ["Completed", "Finished", "Done", "Ended"] },
+    { id: "b2", correct: "closeTween:Play()", options: ["closeTween:Play()", "closeTween:Start()", "closeTween:Run()", "closeTween:Begin()"] },
+    { id: "b3", correct: "task.delay", options: ["task.delay", "task.wait", "task.spawn", "task.defer"] }
+]);
+const tweenChainTemplate = `-- ========================================
+-- 🔗 Tween 체인 — 문 자동 닫기
+-- ========================================
+local TweenService = game:GetService("TweenService")
+local door = script.Parent
+
+local openGoal = { Position = door.Position + Vector3.new(0, 8, 0) }
+local closeGoal = { Position = door.Position }
+local info = TweenInfo.new(1, Enum.EasingStyle.Quad)
+
+local openTween = TweenService:Create(door, info, openGoal)
+local closeTween = TweenService:Create(door, info, closeGoal)
+
+-- 💡 문 열기 트윈이 끝나면 → 3초 후 닫기!
+openTween.[b1]:Connect(function()
+    -- 💡 3초 뒤에 닫기 트윈 실행 (코드 안 멈춤!)
+    [b3](3, function()
+        [b2]
+    end)
+end)
+
+openTween:Play()`;
+const tweenChainFullCode = `-- 🔗 Tween 체인 — 문 자동 닫기
+local TweenService = game:GetService("TweenService")
+local door = script.Parent
+
+local openGoal = { Position = door.Position + Vector3.new(0, 8, 0) }
+local closeGoal = { Position = door.Position }
+local info = TweenInfo.new(1, Enum.EasingStyle.Quad)
+
+local openTween = TweenService:Create(door, info, openGoal)
+local closeTween = TweenService:Create(door, info, closeGoal)
+
+openTween.Completed:Connect(function()
+    task.delay(3, function()
+        closeTween:Play()
+    end)
+end)
+
+openTween:Play()`;
+
+// 퀴즈 9 (슬라이드 19): Constraint 빈칸
+const constraintBlanks = JSON.stringify([
+    { id: "b1", correct: "Enum.ActuatorType.Motor", options: ["Enum.ActuatorType.Motor", "Enum.ActuatorType.Servo", "Enum.ActuatorType.None", "\"Motor\""] },
+    { id: "b2", correct: "AngularVelocity", options: ["AngularVelocity", "Speed", "Velocity", "RotationSpeed"] },
+    { id: "b3", correct: "MotorMaxTorque", options: ["MotorMaxTorque", "MaxForce", "Power", "Strength"] }
+]);
+const constraintTemplate = `-- ========================================
+-- 🔄 HingeConstraint 회전 장애물
+-- ========================================
+-- 📦 준비:
+--   Part에 Attachment0, 다른 Part에 Attachment1
+--   두 Attachment를 HingeConstraint로 연결!
+
+local hinge = script.Parent:FindFirstChild("HingeConstraint")
+
+-- 💡 Motor 모드 = 자동으로 계속 회전!
+hinge.ActuatorType = [b1]
+
+-- 💡 초당 회전 속도 (라디안/초)
+-- math.rad(90) = 초당 90도 회전!
+hinge.[b2] = math.rad(90)
+
+-- 💡 회전 힘 (높을수록 강하게 회전)
+hinge.[b3] = 10000
+
+print("회전 장애물 가동!")`;
+const constraintFullCode = `-- 🔄 HingeConstraint 회전 장애물
+local hinge = script.Parent:FindFirstChild("HingeConstraint")
+
+hinge.ActuatorType = Enum.ActuatorType.Motor
+hinge.AngularVelocity = math.rad(90)
+hinge.MotorMaxTorque = 10000
+
+print("회전 장애물 가동!")`;
+
+// 퀴즈 10 (슬라이드 23): task + 패턴 빈칸
+const taskBlanks = JSON.stringify([
+    { id: "b1", correct: "task.spawn", options: ["task.spawn", "task.wait", "task.delay", "task.defer"] },
+    { id: "b2", correct: "task.wait", options: ["task.wait", "wait", "task.delay", "task.spawn"] },
+    { id: "b3", correct: "task.delay", options: ["task.delay", "task.wait", "task.spawn", "task.defer"] }
+]);
+const taskTemplate = `-- ========================================
+-- 🚀 task 라이브러리 활용
+-- ========================================
+
+-- 💡 while true do 2개를 동시에 실행!
+-- 분신술: 메인 코드가 안 멈춤!
+[b1](function()
+    while true do
+        part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(2), 0)
+        [b2](0.03)  -- 💡 0.03초마다 회전
+    end
+end)
+
+-- 💡 색상 변경 루프도 동시에!
+[b1](function()
+    while true do
+        part.Color = Color3.fromRGB(
+            math.random(0, 255),
+            math.random(0, 255),
+            math.random(0, 255)
+        )
+        [b2](1)  -- 💡 1초마다 색 변경
+    end
+end)
+
+-- 💡 5초 뒤에 파트 자동 삭제 예약
+[b3](5, function()
+    part:Destroy()
+    print("5초 후 삭제됨!")
+end)`;
+const taskFullCode = `-- 🚀 task 라이브러리 활용
+-- 회전 루프 (별도 스레드)
+task.spawn(function()
+    while true do
+        part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(2), 0)
+        task.wait(0.03)
+    end
+end)
+
+-- 색상 변경 루프 (별도 스레드)
+task.spawn(function()
+    while true do
+        part.Color = Color3.fromRGB(
+            math.random(0, 255),
+            math.random(0, 255),
+            math.random(0, 255)
+        )
+        task.wait(1)
+    end
+end)
+
+-- 5초 뒤 삭제 예약
+task.delay(5, function()
+    part:Destroy()
+    print("5초 후 삭제됨!")
+end)`;
+
+---
+
+<LessonLayout title="로블록스 엔진 마스터" lessonNumber={11} totalSlides={24}>
+
+    <!-- ==================== -->
+    <!-- 슬라이드 1: 인트로 -->
+    <!-- ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">11주차 B</span>
+                <h1 class="title-display mb-4">
+                    로블록스 엔진 마스터<br>
+                    <span class="text-neon-mint">오비맵에 필요한 모든 것</span>
+                </h1>
+                <p class="text-ink-light text-lg mb-8">
+                    10주 동안 사용한 코드들의 진짜 의미 + 아직 모르는 강력한 기능들
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto mb-8">
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">🔑</div>
+                        <div class="text-xs font-semibold">엔진 기초</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">🧩</div>
+                        <div class="text-xs font-semibold">Instance 체계</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">📐</div>
+                        <div class="text-xs font-semibold">데이터 타입</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">🧠</div>
+                        <div class="text-xs font-semibold">Humanoid</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">🎬</div>
+                        <div class="text-xs font-semibold">TweenService</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">⚙️</div>
+                        <div class="text-xs font-semibold">물리 Constraint</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">🎯</div>
+                        <div class="text-xs font-semibold">이벤트 대백과</div>
+                    </div>
+                    <div class="lesson-card text-center !p-3">
+                        <div class="text-2xl mb-1">🚀</div>
+                        <div class="text-xs font-semibold">task & 패턴</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 1: 엔진 기초 -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 2: GetService 서비스 전체 지도 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 1 — 엔진 기초</span>
+            <h2 class="title-section mb-4">game:GetService() — 서비스 전체 지도</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                로블록스 엔진은 기능별로 <strong>서비스(Service)</strong>를 나눠 놓았습니다.
+                Players, TweenService, Debris 등 각각의 서비스가 특정 기능을 담당하고,
+                <code class="text-xs bg-gray-100 px-1 rounded">game:GetService("이름")</code>으로 가져와야 그 기능을 사용할 수 있어요.
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-2">🔑 왜 GetService를 써야 할까?</h3>
+                <div class="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div class="bg-red-50 rounded-lg p-3">
+                        <div class="font-bold text-red-600 mb-1">❌ game.Players (직접 접근)</div>
+                        <div class="text-xs text-gray-600">
+                            이름으로 직접 찾는 방식.<br>
+                            <strong>오타(game.Playres)를 쳐도 에러 없이 nil 반환!</strong><br>
+                            나중에 nil 관련 버그가 터져도 원인을 찾기 매우 어려움.
+                        </div>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3">
+                        <div class="font-bold text-green-600 mb-1">✅ game:GetService("Players")</div>
+                        <div class="text-xs text-gray-600">
+                            서비스 타입으로 찾는 방식.<br>
+                            <strong>오타("Playres")를 치면 즉시 에러 발생!</strong><br>
+                            바로 원인을 알 수 있어 디버깅이 쉬움.
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 bg-gray-50 rounded p-2">💡 <strong>결론</strong>: game.X도 작동하긴 하지만, GetService()를 쓰면 오타를 즉시 잡아줘서 버그 예방에 훨씬 좋습니다. 프로 개발자들도 항상 GetService를 씁니다!</p>
+            </div>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">🗺️ 서비스 개념도</h3>
+                <div class="engine-map-shell">
+                    <div class="engine-map-grid">
+                        <div class="engine-map-node tone-blue area-player">
+                            <div class="engine-map-title">플레이어</div>
+                            <div class="engine-map-tags">
+                                <span>Players</span>
+                                <span>UserInputService</span>
+                            </div>
+                            <p>접속, LocalPlayer, 키보드와 마우스 입력 처리</p>
+                        </div>
+
+                        <div class="engine-map-node tone-gold area-world">
+                            <div class="engine-map-title">월드 제어</div>
+                            <div class="engine-map-tags">
+                                <span>Lighting</span>
+                                <span>TweenService</span>
+                            </div>
+                            <p>시간, 분위기, 애니메이션, 움직임 제어</p>
+                        </div>
+
+                        <div class="engine-map-node tone-red area-runtime">
+                            <div class="engine-map-title">런타임 유틸</div>
+                            <div class="engine-map-tags">
+                                <span>Debris</span>
+                                <span>RunService</span>
+                            </div>
+                            <p>임시 오브젝트 정리, 프레임 단위 반복 처리</p>
+                        </div>
+
+                        <div class="engine-map-focus area-center">
+                            <div class="engine-map-focus-title">game</div>
+                            <code>game:GetService("이름")</code>
+                            <p>서비스를 이름이 아니라 역할로 안전하게 가져오는 시작점</p>
+                        </div>
+
+                        <div class="engine-map-node tone-green area-shared">
+                            <div class="engine-map-title">공유 저장소</div>
+                            <div class="engine-map-tags">
+                                <span>ReplicatedStorage</span>
+                                <span>RemoteEvent</span>
+                            </div>
+                            <p>서버와 클라가 같이 읽어야 하는 것 보관</p>
+                        </div>
+
+                        <div class="engine-map-node tone-purple area-storage">
+                            <div class="engine-map-title">템플릿/보관</div>
+                            <div class="engine-map-tags">
+                                <span>ServerStorage</span>
+                                <span>StarterGui</span>
+                            </div>
+                            <p>원본 보호, 플레이어용 UI와 자산 템플릿 관리</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">공식 한 장짜리 개념도는 없어 11B 흐름에 맞게 직접 정리한 다이어그램입니다. 실제 배치 예시는 아래 공식 Explorer 이미지와 함께 보면 됩니다.</p>
+            </div>
+
+            <div class="lesson-card">
+                <h3 class="font-bold text-sm mb-2">📋 서비스 전체 지도</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead>
+                            <tr class="border-b border-gray-200">
+                                <th class="text-left py-1.5 pr-2 w-1/5">서비스</th>
+                                <th class="text-left py-1.5 pr-2">역할 & 설명</th>
+                                <th class="text-left py-1.5 w-12">주차</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 pr-2 font-mono font-bold">Players</td>
+                                <td class="pr-2">접속한 모든 플레이어를 관리. <code>PlayerAdded</code>로 새 접속자 감지, <code>GetPlayers()</code>로 전체 목록, <code>LocalPlayer</code>로 내 캐릭터 참조</td>
+                                <td>3B</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 pr-2 font-mono font-bold">TweenService</td>
+                                <td class="pr-2">파트의 위치·크기·투명도 등을 부드럽게 변화시킴. <code>Create()</code>로 트윈 생성 후 <code>Play()</code>로 실행</td>
+                                <td>6B</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 pr-2 font-mono font-bold">SoundService</td>
+                                <td class="pr-2">게임 전체 오디오 설정 관리. 환경 반향(AmbientReverb), 거리별 소리 감쇠 등 글로벌 사운드 제어</td>
+                                <td>11A</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 pr-2 font-mono font-bold">Lighting</td>
+                                <td class="pr-2">게임 시간대(ClockTime), 조명 색상, 안개, 후처리 효과(BloomEffect, ColorCorrection 등) 관리</td>
+                                <td>11A</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-yellow-50">
+                                <td class="py-1.5 pr-2 font-mono font-bold">Debris</td>
+                                <td class="pr-2">일정 시간 뒤 오브젝트를 자동 삭제 예약. <code>AddItem(obj, 초)</code> 하나로 타이머 삭제 완료! 이펙트·총알 등 임시 오브젝트에 필수</td>
+                                <td class="text-neon-coral font-bold">NEW</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-yellow-50">
+                                <td class="py-1.5 pr-2 font-mono font-bold">RunService</td>
+                                <td class="pr-2">매 프레임(1/60초)마다 코드 실행. <code>Heartbeat</code>(서버+클라), <code>RenderStepped</code>(클라 전용). 실시간 물리·카메라 제어에 사용</td>
+                                <td class="text-neon-coral font-bold">NEW</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-yellow-50">
+                                <td class="py-1.5 pr-2 font-mono font-bold">UserInputService</td>
+                                <td class="pr-2">키보드·마우스·터치 입력 감지. <code>InputBegan</code>으로 키 눌림 감지, <code>IsKeyDown()</code>으로 현재 상태 확인</td>
+                                <td class="text-neon-coral font-bold">NEW</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-yellow-50">
+                                <td class="py-1.5 pr-2 font-mono font-bold">ReplicatedStorage</td>
+                                <td class="pr-2">서버+클라이언트 <strong>모두 접근 가능</strong>한 공유 저장소. RemoteEvent, 공용 모듈 등을 여기에 보관</td>
+                                <td class="text-neon-coral font-bold">NEW</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 bg-yellow-50">
+                                <td class="py-1.5 pr-2 font-mono font-bold">ServerStorage</td>
+                                <td class="pr-2"><strong>서버만 접근 가능</strong>한 안전한 저장소. Clone 원본(코인, 무기 등)을 여기에 보관하면 해커가 접근 불가!</td>
+                                <td class="text-neon-coral font-bold">NEW</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 pr-2 font-mono font-bold">StarterGui</td>
+                                <td class="pr-2">플레이어 접속 시 자동으로 PlayerGui에 복사되는 GUI 템플릿. ScreenGui, TextButton 등을 여기에 배치</td>
+                                <td>7A</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 pr-2 font-mono font-bold">StarterPack</td>
+                                <td class="pr-2">플레이어 접속 시 자동 지급되는 도구(Tool) 템플릿. 여기에 Tool을 넣으면 모든 플레이어가 자동으로 받음</td>
+                                <td>9A</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 pr-2 font-mono font-bold">StarterPlayer</td>
+                                <td class="pr-2">캐릭터의 기본 설정(WalkSpeed, JumpPower 등)과 StarterPlayerScripts(리스폰 시에도 유지되는 클라 스크립트) 관리</td>
+                                <td class="text-neon-coral font-bold">NEW</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <HintBox type="tip" title="핵심 정리">
+                GetService = 만능 열쇠! 오타를 즉시 잡아주는 안전한 방식이에요. 항상 <code>game:GetService("서비스명")</code>을 쓰세요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 3: Quiz — GetService 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="GetService로 서비스 가져오기"
+                setup="Script 1개"
+                concepts={JSON.stringify(["GetService", "Debris", "TweenService"])}
+                blanks={getServiceBlanks}
+                template={getServiceTemplate}
+                full-code={getServiceFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 4: Script vs LocalScript + 저장소 + Enum -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-lesson mb-3">아키텍처</span>
+            <h2 class="title-section mb-4">Script vs LocalScript + 저장소 + Enum</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                로블록스는 <strong>서버-클라이언트 구조</strong>입니다. 게임의 "진짜 데이터"는 서버(Script)가 관리하고,
+                플레이어 화면에 보이는 것(GUI, 카메라, 입력)은 클라이언트(LocalScript)가 담당해요.
+                이 구분을 이해해야 해킹을 막고 안전한 게임을 만들 수 있습니다!
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <figure class="img-card !my-0">
+                    <div class="lesson-image-frame lesson-image-compact">
+                        <img src="/images/week11/official/explorer-workspace-serverstorage.png" alt="Workspace와 ServerStorage를 오가는 모델 구조 예시" loading="lazy" />
+                    </div>
+                    <figcaption class="caption">
+                        Roblox 공식 문서의 Explorer 예시. Workspace와 ServerStorage를 나눠 두는 실제 폴더 구조를 바로 보여줍니다.
+                    </figcaption>
+                </figure>
+                <figure class="img-card !my-0">
+                    <div class="lesson-image-frame lesson-image-compact">
+                        <img src="/images/week11/official/client-server-model.png" alt="Roblox 클라이언트 서버 모델 다이어그램" loading="lazy" />
+                    </div>
+                    <figcaption class="caption">
+                        Roblox 공식 클라이언트-서버 런타임 다이어그램. 서버가 상태를 관리하고 여러 클라이언트가 연결되는 구조입니다.
+                    </figcaption>
+                </figure>
+            </div>
+
+            <figure class="img-card mb-4">
+                <div class="lesson-image-frame lesson-image-tall">
+                    <img src="/images/week11/official/data-model-mapping.png" alt="편집 데이터 모델과 런타임 데이터 모델 매핑" loading="lazy" />
+                </div>
+                <figcaption class="caption">
+                    Studio에서 배치한 편집 데이터 모델이 실제 플레이 중 런타임 데이터 모델로 복사되는 흐름입니다. Script, LocalScript, Starter 계열 저장소 설명과 직접 연결됩니다.
+                </figcaption>
+            </figure>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📜 Script vs LocalScript</h3>
+                    <table class="w-full text-xs">
+                        <thead><tr class="border-b"><th class="text-left py-1.5 w-1/4">구분</th><th class="text-left py-1.5">Script (서버)</th><th class="text-left py-1.5">LocalScript (클라)</th></tr></thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 font-bold">실행 위치</td>
+                                <td>로블록스 서버 컴퓨터</td>
+                                <td>내 PC / 모바일</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 font-bold">놓는 곳</td>
+                                <td>ServerScriptService, Workspace 내 파트</td>
+                                <td>StarterGui, StarterPlayerScripts</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 font-bold">할 수 있는 것</td>
+                                <td>점수 저장, 파트 생성/삭제, 데이터 관리, 모든 플레이어 제어</td>
+                                <td>GUI 조작, 카메라 제어, 키보드/마우스 입력, 내 캐릭터만 제어</td>
+                            </tr>
+                            <tr>
+                                <td class="py-1.5 font-bold">보안</td>
+                                <td class="text-green-600 font-bold">안전 🔒 해커 접근 불가</td>
+                                <td class="text-red-600 font-bold">위험 ⚠️ 해커가 코드 수정 가능!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-xs text-gray-500 mt-2 bg-red-50 rounded p-1.5">⚠️ LocalScript에서 점수를 올리면? → 해커가 점수를 999999로 바꿀 수 있음! 반드시 서버에서 검증!</p>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📦 저장소 서비스 5형제 — 어디에 뭘 넣지?</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="flex items-start gap-2 p-2 bg-green-50 rounded">
+                            <span class="font-mono font-bold text-green-600 whitespace-nowrap">ServerStorage</span>
+                            <span><strong>서버 전용</strong> 저장소. Clone 원본(코인, 무기, NPC 등)을 보관. 클라이언트에서 접근 불가 → 해커가 못 건드림!</span>
+                        </div>
+                        <div class="flex items-start gap-2 p-2 bg-blue-50 rounded">
+                            <span class="font-mono font-bold text-blue-600 whitespace-nowrap">ReplicatedStorage</span>
+                            <span><strong>서버+클라 공유</strong> 저장소. RemoteEvent, 공용 모듈, 공유 데이터를 여기에. 양쪽 모두 접근 필요한 것만!</span>
+                        </div>
+                        <div class="flex items-start gap-2 p-2 bg-gray-50 rounded">
+                            <span class="font-mono font-bold whitespace-nowrap">StarterGui</span>
+                            <span>GUI 템플릿. 접속 시 자동으로 각 플레이어의 PlayerGui에 <strong>복사</strong>됨. ScreenGui, TextButton 등 배치</span>
+                        </div>
+                        <div class="flex items-start gap-2 p-2 bg-gray-50 rounded">
+                            <span class="font-mono font-bold whitespace-nowrap">StarterPack</span>
+                            <span>Tool(도구) 템플릿. 접속 시 자동으로 Backpack에 지급. 검, 총 등 아이템을 여기에 넣으면 모두에게 지급!</span>
+                        </div>
+                        <div class="flex items-start gap-2 p-2 bg-gray-50 rounded">
+                            <span class="font-mono font-bold whitespace-nowrap">StarterPlayerScripts</span>
+                            <span>클라 스크립트 보관. StarterGui의 LocalScript와 다르게 <strong>리스폰해도 초기화 안 됨!</strong> 카메라 스크립트 등에 적합</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card">
+                <h3 class="font-bold text-sm mb-2">🏷️ Enum 기초 — 정해진 선택지 목록</h3>
+                <p class="text-xs text-gray-600 mb-2">
+                    Enum은 "정해진 값들의 목록"입니다. 문자열 대신 Enum을 쓰면 오타 방지 + 자동완성이 가능해요!
+                    패턴: <code class="bg-gray-100 px-1 rounded">Enum.카테고리.값</code>
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div class="bg-purple-50 rounded p-2">
+                        <span class="font-mono font-bold">Material</span> (54종)<br>
+                        <span class="text-gray-500">Neon, SmoothPlastic, Wood, Ice...</span><br>
+                        <code class="text-purple-600">Enum.Material.Neon</code>
+                    </div>
+                    <div class="bg-purple-50 rounded p-2">
+                        <span class="font-mono font-bold">EasingStyle</span> (11종)<br>
+                        <span class="text-gray-500">Quad, Bounce, Elastic, Linear...</span><br>
+                        <code class="text-purple-600">Enum.EasingStyle.Bounce</code>
+                    </div>
+                    <div class="bg-purple-50 rounded p-2">
+                        <span class="font-mono font-bold">KeyCode</span> (키보드 키)<br>
+                        <span class="text-gray-500">E, Space, LeftShift, W...</span><br>
+                        <code class="text-purple-600">Enum.KeyCode.E</code>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="warning" title="보안 핵심 규칙">
+                중요 데이터(점수, 체력, 아이템)는 반드시 <strong>서버(Script)</strong>에서 관리! LocalScript는 해커가 자유롭게 수정 가능합니다. 클라이언트는 "요청"만 하고, 서버가 "검증 후 처리"하는 구조가 안전해요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 5: Quiz — 아키텍처 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="서버/클라 아키텍처"
+                setup="Script + LocalScript"
+                concepts={JSON.stringify(["ServerStorage", "ReplicatedStorage", "LocalPlayer"])}
+                blanks={archBlanks}
+                template={archTemplate}
+                full-code={archFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 2: Instance 체계 -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 6: Instance 메서드 총정리 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 2 — Instance 체계</span>
+            <h2 class="title-section mb-4">Instance 메서드 총정리</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                로블록스의 모든 오브젝트(Part, Humanoid, GUI 등)는 <strong>Instance</strong>입니다.
+                Instance에는 자식을 찾고, 탐색하고, 변화를 감지하는 다양한 메서드가 있어요.
+                특히 <strong>"찾기 메서드"를 상황에 맞게 고르는 것</strong>이 가장 중요합니다!
+            </p>
+
+            <figure class="img-card mb-4">
+                <div class="lesson-image-frame lesson-image-compact">
+                    <img src="/images/week11/official/explorer-folders.png" alt="Explorer에서 폴더로 객체를 정리한 예시" loading="lazy" />
+                </div>
+                <figcaption class="caption">
+                    Roblox 공식 Explorer 정리 예시. 자식들이 폴더로 묶여 있어서 <code>FindFirstChild</code>, <code>GetChildren()</code> 같은 탐색 메서드가 왜 필요한지 바로 연결됩니다.
+                </figcaption>
+            </figure>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">🔍 찾기 메서드 비교 — 이게 가장 중요!</h3>
+                <div class="space-y-2 text-xs">
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <code class="font-bold text-blue-700">FindFirstChild(name)</code>
+                            <span class="text-blue-500 font-bold">— 서버 Script용</span>
+                        </div>
+                        <div class="text-gray-600">
+                            자식 중에서 해당 이름을 가진 오브젝트를 찾아 반환합니다. <strong>즉시 반환</strong>하며, 없으면 nil을 돌려줍니다.
+                            서버 Script에서는 모든 오브젝트가 이미 로드된 상태이므로 이걸 쓰면 됩니다.
+                            <br><span class="text-blue-600">예: <code>hit.Parent:FindFirstChild("Humanoid")</code> → Touched에서 사람인지 확인</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <code class="font-bold text-green-700">WaitForChild(name, timeout?)</code>
+                            <span class="text-green-500 font-bold">— LocalScript 필수!</span>
+                        </div>
+                        <div class="text-gray-600">
+                            해당 이름의 자식이 <strong>나타날 때까지 기다립니다!</strong> 클라이언트는 서버에서 데이터를 받아와야 하므로 아직 로드 안 된 오브젝트가 있을 수 있어요.
+                            timeout을 지정하면 그 시간만 기다림 (예: 5초).
+                            <br><span class="text-green-600">예: <code>script.Parent:WaitForChild("TextLabel", 5)</code> → GUI가 로드될 때까지 최대 5초 대기</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center gap-2 mb-1">
+                            <code class="font-bold text-gray-700">FindFirstChildOfClass("Humanoid")</code>
+                        </div>
+                        <div class="text-gray-600">
+                            이름이 아니라 <strong>클래스(타입) 이름</strong>으로 찾습니다. 이름을 몰라도 타입만 알면 찾을 수 있어요!
+                            <br><span class="text-gray-500">예: 캐릭터 모델에서 Humanoid 찾기 (이름이 바뀌어도 OK)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📂 탐색 메서드 — 여러 개 한번에</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">GetChildren()</code> — 바로 아래 자식들만 리스트로 반환<br>
+                            <span class="text-gray-500">예: 폴더 안의 코인들을 반복할 때 <code>folder:GetChildren()</code></span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">GetDescendants()</code> — 모든 자손 (자식의 자식의 자식...)<br>
+                            <span class="text-gray-500">예: 맵 전체에서 모든 파트를 찾을 때 <code>workspace:GetDescendants()</code></span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">IsA("BasePart")</code> — 이 오브젝트가 해당 타입인지 확인 (상속 포함)<br>
+                            <span class="text-gray-500">예: Part, MeshPart, WedgePart 모두 BasePart이므로 <code>obj:IsA("BasePart")</code>로 한번에 확인</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📡 신호(Signal) 메서드 <span class="text-neon-coral text-xs">NEW</span></h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">GetPropertyChangedSignal("속성명")</code><br>
+                            <span class="text-gray-600">특정 속성이 바뀔 때마다 실행. 예: 체력이 바뀌면 UI 업데이트</span><br>
+                            <code class="text-yellow-700">hum:GetPropertyChangedSignal("Health"):Connect(fn)</code>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">ChildAdded</code> / <code class="font-bold">ChildRemoved</code><br>
+                            <span class="text-gray-600">자식이 추가/제거될 때 실행. 예: 새 코인이 생기면 이벤트 연결</span><br>
+                            <code class="text-yellow-700">folder.ChildAdded:Connect(function(child) ... end)</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="tip" title="의사결정 가이드">
+                <strong>서버 Script</strong>에서 이미 있는 것을 찾을 때 → <code>FindFirstChild</code><br>
+                <strong>LocalScript</strong>에서 로딩 중인 것을 찾을 때 → <code>WaitForChild(name, 5)</code> (5초 타임아웃 추천!)<br>
+                <strong>여러 개</strong>를 반복할 때 → <code>GetChildren()</code> 또는 <code>GetDescendants()</code>
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 7: Quiz — Instance 메서드 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="Instance 메서드 실전"
+                setup="Script + LocalScript"
+                concepts={JSON.stringify(["FindFirstChild", ":WaitForChild()", "GetChildren"])}
+                blanks={instanceBlanks}
+                template={instanceTemplate}
+                full-code={instanceFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 8: Clone + Destroy + Debris -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-lesson mb-3">오브젝트 생명주기</span>
+            <h2 class="title-section mb-4">Clone + Destroy + Debris</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                게임에서 오브젝트는 <strong>만들고 → 사용하고 → 삭제하는</strong> 생명주기를 거칩니다.
+                코인을 리스폰하거나, 총알을 발사하거나, 이펙트를 만들 때 이 패턴이 필수에요!
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">🔁 오브젝트 생명주기 흐름도</h3>
+                <div class="flow-track">
+                    <div class="flow-step">
+                        <strong>ServerStorage</strong>
+                        <span>원본 보관</span>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <strong>Clone()</strong>
+                        <span>복제본 생성</span>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <strong>workspace</strong>
+                        <span>월드 배치</span>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step">
+                        <strong>Touched</strong>
+                        <span>사용 / 수집</span>
+                    </div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-step danger">
+                        <strong>Destroy / Debris</strong>
+                        <span>즉시 삭제 / 예약 삭제</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">🔄 생명주기 3단계</h3>
+                <div class="grid grid-cols-3 gap-3 text-center text-xs">
+                    <div class="p-3 bg-blue-50 rounded-lg">
+                        <div class="text-2xl mb-1">🏭</div>
+                        <div class="font-bold mb-1">1. 만들기</div>
+                        <code class="text-blue-700">Instance.new("Part")</code>
+                        <div class="text-gray-500 mt-1">빈 오브젝트를 처음부터 생성. 크기, 색상, 위치 등 모든 속성을 직접 설정해야 함</div>
+                    </div>
+                    <div class="p-3 bg-green-50 rounded-lg">
+                        <div class="text-2xl mb-1">📋</div>
+                        <div class="font-bold mb-1">2. 복제하기</div>
+                        <code class="text-green-700">template:Clone()</code>
+                        <div class="text-gray-500 mt-1">원본의 속성 + 자식(GUI, Script 등) <strong>전부</strong> 복사! 가장 많이 쓰는 방식</div>
+                    </div>
+                    <div class="p-3 bg-red-50 rounded-lg">
+                        <div class="text-2xl mb-1">🗑️</div>
+                        <div class="font-bold mb-1">3. 삭제하기</div>
+                        <code class="text-red-700">:Destroy()</code>
+                        <div class="text-gray-500 mt-1">완전히 제거. 이벤트 연결도 해제. 되돌릴 수 없음!</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📋 Clone vs Instance.new — 언제 뭘 쓸까?</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 bg-gray-50 rounded">
+                            <strong class="text-blue-700">Instance.new("Part")</strong> = 공장에서 새로 만들기<br>
+                            <span class="text-gray-500">빈 껍데기가 나옴 → Size, Color, Position 등 속성을 하나하나 설정해야 함. 단순한 오브젝트(이펙트용 Part 등)에 적합</span>
+                        </div>
+                        <div class="p-2.5 bg-green-50 rounded">
+                            <strong class="text-green-700">template:Clone()</strong> = 복사기로 통째로 복사<br>
+                            <span class="text-gray-500">원본의 크기, 색상, 위치, 자식 오브젝트(BillboardGui, Sound, Script 등)까지 <strong>전부 복사!</strong> 코인, 아이템, NPC 등 복잡한 오브젝트에 필수</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🗑️ 삭제 방법 3가지 비교</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-2.5 bg-red-50 rounded">
+                            <strong class="text-red-700">:Destroy()</strong> = 즉시 완전 삭제<br>
+                            <span class="text-gray-500">이벤트 연결까지 모두 해제. 되돌릴 수 없음! 코인 수집, 적 처치 등에 사용</span>
+                        </div>
+                        <div class="p-2.5 bg-yellow-50 rounded">
+                            <strong class="text-yellow-700">Debris:AddItem(obj, n)</strong> = n초 뒤 자동 삭제<br>
+                            <span class="text-gray-500">예약 삭제! 이펙트(3초 뒤 사라지는 폭발), 총알(5초 뒤 삭제) 등에 딱. 서비스 한도: 최대 1000개</span>
+                        </div>
+                        <div class="p-2.5 bg-blue-50 rounded">
+                            <strong class="text-blue-700">Parent = nil</strong> = 숨기기만 (삭제 아님!)<br>
+                            <span class="text-gray-500">월드에서 사라지지만 메모리에 남아있음. 나중에 <code>obj.Parent = workspace</code>로 다시 꺼낼 수 있음</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="tip" title="실전 패턴: 코인 리스폰">
+                ① ServerStorage에 원본 보관 → ② Clone()으로 복제 → ③ workspace에 배치 → ④ Touched로 수집 → ⑤ Destroy()로 삭제 → ⑥ task.delay로 N초 뒤 다시 Clone!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 9: Quiz — Clone + Debris 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="코인 리스폰 시스템"
+                setup="ServerStorage에 Coin 원본 + Script"
+                concepts={JSON.stringify(["Clone", ":Destroy()", "Debris"])}
+                blanks={cloneBlanks}
+                template={cloneTemplate}
+                full-code={cloneFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 3: 데이터 타입 심화 -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 10: Vector3 + CFrame 심화 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 3 — 데이터 타입</span>
+            <h2 class="title-section mb-4">Vector3 + CFrame 심화</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                <strong>Vector3</strong>은 3D 공간의 <strong>위치나 방향</strong>을 나타내는 (x, y, z) 좌표입니다.
+                <strong>CFrame</strong>은 위치 + 회전을 동시에 담는 더 강력한 타입이에요.
+                오비맵에서는 거리 계산, NPC 바라보기, 부드러운 이동 등에 필수로 쓰입니다!
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-3">📍 Vector3는 그냥 좌표 3개</h3>
+                    <div class="concept-stack">
+                        <div class="concept-card soft-blue">
+                            <strong>Vector3.new(x, y, z)</strong>
+                            <span>x = 좌우, y = 위아래, z = 앞뒤</span>
+                        </div>
+                        <div class="axis-readout">
+                            <div><b>X</b><span>오른쪽으로 갈수록 +</span></div>
+                            <div><b>Y</b><span>위로 갈수록 +</span></div>
+                            <div><b>Z</b><span>앞/뒤 방향</span></div>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-line"><code>Vector3.new(0, 10, 0)</code><span>= 현재 자리에서 위로 10</span></div>
+                            <div class="example-line"><code>part.Position + Vector3.new(5, 0, 0)</code><span>= 오른쪽으로 5 이동</span></div>
+                            <div class="example-line"><code>(A - B).Magnitude</code><span>= A와 B 사이 거리</span></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">핵심은 이것뿐입니다. Vector3는 “어디에 있나”를 숫자 3개로 적는 방식입니다.</p>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-3">🧭 CFrame은 좌표 + 방향</h3>
+                    <div class="concept-stack">
+                        <div class="concept-card dark">
+                            <strong>CFrame = Position + Rotation</strong>
+                            <span>위치만이 아니라 어느 방향을 보는지도 포함</span>
+                        </div>
+                        <div class="example-box">
+                            <div class="example-line"><code>part.CFrame = CFrame.new(0, 10, 0)</code><span>= 0,10,0 위치로 옮기기</span></div>
+                            <div class="example-line"><code>part.CFrame = part.CFrame * CFrame.Angles(0, math.rad(90), 0)</code><span>= 그 자리에서 Y축 90도 회전</span></div>
+                            <div class="example-line"><code>npc.CFrame = CFrame.lookAt(npc.Position, player.Position)</code><span>= NPC가 플레이어 쪽 바라보기</span></div>
+                        </div>
+                        <div class="concept-card soft-green">
+                            <strong>한 줄 요약</strong>
+                            <span>Vector3는 “위치”, CFrame은 “위치 + 회전”</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📐 Vector3 — 위치와 방향의 기본</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">Vector3.new(x, y, z)</code> — 좌표 생성<br>
+                            <span class="text-gray-500">x=좌우, y=상하, z=앞뒤. 예: Vector3.new(0, 10, 0) = 위로 10</span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">v1 + v2</code>, <code>v1 * 3</code>, <code>v1 - v2</code> — 벡터 사칙연산<br>
+                            <span class="text-gray-500">위치 이동, 크기 조절에 사용. <code>pos + Vector3.new(0,5,0)</code> = 위로 5 이동</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">.Magnitude</code> — <strong>두 점 사이 거리!</strong> <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500"><code>(posA - posB).Magnitude</code> = A와 B 사이 스터드 거리. 근접 감지, 범위 체크에 핵심!</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">.Unit</code> — 방향만 추출 (길이를 1로) <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500">"어느 방향인지"만 알고 싶을 때. 총알 발사 방향 등에 활용</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">:Lerp(goal, alpha)</code> — 두 점 사이 보간 <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500">alpha: 0=시작점, 0.5=중간, 1=끝점. 부드러운 이동 경로 계산</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🧭 CFrame — 위치 + 회전 동시 처리</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">CFrame.new(pos)</code> — 해당 위치의 CFrame 생성<br>
+                            <span class="text-gray-500">회전 없이 위치만 지정. Position과 비슷하지만 CFrame 타입</span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">CFrame.Angles(rx, ry, rz)</code> — 회전 생성 (라디안)<br>
+                            <span class="text-gray-500"><code>math.rad(90)</code>으로 각도→라디안 변환. 90도 = math.rad(90)</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">CFrame.lookAt(pos, target)</code> — 목표를 바라보기! <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500">NPC가 플레이어를 바라보게 할 때! pos에서 target 방향을 향한 CFrame 생성</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">cf * cf</code> — 변환 합성 (위치+회전 동시에!) <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500"><code>part.CFrame * CFrame.Angles(0, math.rad(90), 0)</code> = 현재 위치에서 Y축 90도 회전</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">.LookVector</code> — 바라보는 방향 벡터 <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500">파트가 "앞으로" 바라보는 방향. 총알 발사 방향 = <code>gun.CFrame.LookVector</code></span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">:Lerp(goal, alpha)</code> — 부드러운 CFrame 보간 <span class="text-neon-coral">NEW</span><br>
+                            <span class="text-gray-500">위치+회전을 동시에 부드럽게 전환. 카메라 연출, NPC 이동에 활용</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card">
+                <h3 class="font-bold text-sm mb-2">🎨 Color3 — 색상 생성 3가지 방식</h3>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div class="p-2 bg-gray-50 rounded text-center">
+                        <code class="font-bold">Color3.new(0~1, 0~1, 0~1)</code><br>
+                        <span class="text-gray-500">0~1 비율 방식</span><br>
+                        <span class="text-gray-400">예: Color3.new(1, 0, 0) = 빨강</span>
+                    </div>
+                    <div class="p-2 bg-green-50 rounded text-center border border-green-200">
+                        <code class="font-bold">fromRGB(0~255, 0~255, 0~255)</code><br>
+                        <span class="text-gray-500">RGB 방식 ✅ 가장 직관적!</span><br>
+                        <span class="text-gray-400">예: fromRGB(255, 0, 0) = 빨강</span>
+                    </div>
+                    <div class="p-2 bg-gray-50 rounded text-center">
+                        <code class="font-bold">fromHSV(0~1, 0~1, 0~1)</code><br>
+                        <span class="text-gray-500">색상/채도/밝기 방식</span><br>
+                        <span class="text-gray-400">무지개색 반복에 유용</span>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="tip" title="거리 체크 패턴 (자주 쓰임!)">
+                <code>if (partA.Position - partB.Position).Magnitude &lt; 10 then</code> → "10 스터드 이내면 실행!" 근접 감지, 범위 공격, NPC AI 등에 필수 패턴!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 11: Quiz — 데이터 타입 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="Vector3 & CFrame 심화"
+                setup="Part 2개 + NPC"
+                concepts={JSON.stringify(["Magnitude", "CFrame.lookAt", "Lerp"])}
+                blanks={datatypeBlanks}
+                template={datatypeTemplate}
+                full-code={datatypeFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 4: Humanoid 완전체 -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 12: Humanoid 속성+이벤트+State 전부 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 4 — Humanoid 완전체</span>
+            <h2 class="title-section mb-4">Humanoid 속성 + 이벤트 + 메서드</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                <strong>Humanoid</strong>은 캐릭터의 "두뇌"입니다. 체력, 이동속도, 점프력 같은 <strong>속성</strong>,
+                사망·점프·낙하 같은 <strong>이벤트</strong>, 대미지·이동 같은 <strong>메서드</strong>를 모두 가지고 있어요.
+                캐릭터 모델 구조: HumanoidRootPart(중심부) + Head + Torso + Arms + Legs + <strong>Humanoid(두뇌)</strong>
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">🧠 Humanoid 상태 흐름</h3>
+                <div class="state-rail">
+                    <div class="state-chip">Idle</div>
+                    <div class="state-link">→ Running</div>
+                    <div class="state-link">→ Jumping</div>
+                    <div class="state-link warn">→ FreeFalling</div>
+                    <div class="state-link">→ Landed</div>
+                    <div class="state-link danger">→ Died</div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3"><code>StateChanged</code>는 이 흐름 전체를, <code>FreeFalling</code>은 낙사 감지를, <code>Died</code>는 리스폰 로직을 잡는 데 핵심입니다.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📊 핵심 속성 — 캐릭터 능력치</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-1.5 bg-gray-50 rounded"><code class="font-bold">Health / MaxHealth</code><br><span class="text-gray-500">현재 체력 / 최대 체력. Health=0이면 사망!</span></div>
+                        <div class="p-1.5 bg-gray-50 rounded"><code class="font-bold">WalkSpeed</code> <span class="text-gray-400">(기본 16)</span><br><span class="text-gray-500">이동 속도. 32=2배속, 0=이동 불가</span></div>
+                        <div class="p-1.5 bg-gray-50 rounded"><code class="font-bold">JumpPower</code> <span class="text-gray-400">(기본 50)</span><br><span class="text-gray-500">점프 힘. 100=2배 높이, 0=점프 불가</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">UseJumpPower</code> <span class="text-gray-400">true/false</span><br><span class="text-gray-500">true면 JumpPower 사용, false면 JumpHeight 사용</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">HipHeight</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">발이 땅에서 얼마나 떠있는지. 높이면 허공에 뜸!</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">AutoRotate</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">false면 이동해도 캐릭터가 안 돌아감 (고정 시점)</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">MaxSlopeAngle</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">걸어 올라갈 수 있는 최대 경사각(도). 기본 89도</span></div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📡 핵심 이벤트 — 상태 감지</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-1.5 bg-gray-50 rounded"><code class="font-bold">Died</code><br><span class="text-gray-500">캐릭터 사망 시 발생. 리스폰 로직, 사망 카운트에 사용</span></div>
+                        <div class="p-1.5 bg-gray-50 rounded"><code class="font-bold">HealthChanged(newHealth)</code><br><span class="text-gray-500">체력 변화 시 발생. 대미지 이펙트, HP바 업데이트에 사용</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">Running(speed)</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">달릴 때 발생. speed=0이면 멈춤, 0보다 크면 달리는 중</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">Jumping(active)</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">점프 시 발생. active=true면 점프 시작</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">FreeFalling(active)</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">공중에 떠있을 때! <strong>낙사 감지</strong>에 핵심. active=true면 떨어지는 중</span></div>
+                        <div class="p-1.5 bg-yellow-50 rounded"><code class="font-bold">StateChanged(old, new)</code> <span class="text-neon-coral text-xs">NEW</span><br><span class="text-gray-500">상태 전환 감지. Running↔Jumping↔Freefall 등 모든 변화</span></div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🔧 핵심 메서드 — 캐릭터 제어</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-1.5 bg-gray-50 rounded">
+                            <code class="font-bold">TakeDamage(amount)</code><br>
+                            <span class="text-gray-500">ForceField(보호막)가 있으면 대미지 무효! <code>Health -= n</code>과 다른 점이 이것. 안전한 대미지 처리</span>
+                        </div>
+                        <div class="p-1.5 bg-yellow-50 rounded">
+                            <code class="font-bold">MoveTo(position)</code> <span class="text-neon-coral text-xs">NEW</span><br>
+                            <span class="text-gray-500">NPC를 해당 위치로 걸어가게 함. NPC AI, 가이드 캐릭터에 사용. 8초 타임아웃 있음!</span>
+                        </div>
+                        <div class="p-1.5 bg-yellow-50 rounded">
+                            <code class="font-bold">GetState() / ChangeState()</code> <span class="text-neon-coral text-xs">NEW</span><br>
+                            <span class="text-gray-500">현재 상태(Running, Jumping 등) 확인/변경. 특수 이동 메카닉에 활용</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="info" title="낙사 감지 패턴">
+                <code>FreeFalling</code>에서 active=true면 타이머 시작 → 5초 이상 떨어지고 있으면 <code>humanoid.Health = 0</code>으로 Kill! 오비맵에서 맵 밖으로 떨어지는 것을 감지하는 핵심 패턴이에요.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 13: Quiz — Humanoid 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="Humanoid 이벤트 활용"
+                setup="Script (서버 또는 클라)"
+                concepts={JSON.stringify(["Humanoid", "FreeFalling", "TakeDamage"])}
+                blanks={humanoidBlanks}
+                template={humanoidTemplate}
+                full-code={humanoidFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 5: TweenService 완전 정복 -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 14: TweenInfo 6파라미터 완전체 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 5 — TweenService 완전 정복</span>
+            <h2 class="title-section mb-4">TweenInfo 6파라미터 완전체</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                <strong>TweenInfo</strong>는 트윈의 "설정표"입니다. 얼마나 오래, 어떤 속도로, 몇 번 반복할지를 6개 파라미터로 정합니다.
+                순서대로: <code class="text-xs bg-gray-100 px-1 rounded">TweenInfo.new(time, style, direction, repeatCount, reverses, delayTime)</code>
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">🎬 Tween 흐름도</h3>
+                <div class="tween-strip">
+                    <div class="tween-pill">delayTime</div>
+                    <div class="tween-bar">
+                        <span class="seg start">시작</span>
+                        <span class="seg move">time</span>
+                        <span class="seg end">Completed</span>
+                    </div>
+                    <div class="tween-pill">repeatCount</div>
+                    <div class="tween-pill">reverses</div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">트윈은 "대기 → 이동 → 완료"를 반복합니다. <code>Completed</code> 이벤트에 다음 트윈을 이어 붙이면 자동문, 엘리베이터 같은 체인이 됩니다.</p>
+            </div>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">⚙️ 6개 파라미터 완전 분석</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold text-blue-700">① time <span class="text-gray-400 font-normal">(기본: 1)</span></div>
+                        <div class="text-gray-600">트윈의 총 지속 시간(초). 3이면 3초에 걸쳐 변화. 짧을수록 빠르게 움직임</div>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold text-blue-700">② easingStyle <span class="text-gray-400 font-normal">(기본: Quad)</span></div>
+                        <div class="text-gray-600">속도 변화 곡선. Linear=일정, Bounce=통통, Elastic=고무줄... (다음 슬라이드에서 11종 비교!)</div>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold text-blue-700">③ easingDirection <span class="text-gray-400 font-normal">(기본: Out)</span></div>
+                        <div class="text-gray-600">가감속 적용 위치. In=시작에서, Out=끝에서, InOut=양쪽. 보통 Out이 자연스러움</div>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold text-blue-700">④ repeatCount <span class="text-gray-400 font-normal">(기본: 0)</span></div>
+                        <div class="text-gray-600">반복 횟수. 0=1번만, 3=총 4번, <strong>-1=무한 반복!</strong> 엘리베이터, 회전 발판 등에 -1 사용</div>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold text-blue-700">⑤ reverses <span class="text-gray-400 font-normal">(기본: false)</span></div>
+                        <div class="text-gray-600">true면 왕복 운동! A→B→A→B... 엘리베이터(올라갔다 내려오기)에 필수</div>
+                    </div>
+                    <div class="p-2.5 bg-yellow-50 rounded-lg border-2 border-yellow-300">
+                        <div class="font-bold text-yellow-700">⑥ delayTime <span class="text-neon-coral">NEW!</span> <span class="text-gray-400 font-normal">(기본: 0)</span></div>
+                        <div class="text-gray-600">트윈 시작 전 대기 시간(초). repeatCount와 함께 쓰면 <strong>매 반복마다</strong> 대기! 플랫폼 타이밍 조절에 유용</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card">
+                <h3 class="font-bold text-sm mb-2">🎯 Tween 가능한 속성들 — 이런 것들을 부드럽게 변화시킬 수 있어요!</h3>
+                <div class="flex flex-wrap gap-2 text-xs">
+                    <span class="px-2 py-1 bg-blue-100 rounded-full font-mono" title="위치+회전 동시에">CFrame</span>
+                    <span class="px-2 py-1 bg-blue-100 rounded-full font-mono" title="위치만">Position</span>
+                    <span class="px-2 py-1 bg-green-100 rounded-full font-mono" title="크기">Size</span>
+                    <span class="px-2 py-1 bg-gray-100 rounded-full font-mono" title="투명도 (0=불투명, 1=투명)">Transparency</span>
+                    <span class="px-2 py-1 bg-red-100 rounded-full font-mono" title="색상">Color3</span>
+                    <span class="px-2 py-1 bg-purple-100 rounded-full font-mono" title="회전 각도">Orientation</span>
+                    <span class="px-2 py-1 bg-yellow-100 rounded-full font-mono" title="숫자 값">NumberValue.Value</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">💡 숫자로 표현되는 속성이면 대부분 Tween 가능! 문자열이나 boolean은 불가능</p>
+            </div>
+            <HintBox type="tip" title="실전 조합 예시">
+                엘리베이터: time=3, Sine, Out, <strong>repeatCount=-1, reverses=true, delayTime=2</strong> → "3초 올라가고 → 2초 대기 → 3초 내려가고 → 2초 대기" 무한 반복!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 15: Quiz — TweenInfo 6파라미터 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="TweenInfo 6파라미터 — 통통 튀는 엘리베이터"
+                setup="Part 1개 (Anchored)"
+                concepts={JSON.stringify(["TweenInfo", "EasingStyle", "DelayTime"])}
+                blanks={tweenInfoBlanks}
+                template={tweenInfoTemplate}
+                full-code={tweenInfoFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- 슬라이드 16: EasingStyle 카탈로그 + Tween 이벤트 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-lesson mb-3">TweenService 심화</span>
+            <h2 class="title-section mb-4">EasingStyle 11종 + Tween 이벤트</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                EasingStyle은 트윈의 <strong>속도 변화 곡선</strong>입니다. 같은 거리를 이동해도 시작이 느리고 끝이 빠른지,
+                통통 튀는지, 고무줄처럼 흔들리는지에 따라 느낌이 완전히 달라져요!
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-2">📈 EasingStyle 11종 — 용도별 추천</h3>
+                <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 text-xs">
+                    <div class="p-2 bg-gray-50 rounded text-center"><strong>Linear</strong><br><span class="text-gray-500">일정 속도 (로봇처럼)</span><br><span class="text-gray-400">컨베이어, 진행바</span></div>
+                    <div class="p-2 bg-blue-50 rounded text-center"><strong>Sine</strong><br><span class="text-gray-500">부드러운 파동</span><br><span class="text-gray-400">엘리베이터, 호흡</span></div>
+                    <div class="p-2 bg-green-50 rounded text-center border border-green-300"><strong>Quad ✅</strong><br><span class="text-gray-500">자연스러운 기본</span><br><span class="text-gray-400">대부분의 상황 추천!</span></div>
+                    <div class="p-2 bg-gray-50 rounded text-center"><strong>Cubic</strong><br><span class="text-gray-500">Quad보다 강한 가감속</span><br><span class="text-gray-400">강조 효과</span></div>
+                    <div class="p-2 bg-gray-50 rounded text-center"><strong>Quart/Quint</strong><br><span class="text-gray-500">더 극적인 가감속</span><br><span class="text-gray-400">드라마틱 연출</span></div>
+                    <div class="p-2 bg-gray-50 rounded text-center"><strong>Exponential</strong><br><span class="text-gray-500">급격한 변화</span><br><span class="text-gray-400">폭발적 가속</span></div>
+                    <div class="p-2 bg-gray-50 rounded text-center"><strong>Circular</strong><br><span class="text-gray-500">원형 곡선 가감속</span><br><span class="text-gray-400">시계, 회전체</span></div>
+                    <div class="p-2 bg-purple-50 rounded text-center"><strong>Back</strong><br><span class="text-gray-500">살짝 넘어갔다 돌아옴</span><br><span class="text-gray-400">버튼 눌림 효과</span></div>
+                    <div class="p-2 bg-orange-50 rounded text-center"><strong>Bounce</strong><br><span class="text-gray-500">통통 튀기</span><br><span class="text-gray-400">착지, 공 튀기</span></div>
+                    <div class="p-2 bg-pink-50 rounded text-center"><strong>Elastic</strong><br><span class="text-gray-500">고무줄처럼 흔들림</span><br><span class="text-gray-400">GUI 등장, 경고 효과</span></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🔀 EasingDirection 3종 — 효과 적용 위치</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded"><strong>In</strong> — 시작에서 효과 적용 (천천히 출발 → 빠르게 도착)</div>
+                        <div class="p-2 bg-green-50 rounded border border-green-200"><strong>Out</strong> — 끝에서 효과 적용 (빠르게 출발 → 천천히 도착) ✅ 기본, 가장 자연스러움</div>
+                        <div class="p-2 bg-gray-50 rounded"><strong>InOut</strong> — 양쪽 모두 (천천히 → 빠르게 → 천천히). 엘리베이터처럼 양쪽 끝에서 감속할 때</div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">✅ Tween 이벤트 & 메서드 <span class="text-neon-coral text-xs">NEW</span></h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">tween.Completed:Connect(function() ... end)</code><br>
+                            <span class="text-gray-500">트윈이 끝나면 실행! 문 열기 → 완료 → 3초 후 닫기 같은 <strong>체인 패턴</strong>의 핵심</span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">:Play()</code> 시작 / <code class="font-bold">:Pause()</code> 일시정지 / <code class="font-bold">:Cancel()</code> 취소+원위치<br>
+                            <span class="text-gray-500">Play()는 여러 번 호출해도 OK. Cancel()은 초기 상태로 되돌림!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="info" title="체인 패턴 — 트윈 연속 실행">
+                openTween:Play() → openTween.Completed:Connect(function() task.delay(3, function() closeTween:Play() end) end) — "열기 → 3초 대기 → 닫기" 자동 문!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 17: Quiz — Tween 체인 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="Tween 체인 — 문 자동 닫기"
+                setup="Part 1개 (문, Anchored)"
+                concepts={JSON.stringify(["Completed", "task.delay", "TweenService"])}
+                blanks={tweenChainBlanks}
+                template={tweenChainTemplate}
+                full-code={tweenChainFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 6: 물리 Constraint -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 18: 물리 Constraint 종합 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 6 — 물리 Constraint</span>
+            <h2 class="title-section mb-4">Constraint 종합 가이드</h2>
+
+            <p class="text-ink-light text-sm mb-3">
+                <strong>Constraint</strong>는 두 파트를 물리적으로 연결하는 장치입니다.
+                경첩처럼 돌리거나, 접착제처럼 붙이거나, 스프링처럼 튀게 만들 수 있어요!
+                모든 Constraint는 <strong>Attachment(고리)</strong>를 통해 파트에 연결됩니다.
+            </p>
+
+            <div class="lesson-card mb-3">
+                <h3 class="font-bold text-sm mb-3">🔩 Attachment 연결 그림</h3>
+                <div class="constraint-line">
+                    <div class="constraint-part">
+                        <strong>Part A</strong>
+                        <span>Attachment0</span>
+                    </div>
+                    <div class="constraint-join">HingeConstraint</div>
+                    <div class="constraint-part">
+                        <strong>Part B</strong>
+                        <span>Attachment1</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">대부분의 Constraint는 "Part + Attachment + Constraint + Attachment + Part" 순서로 연결됩니다. WeldConstraint만 예외적으로 Attachment 없이 Part0/Part1을 바로 씁니다.</p>
+            </div>
+
+            <div class="lesson-card mb-3">
+                <h3 class="font-bold text-sm mb-2">📌 Attachment — 모든 Constraint의 기본!</h3>
+                <p class="text-xs text-gray-600">
+                    Attachment는 파트에 붙이는 "연결 고리"입니다.
+                    각 파트에 Attachment를 하나씩 넣고, Constraint의 <code>Attachment0</code>과 <code>Attachment1</code>에 연결하면 두 파트가 물리적으로 연결돼요.
+                    Studio에서 "모델 > Constraint" 메뉴로 쉽게 추가할 수 있습니다!
+                </p>
+            </div>
+
+            <div class="lesson-card mb-3">
+                <h3 class="font-bold text-sm mb-2">🔧 주요 Constraint 6종 — 오비맵 장애물의 핵심!</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold text-blue-700">🔄 HingeConstraint</div>
+                        <div class="text-gray-600">경첩처럼 한 축으로 회전. 문, 회전 장애물, 풍차에 사용</div>
+                        <div class="text-gray-500 mt-1">
+                            <strong>ActuatorType</strong>: None(자유회전), <strong>Motor</strong>(자동회전!), Servo(목표각도)<br>
+                            Motor: AngularVelocity(회전속도) + MotorMaxTorque(회전 힘)
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-green-50 rounded-lg">
+                        <div class="font-bold text-green-700">🔗 WeldConstraint</div>
+                        <div class="text-gray-600">두 파트를 접착제처럼 고정! 가장 간단한 Constraint</div>
+                        <div class="text-gray-500 mt-1">
+                            Part0, Part1만 설정하면 끝!<br>
+                            Attachment 필요 없음. 캐릭터에 파트 붙이기, 복합 오브젝트 만들기
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-yellow-50 rounded-lg">
+                        <div class="font-bold text-yellow-700">🌀 SpringConstraint</div>
+                        <div class="text-gray-600">스프링 물리! 밟으면 튕겨 올리는 발판에 딱</div>
+                        <div class="text-gray-500 mt-1">
+                            <strong>Stiffness</strong>(탄성 강도), <strong>Damping</strong>(감쇠, 높으면 빨리 멈춤), FreeLength(자연 길이)
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-orange-50 rounded-lg">
+                        <div class="font-bold text-orange-700">🪢 RopeConstraint</div>
+                        <div class="text-gray-600">밧줄! 최대 길이 제한, 늘어지며 흔들림</div>
+                        <div class="text-gray-500 mt-1">
+                            <strong>Length</strong>(밧줄 길이), <strong>WinchEnabled</strong>=true면 자동으로 당기기 가능!
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-purple-50 rounded-lg">
+                        <div class="font-bold text-purple-700">🔧 PrismaticConstraint</div>
+                        <div class="text-gray-600">한 축으로만 슬라이딩. 피스톤, 서랍, 슬라이딩 문</div>
+                        <div class="text-gray-500 mt-1">
+                            Motor/Servo 모드로 자동 이동 가능. 엘리베이터의 물리 버전!
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-gray-100 rounded-lg">
+                        <div class="font-bold text-gray-700">📏 RodConstraint</div>
+                        <div class="text-gray-600">두 점 사이 거리를 고정 유지. 시소, 진자에 사용</div>
+                        <div class="text-gray-500 mt-1">
+                            밧줄과 비슷하지만 압축 불가! 항상 같은 거리를 유지
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card">
+                <h3 class="font-bold text-sm mb-2">🚀 Mover Constraint (고급) — 스크립트 없이 물리 이동! <span class="text-neon-coral text-xs">NEW</span></h3>
+                <div class="grid grid-cols-3 gap-2 text-xs">
+                    <div class="p-2 bg-gray-50 rounded">
+                        <strong>AlignPosition</strong><br>
+                        <span class="text-gray-500">목표 위치로 끌어당기는 힘. 호밍 미사일, 자석 효과</span>
+                    </div>
+                    <div class="p-2 bg-gray-50 rounded">
+                        <strong>LinearVelocity</strong><br>
+                        <span class="text-gray-500">일정 속도로 이동시키는 힘. <strong>컨베이어 벨트</strong>에 딱!</span>
+                    </div>
+                    <div class="p-2 bg-gray-50 rounded">
+                        <strong>AngularVelocity</strong><br>
+                        <span class="text-gray-500">일정 속도로 회전시키는 힘. 회전판, 팬 등에 사용</span>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="tip" title="오비맵 장애물 3대장">
+                <strong>HingeConstraint</strong>(회전 장애물) + <strong>WeldConstraint</strong>(여러 파트를 하나로 결합) + <strong>SpringConstraint</strong>(탄성 발판). 이 3개면 대부분의 오비 장애물을 만들 수 있어요!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 19: Quiz — Constraint 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="HingeConstraint 회전 장애물"
+                setup="2개 Part + Attachment + HingeConstraint"
+                concepts={JSON.stringify(["HingeConstraint", "ActuatorType", "AngularVelocity"])}
+                blanks={constraintBlanks}
+                template={constraintTemplate}
+                full-code={constraintFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- Part 7: 이벤트 & 패턴 -->
+    <!-- ==================== -->
+
+    <!-- 슬라이드 20: 이벤트 대백과 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-roblox mb-3">Part 7 — 이벤트 & 패턴</span>
+            <h2 class="title-section mb-4">이벤트 대백과</h2>
+
+            <p class="text-ink-light text-sm mb-3">
+                <strong>이벤트</strong>는 "어떤 일이 일어났을 때 코드를 실행"하는 메커니즘입니다.
+                파트에 닿았을 때, 플레이어가 접속했을 때, 버튼을 클릭했을 때...
+                이벤트를 <code class="text-xs bg-gray-100 px-1 rounded">:Connect(function() end)</code>로 연결하면 자동 실행!
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">⚡ 이벤트 처리 흐름</h3>
+                <div class="event-flow">
+                    <div class="event-node">신호 발생<br><span>Touched / Click / PlayerAdded</span></div>
+                    <div class="event-arrow">→</div>
+                    <div class="event-node">Connect<br><span>함수 연결</span></div>
+                    <div class="event-arrow">→</div>
+                    <div class="event-node">검사<br><span>Humanoid? 조건문?</span></div>
+                    <div class="event-arrow">→</div>
+                    <div class="event-node success">실행<br><span>죽이기, 점수, 문 열기</span></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">👆 파트 이벤트 — 물리적 접촉 감지</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">Touched(otherPart)</code> — 다른 파트와 닿았을 때<br>
+                            <span class="text-gray-500">킬파트, 코인 수집, 속도 패드 등 가장 많이 쓰는 이벤트! otherPart.Parent에서 Humanoid 찾기</span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">TouchEnded(otherPart)</code> — 접촉이 끝났을 때<br>
+                            <span class="text-gray-500">구역 벗어남 감지. 저중력 구역에서 나갈 때 중력 복구 등</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🚪 플레이어 이벤트 — 접속/퇴장/리스폰</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">PlayerAdded(player)</code> — 플레이어 최초 접속 시 1번<br>
+                            <span class="text-gray-500">leaderstats 생성, 환영 메시지, 초기 데이터 로드</span>
+                        </div>
+                        <div class="p-2 bg-gray-50 rounded">
+                            <code class="font-bold">PlayerRemoving(player)</code> — 퇴장 직전<br>
+                            <span class="text-gray-500">데이터 저장! 이 이벤트를 놓치면 진행 상황이 사라짐</span>
+                        </div>
+                        <div class="p-2 bg-yellow-50 rounded">
+                            <code class="font-bold">CharacterAdded(character)</code> — 캐릭터 생성/리스폰 시마다!<br>
+                            <span class="text-gray-500">리스폰할 때마다 실행! PlayerAdded와 다르게 반복됨. Humanoid 이벤트 재연결에 사용</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🧠 Humanoid 이벤트 — 캐릭터 상태 감지</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">Died</code> — 사망 시. <span class="text-gray-500">리스폰 로직, 사망 카운트, 사망 이펙트</span></div>
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">HealthChanged(newHealth)</code> — 체력 변화. <span class="text-gray-500">HP바 업데이트, 대미지 이펙트(화면 빨개지기)</span></div>
+                        <div class="p-2 bg-yellow-50 rounded"><code class="font-bold">FreeFalling(active)</code> — 공중 낙하. <span class="text-gray-500"><strong>낙사 감지 핵심!</strong> active=true이면 떨어지는 중</span></div>
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">StateChanged(old, new)</code> — 모든 상태 전환. <span class="text-gray-500">Running↔Jumping↔Freefall 등 종합 감지</span></div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🔔 인터랙션 이벤트 — 플레이어 입력</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">ClickDetector.MouseClick(player)</code><br><span class="text-gray-500">파트 클릭. 문 열기, 스위치. player = 클릭한 플레이어</span></div>
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">ProximityPrompt.Triggered(player)</code><br><span class="text-gray-500">[E]키로 상호작용. NPC 대화, 아이템 줍기. 더 현대적인 방식!</span></div>
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">Tool.Activated() / Equipped() / Unequipped()</code><br><span class="text-gray-500">도구 사용/장착/해제. 검 휘두르기, 총 발사</span></div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">🖱️ GUI 이벤트 — 화면 UI 조작</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">TextButton.MouseButton1Click</code><br><span class="text-gray-500">버튼 클릭! 상점 구매, 메뉴 선택 등. 가장 기본적인 GUI 이벤트</span></div>
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">MouseEnter / MouseLeave</code><br><span class="text-gray-500">마우스 호버 효과. 버튼 위에 올리면 색상 변경, 커서 바뀜 등</span></div>
+                    </div>
+                </div>
+
+                <div class="lesson-card">
+                    <h3 class="font-bold text-sm mb-2">📡 Instance 이벤트 — 변화 감지</h3>
+                    <div class="space-y-1.5 text-xs">
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">GetPropertyChangedSignal("속성명")</code><br><span class="text-gray-500">특정 속성 변화 감지. 예: Value값이 바뀌면 UI 업데이트</span></div>
+                        <div class="p-2 bg-gray-50 rounded"><code class="font-bold">ChildAdded / ChildRemoved</code><br><span class="text-gray-500">자식 추가/제거 감지. 새 아이템이 인벤토리에 들어오면 알림</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 21: Quiz — 이벤트 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-quiz mb-3">이벤트 퀴즈</span>
+            <h2 class="title-section mb-6">이벤트 활용 퀴즈</h2>
+            <div class="space-y-4">
+                <quiz-question
+                    question="플레이어가 리스폰(캐릭터 재생성)할 때마다 실행되는 이벤트는?"
+                    correct="B"
+                    options={JSON.stringify(["PlayerAdded", "CharacterAdded", "Died", "HealthChanged"])}
+                    correct-explanation="정답! CharacterAdded는 캐릭터가 생성될 때마다(리스폰 포함) 실행돼요! PlayerAdded는 최초 접속 시 1번만."
+                    wrong-explanation="CharacterAdded가 정답! 리스폰할 때마다 캐릭터가 다시 생성되니까 CharacterAdded가 실행돼요."
+                ></quiz-question>
+                <quiz-question
+                    question="킬 파트(밟으면 죽는 파트)를 만들 때 사용하는 이벤트는?"
+                    correct="A"
+                    options={JSON.stringify(["Touched", "ClickDetector.MouseClick", "ProximityPrompt.Triggered", "MouseButton1Click"])}
+                    correct-explanation="정답! Touched는 파트에 닿았을 때 실행! 킬 파트는 Touched + humanoid.Health = 0 조합이에요."
+                    wrong-explanation="Touched가 정답! 파트에 닿는 것을 감지하는 가장 기본적인 이벤트예요."
+                ></quiz-question>
+            </div>
+        </div>
+    </section>
+
+    <!-- 슬라이드 22: task 라이브러리 + 핵심 패턴 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-lesson mb-3">task & 패턴</span>
+            <h2 class="title-section mb-4">task 라이브러리 + 오비 핵심 패턴</h2>
+
+            <p class="text-ink-light text-sm mb-4">
+                <strong>task</strong> 라이브러리는 "시간 제어"의 핵심입니다.
+                기다리기, 동시 실행, 예약 실행 등을 처리합니다.
+                특히 <code class="text-xs bg-gray-100 px-1 rounded">while true do</code> 루프 여러 개를 동시에 돌리려면 <code>task.spawn</code>이 필수!
+            </p>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-3">⏱️ task 동작 그림</h3>
+                <div class="task-grid">
+                    <div class="task-box">
+                        <strong>task.wait</strong>
+                        <span>현재 줄을 잠깐 멈춤</span>
+                    </div>
+                    <div class="task-box highlight">
+                        <strong>task.spawn</strong>
+                        <span>옆에서 새 루프 실행</span>
+                    </div>
+                    <div class="task-box">
+                        <strong>task.delay</strong>
+                        <span>n초 뒤 예약 실행</span>
+                    </div>
+                    <div class="task-box">
+                        <strong>task.defer</strong>
+                        <span>현재 코드 직후 실행</span>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">여러 루프를 동시에 굴릴 때는 <code>task.spawn</code>, 일정 시간 뒤 액션은 <code>task.delay</code>, 루프 속도 조절은 <code>task.wait</code>가 기본 패턴입니다.</p>
+            </div>
+
+            <div class="lesson-card mb-4">
+                <h3 class="font-bold text-sm mb-2">🚀 task 4종 비교 — 비유로 이해하기</h3>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-2.5 bg-gray-50 rounded-lg">
+                        <code class="font-bold text-blue-700">task.wait(n)</code> — <strong>줄 서기</strong><br>
+                        <span class="text-gray-500">n초 동안 코드 실행을 멈추고 기다립니다. 이 줄 아래 코드는 n초 뒤에 실행됨. <code>while true do</code> 안에서 루프 속도 조절에 사용</span>
+                    </div>
+                    <div class="p-2.5 bg-yellow-50 rounded-lg">
+                        <code class="font-bold text-green-700">task.spawn(fn)</code> <span class="text-neon-coral">NEW</span> — <strong>분신술!</strong><br>
+                        <span class="text-gray-500">함수를 <strong>별도 스레드</strong>에서 실행! 메인 코드가 멈추지 않음. while true do 2개를 동시에 돌릴 때 필수! 가장 중요한 함수</span>
+                    </div>
+                    <div class="p-2.5 bg-yellow-50 rounded-lg">
+                        <code class="font-bold text-orange-700">task.delay(n, fn)</code> <span class="text-neon-coral">NEW</span> — <strong>알람 설정!</strong><br>
+                        <span class="text-gray-500">n초 뒤에 함수를 실행 예약. 코드가 안 멈김! "5초 뒤 파트 삭제", "3초 뒤 문 닫기" 등에 사용. Debris:AddItem과 비슷하지만 더 유연</span>
+                    </div>
+                    <div class="p-2.5 bg-yellow-50 rounded-lg">
+                        <code class="font-bold text-purple-700">task.defer(fn)</code> <span class="text-neon-coral">NEW</span> — <strong>다음 차례에!</strong><br>
+                        <span class="text-gray-500">현재 코드가 끝난 직후(다음 프레임)에 실행. 초기화 순서 제어 등 고급 용도. 일반적으로 자주 쓰진 않음</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lesson-card">
+                <h3 class="font-bold text-sm mb-2">🎯 오비 핵심 패턴 4종 — 이것만 알면 오비맵 완성!</h3>
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-2.5 bg-blue-50 rounded-lg">
+                        <div class="font-bold mb-1">1. Debounce (쿨다운)</div>
+                        <div class="text-gray-600">
+                            <code>local canTouch = true</code> 플래그로 연속 실행 방지!<br>
+                            Touched 발생 → canTouch=false → 처리 → task.wait(1) → canTouch=true<br>
+                            <span class="text-blue-600">없으면 Touched가 1초에 수십 번 실행되어 버그 발생!</span>
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-red-50 rounded-lg">
+                        <div class="font-bold mb-1">2. Kill Brick (죽음 발판)</div>
+                        <div class="text-gray-600">
+                            Touched → Humanoid 확인 → <code>humanoid.Health = 0</code><br>
+                            또는 <code>humanoid:TakeDamage(humanoid.MaxHealth)</code> (ForceField 존중)<br>
+                            <span class="text-red-600">반드시 debounce와 함께 사용!</span>
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-green-50 rounded-lg">
+                        <div class="font-bold mb-1">3. Checkpoint (체크포인트)</div>
+                        <div class="text-gray-600">
+                            leaderstats에 Stage 값 저장 + <code>player.RespawnLocation</code>을 체크포인트 SpawnLocation으로 변경<br>
+                            <span class="text-green-600">죽어도 마지막 체크포인트에서 리스폰!</span>
+                        </div>
+                    </div>
+                    <div class="p-2.5 bg-purple-50 rounded-lg">
+                        <div class="font-bold mb-1">4. 코인 리스폰</div>
+                        <div class="text-gray-600">
+                            ServerStorage에 원본 → Clone → workspace 배치 → Touched로 수집 → Destroy → task.delay로 N초 뒤 다시 Clone<br>
+                            <span class="text-purple-600">무한 리스폰 시스템!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <HintBox type="tip" title="while true do 2개 동시 실행">
+                <code>task.spawn(function() while true do 회전 end end)</code> + <code>task.spawn(function() while true do 색변경 end end)</code> → 회전과 색상 변경이 동시에!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- 슬라이드 23: Quiz — task + 패턴 빈칸 -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <roblox-quiz-example
+                name="task 라이브러리 활용"
+                setup="Part 1개 + Script"
+                concepts={JSON.stringify(["task.spawn", "task.wait", "task.delay"])}
+                blanks={taskBlanks}
+                template={taskTemplate}
+                full-code={taskFullCode}
+            ></roblox-quiz-example>
+        </div>
+    </section>
+
+    <!-- ==================== -->
+    <!-- 슬라이드 24: 최종 MC 퀴즈 8개 + 마무리 -->
+    <!-- ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-8">
+            <span class="badge badge-quiz mb-3">최종 확인 퀴즈</span>
+            <h2 class="title-section mb-4">엔진 마스터 최종 퀴즈</h2>
+            <div class="space-y-3">
+                <quiz-question
+                    question="game:GetService('Players') vs game.Players의 차이점은?"
+                    correct="A"
+                    options={mcQ1Options}
+                    correct-explanation="정답! GetService는 서비스 타입으로 찾아서 오타 시 에러로 알려줘요. game.Players는 오타 시 nil을 반환해서 디버깅이 어려워요."
+                    wrong-explanation="GetService는 서비스 타입으로 찾아서 더 안전해요! 오타 시 에러를 내서 버그를 빨리 잡을 수 있어요."
+                ></quiz-question>
+                <quiz-question
+                    question="LocalScript에서 아직 로드 안 된 GUI 요소를 찾으려면?"
+                    correct="A"
+                    options={mcQ2Options}
+                    correct-explanation="정답! WaitForChild는 오브젝트가 나타날 때까지 기다려요! LocalScript에서 GUI를 찾을 때 필수!"
+                    wrong-explanation="WaitForChild가 정답! FindFirstChild는 즉시 반환이라 아직 로드 안 됐으면 nil이에요."
+                ></quiz-question>
+                <quiz-question
+                    question="ServerStorage에 Clone 원본을 두는 이유는?"
+                    correct="A"
+                    options={mcQ3Options}
+                    correct-explanation="정답! ServerStorage는 서버만 접근 가능해서 해커가 원본을 수정/복제할 수 없어요!"
+                    wrong-explanation="보안이 핵심! ServerStorage는 서버만 접근 가능해서 해커 접근 불가예요."
+                ></quiz-question>
+                <quiz-question
+                    question="TweenInfo의 6번째 파라미터 DelayTime은?"
+                    correct="A"
+                    options={mcQ4Options}
+                    correct-explanation="정답! DelayTime은 트윈 시작 전 대기 시간이에요! repeatCount와 함께 쓰면 매 반복마다 대기!"
+                    wrong-explanation="DelayTime은 '트윈 시작 전 대기 시간'이에요! 1번째 time(총 시간)과 다른 개념!"
+                ></quiz-question>
+                <quiz-question
+                    question="Humanoid.FreeFalling 이벤트는 언제 발생?"
+                    correct="A"
+                    options={mcQ5Options}
+                    correct-explanation="정답! FreeFalling은 캐릭터가 공중에 떠있을 때 발생! 낙사 감지에 사용해요."
+                    wrong-explanation="FreeFalling은 '공중에 떠있을 때' 발생! Jumping은 점프할 때, Died는 죽을 때예요."
+                ></quiz-question>
+                <quiz-question
+                    question="HingeConstraint의 ActuatorType=Motor이면?"
+                    correct="A"
+                    options={mcQ6Options}
+                    correct-explanation="정답! Motor 모드는 지정한 AngularVelocity로 계속 회전해요! 풍차, 회전 장애물에 딱!"
+                    wrong-explanation="Motor는 '지정한 속도로 계속 회전'! Servo는 목표 각도에서 멈추고, None은 자유 회전이에요."
+                ></quiz-question>
+                <quiz-question
+                    question="while true do 2개를 동시에 실행하려면?"
+                    correct="A"
+                    options={mcQ7Options}
+                    correct-explanation="정답! task.spawn으로 별도 스레드를 만들면 여러 while true do를 동시에 실행할 수 있어요!"
+                    wrong-explanation="task.spawn이 정답! 분신술처럼 별도 스레드에서 실행돼요."
+                ></quiz-question>
+                <quiz-question
+                    question="Debris:AddItem(part, 3)의 효과는?"
+                    correct="A"
+                    options={mcQ8Options}
+                    correct-explanation="정답! Debris:AddItem(part, 3)은 3초 뒤에 part를 자동으로 삭제해요! 타이머 삭제!"
+                    wrong-explanation="3초 뒤 part를 자동 삭제가 정답! Debris는 자동 삭제 서비스예요."
+                ></quiz-question>
+            </div>
+            <div class="animate-in mt-6 text-center">
+                <div class="inline-block bg-gradient-to-r from-purple-100/50 to-green-100/50 rounded-2xl p-6">
+                    <h3 class="font-bold text-lg mb-2">11주차 B 완료!</h3>
+                    <p class="text-ink-light text-sm">
+                        10주간의 모든 지식이 하나로!<br>
+                        이제 나만의 오비맵을 만들 준비 완료!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+
+    <style>
+        .lesson-image-frame {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            background: linear-gradient(180deg, #faf8f5 0%, #f3eee8 100%);
+        }
+
+        .lesson-image-compact {
+            height: 320px;
+        }
+
+        .lesson-image-tall {
+            height: 420px;
+        }
+
+        .lesson-image-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .engine-map-shell {
+            border-radius: 20px;
+            padding: 1rem;
+            background: linear-gradient(180deg, #fbf8f4 0%, #f4efe9 100%);
+        }
+
+        .engine-map-grid {
+            display: grid;
+            gap: 0.9rem;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            grid-template-areas:
+                "player player world world runtime runtime"
+                ". center center center center ."
+                "shared shared shared storage storage storage";
+            align-items: stretch;
+        }
+
+        .engine-map-node,
+        .engine-map-focus {
+            border-radius: 18px;
+            padding: 1rem 1rem 0.9rem;
+            border: 1px solid rgba(26, 22, 37, 0.08);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .engine-map-node p,
+        .engine-map-focus p {
+            margin: 0.6rem 0 0;
+            font-size: 0.8rem;
+            color: var(--ink-light);
+            line-height: 1.45;
+        }
+
+        .engine-map-title {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--ink-deep);
+        }
+
+        .engine-map-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.65rem;
+        }
+
+        .engine-map-tags span {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.32rem 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .engine-map-focus {
+            grid-area: center;
+            background: #1a1625;
+            color: white;
+            text-align: center;
+            padding-top: 1.2rem;
+        }
+
+        .engine-map-focus-title {
+            font-size: 1.9rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .engine-map-focus code {
+            display: inline-block;
+            margin-top: 0.15rem;
+            border-radius: 999px;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.12);
+            color: #fdfcfb;
+        }
+
+        .engine-map-focus p {
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .area-player { grid-area: player; }
+        .area-world { grid-area: world; }
+        .area-runtime { grid-area: runtime; }
+        .area-shared { grid-area: shared; }
+        .area-storage { grid-area: storage; }
+
+        .tone-blue { background: #eef7ff; }
+        .tone-gold { background: #fff7db; }
+        .tone-red { background: #fdecec; }
+        .tone-green { background: #ecf9f0; }
+        .tone-purple { background: #f2eeff; }
+
+        @media (max-width: 768px) {
+            .lesson-image-compact {
+                height: 240px;
+            }
+
+            .lesson-image-tall {
+                height: 300px;
+            }
+
+            .engine-map-grid {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "center"
+                    "player"
+                    "world"
+                    "runtime"
+                    "shared"
+                    "storage";
+            }
+
+            .engine-map-focus-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        .flow-track,
+        .event-flow,
+        .constraint-line {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .flow-step,
+        .event-node,
+        .constraint-part,
+        .constraint-join,
+        .task-box,
+        .state-chip,
+        .state-link {
+            border-radius: 16px;
+            padding: 0.85rem 1rem;
+            background: #f8f5f1;
+            border: 1px solid rgba(26, 22, 37, 0.08);
+        }
+
+        .flow-step,
+        .constraint-part,
+        .task-box {
+            min-width: 130px;
+            text-align: center;
+        }
+
+        .flow-step strong,
+        .constraint-part strong,
+        .constraint-join,
+        .task-box strong {
+            display: block;
+            font-size: 0.88rem;
+            color: var(--ink-deep);
+        }
+
+        .flow-step span,
+        .constraint-part span,
+        .task-box span {
+            display: block;
+            margin-top: 0.35rem;
+            font-size: 0.77rem;
+            color: var(--ink-light);
+            line-height: 1.35;
+        }
+
+        .flow-arrow,
+        .event-arrow {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--ink-light);
+        }
+
+        .flow-step.danger {
+            background: #fdecec;
+        }
+
+        .concept-stack {
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .concept-card,
+        .example-box,
+        .axis-readout {
+            border-radius: 16px;
+            border: 1px solid rgba(26, 22, 37, 0.08);
+            padding: 0.95rem 1rem;
+            background: #f8f5f1;
+        }
+
+        .concept-card strong {
+            display: block;
+            font-size: 0.92rem;
+            color: var(--ink-deep);
+        }
+
+        .concept-card span {
+            display: block;
+            margin-top: 0.4rem;
+            font-size: 0.79rem;
+            color: var(--ink-light);
+            line-height: 1.45;
+        }
+
+        .concept-card.soft-blue {
+            background: #eef7ff;
+        }
+
+        .concept-card.soft-green {
+            background: #ecf9f0;
+        }
+
+        .concept-card.dark {
+            background: #1a1625;
+        }
+
+        .concept-card.dark strong,
+        .concept-card.dark span {
+            color: white;
+        }
+
+        .axis-readout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.65rem;
+            background: linear-gradient(180deg, #fbf8f4 0%, #f3eee8 100%);
+        }
+
+        .axis-readout div {
+            border-radius: 14px;
+            background: rgba(255,255,255,0.85);
+            padding: 0.8rem 0.75rem;
+            text-align: center;
+        }
+
+        .axis-readout b {
+            display: block;
+            font-size: 1rem;
+            color: var(--ink-deep);
+        }
+
+        .axis-readout span {
+            display: block;
+            margin-top: 0.3rem;
+            font-size: 0.76rem;
+            color: var(--ink-light);
+            line-height: 1.4;
+        }
+
+        .example-box {
+            display: grid;
+            gap: 0.55rem;
+            background: linear-gradient(180deg, #fffdf8 0%, #f7f3ee 100%);
+        }
+
+        .example-line {
+            display: grid;
+            grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+            gap: 0.7rem;
+            align-items: start;
+            padding: 0.7rem 0.8rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.88);
+        }
+
+        .example-line code {
+            font-size: 0.76rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .example-line span {
+            font-size: 0.76rem;
+            color: var(--ink-light);
+            line-height: 1.45;
+        }
+
+        .state-rail {
+            display: flex;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+
+        .state-chip,
+        .state-link {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--ink-deep);
+        }
+
+        .state-chip {
+            background: #eef7ff;
+        }
+
+        .state-link {
+            background: #f8f5f1;
+        }
+
+        .state-link.warn {
+            background: #fff7db;
+        }
+
+        .state-link.danger {
+            background: #fdecec;
+        }
+
+        .tween-strip {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .tween-pill {
+            border-radius: 999px;
+            padding: 0.55rem 0.9rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #f2eeff;
+            color: var(--ink-deep);
+            text-align: center;
+        }
+
+        .tween-bar {
+            display: grid;
+            grid-template-columns: 0.6fr 1.4fr 0.7fr;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid rgba(26,22,37,0.08);
+        }
+
+        .tween-bar .seg {
+            padding: 0.7rem 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .tween-bar .start { background: #fff7db; }
+        .tween-bar .move { background: #eef7ff; }
+        .tween-bar .end { background: #ecf9f0; }
+
+        .constraint-line {
+            justify-content: center;
+        }
+
+        .constraint-part {
+            background: #eef7ff;
+        }
+
+        .constraint-join {
+            background: #1a1625;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .event-node {
+            flex: 1 1 150px;
+            text-align: center;
+            background: #f8f5f1;
+        }
+
+        .event-node span {
+            display: block;
+            margin-top: 0.3rem;
+            font-size: 0.75rem;
+            color: var(--ink-light);
+        }
+
+        .event-node.success {
+            background: #ecf9f0;
+        }
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        .task-box {
+            background: #f8f5f1;
+        }
+
+        .task-box.highlight {
+            background: #fff7db;
+        }
+
+        @media (max-width: 768px) {
+            .tween-strip,
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tween-strip {
+                gap: 0.55rem;
+            }
+
+            .axis-readout,
+            .example-line {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</LessonLayout>
