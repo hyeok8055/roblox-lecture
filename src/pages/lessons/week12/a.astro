@@ -1,0 +1,1506 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+---
+
+<LessonLayout title="Tower of Hell - 게임 시스템 설계" lessonNumber={12} totalSlides={20}>
+
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">12주차 A</span>
+                <h1 class="title-display mb-4">
+                    Tower of Hell<br>
+                    <span class="text-neon-mint">게임 시스템 설계</span>
+                </h1>
+                <p class="text-ink-light text-lg max-w-2xl mx-auto mb-8">
+                    실제 인기 게임의 핵심 시스템을 직접 설계하고 구현합니다.<br>
+                    리더보드, 타이머, 맵 로테이션, 높이 추적까지 — 진짜 게임을 만듭니다.
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Leaderstats</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Timer &amp; Round</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Map Rotation</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Height Tracker</span>
+                </div>
+                <HintBox type="info" title="이번 수업 목표">
+                    Tower of Hell 스타일 게임의 <strong>서버 핵심 로직</strong>을 설계합니다.<br>
+                    리더보드 점수 시스템, 라운드 타이머, 맵 자동 교체, 플레이어 높이 추적을 구현합니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 전체 구조도 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 설계</span>
+            <h2 class="title-section mb-6">게임 전체 구조</h2>
+            <p class="text-ink-light mb-8">Tower of Hell은 여러 시스템이 유기적으로 연결된 게임입니다. 먼저 큰 그림을 이해합시다.</p>
+
+            <div class="arch-diagram">
+                <div class="arch-layer server-layer">
+                    <div class="arch-label">ServerScriptService (서버)</div>
+                    <div class="arch-boxes">
+                        <div class="arch-box box-core">
+                            <strong>GameManager</strong>
+                            <span>라운드 진행, 타이머, 맵 교체</span>
+                        </div>
+                        <div class="arch-box box-data">
+                            <strong>LeaderboardManager</strong>
+                            <span>점수, 레벨, 클리어 횟수</span>
+                        </div>
+                        <div class="arch-box box-data">
+                            <strong>HeightTracker</strong>
+                            <span>플레이어 높이 실시간 추적</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arch-arrow">
+                    <span>RemoteEvent / RemoteFunction</span>
+                </div>
+
+                <div class="arch-layer client-layer">
+                    <div class="arch-label">StarterPlayerScripts (클라이언트)</div>
+                    <div class="arch-boxes">
+                        <div class="arch-box box-ui">
+                            <strong>TimerUI</strong>
+                            <span>상단 카운트다운</span>
+                        </div>
+                        <div class="arch-box box-ui">
+                            <strong>HeightBar</strong>
+                            <span>우측 진행도 바</span>
+                        </div>
+                        <div class="arch-box box-ui">
+                            <strong>ShopUI / MusicUI</strong>
+                            <span>상점, 음악 토글</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="arch-layer storage-layer">
+                    <div class="arch-label">ServerStorage</div>
+                    <div class="arch-boxes">
+                        <div class="arch-box box-map">
+                            <strong>Maps 폴더</strong>
+                            <span>Tower1, Tower2, Tower3...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="핵심 원칙">
+                <strong>서버가 모든 게임 로직을 관리</strong>합니다. 클라이언트는 UI 표시만 담당합니다.<br>
+                이렇게 하면 해킹 방지 + 모든 플레이어에게 동일한 게임 상태를 보장할 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: 폴더 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">프로젝트 세팅</span>
+            <h2 class="title-section mb-6">Explorer 폴더 구조</h2>
+            <p class="text-ink-light mb-8">먼저 로블록스 스튜디오에서 이 구조를 만들어야 합니다.</p>
+
+            <div class="folder-tree">
+                <div class="folder-item root">game</div>
+                <div class="folder-item l1 folder">ServerScriptService</div>
+                <div class="folder-item l2 script">GameManager <span class="tag-server">Script</span></div>
+                <div class="folder-item l1 folder">ServerStorage</div>
+                <div class="folder-item l2 folder">Maps</div>
+                <div class="folder-item l3 model">Tower1 <span class="tag-model">Model</span></div>
+                <div class="folder-item l3 model">Tower2 <span class="tag-model">Model</span></div>
+                <div class="folder-item l3 model">Tower3 <span class="tag-model">Model</span></div>
+                <div class="folder-item l1 folder">ReplicatedStorage</div>
+                <div class="folder-item l2 remote">TimerUpdate <span class="tag-remote">RemoteEvent</span></div>
+                <div class="folder-item l2 remote">HeightUpdate <span class="tag-remote">RemoteEvent</span></div>
+                <div class="folder-item l2 remote">RoundInfo <span class="tag-remote">RemoteEvent</span></div>
+                <div class="folder-item l1 folder">Workspace</div>
+                <div class="folder-item l2 folder">Lobby <span class="tag-info">스폰 위치</span></div>
+                <div class="folder-item l2 folder">ActiveMap <span class="tag-info">현재 타워가 여기에 배치됨</span></div>
+                <div class="folder-item l1 folder">StarterPlayerScripts</div>
+                <div class="folder-item l2 script-local">GameUI <span class="tag-local">LocalScript</span></div>
+            </div>
+
+            <HintBox type="warning" title="Maps 폴더 규칙">
+                각 Tower 모델 안에는 반드시 <strong>SpawnPoint</strong>라는 이름의 파트와
+                <strong>WinPart</strong>라는 이름의 파트가 있어야 합니다.<br>
+                SpawnPoint = 타워 시작점, WinPart = 꼭대기 클리어 판정 파트입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 리더보드 시스템 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 1</span>
+            <h2 class="title-section mb-6">리더보드 (Leaderstats)</h2>
+            <p class="text-ink-light mb-8">
+                Tab 키를 누르면 보이는 점수판입니다. Tower of Hell에서는 <strong>Level</strong>과 <strong>Wins</strong>를 추적합니다.
+            </p>
+
+            <div class="system-card">
+                <div class="system-header">
+                    <span class="system-icon">&#x1f3c6;</span>
+                    <div>
+                        <h3>Leaderstats 설계</h3>
+                        <p>플레이어가 접속하면 자동으로 생성되는 점수 폴더</p>
+                    </div>
+                </div>
+
+                <lua-code-block title="GameManager.lua - Leaderstats 부분" show-line-numbers>
+local Players = game:GetService("Players")
+
+-- =============================================
+-- 리더보드 생성: 플레이어 접속 시 자동 실행
+-- =============================================
+local function setupLeaderstats(player)
+    -- "leaderstats"라는 이름은 반드시 지켜야 함 (로블록스 규칙)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    -- Wins: 타워 꼭대기 도달 횟수
+    local wins = Instance.new("IntValue")
+    wins.Name = "Wins"
+    wins.Value = 0
+    wins.Parent = leaderstats
+
+    -- Coins: 게임 재화 (상점에서 사용)
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+
+    -- Level: 실제 TOH처럼 XP 기반 레벨 시스템
+    -- 레벨업 필요 XP: Lv0→1 = 100, Lv1→2 = 200, Lv2→3 = 300...
+    local level = Instance.new("IntValue")
+    level.Name = "Level"
+    level.Value = 0
+    level.Parent = leaderstats
+end
+
+Players.PlayerAdded:Connect(setupLeaderstats)
+                </lua-code-block>
+            </div>
+
+            <HintBox type="info" title="실제 Tower of Hell의 레벨 시스템">
+                실제 TOH에서는 <strong>코인 획득 = XP 획득</strong>이고, 레벨업에 필요한 XP가 선형으로 증가합니다.<br>
+                Lv0&rarr;1 = 100XP, Lv1&rarr;2 = 200XP, Lv2&rarr;3 = 300XP...<br>
+                <code>필요XP = (현재레벨 + 1) * 100</code>
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: 리더보드 - 점수 부여 로직 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 1 계속</span>
+            <h2 class="title-section mb-6">Win 판정 &amp; 점수 부여</h2>
+            <p class="text-ink-light mb-8">
+                플레이어가 타워 꼭대기의 <strong>WinPart</strong>에 닿으면 클리어로 판정합니다.
+            </p>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - Win 판정 부분" show-line-numbers>
+-- =============================================
+-- Win 판정: WinPart에 닿으면 클리어
+-- =============================================
+local function onPlayerWin(player)
+    local leaderstats = player:FindFirstChild("leaderstats")
+    if not leaderstats then return end
+
+    -- 중복 클리어 방지 (같은 라운드에서 1번만)
+    if player:GetAttribute("HasWon") then return end
+    player:SetAttribute("HasWon", true)
+
+    -- Wins 증가
+    local wins = leaderstats:FindFirstChild("Wins")
+    wins.Value += 1
+
+    -- Level 재계산
+    local level = leaderstats:FindFirstChild("Level")
+    level.Value = math.floor(wins.Value / 5) + 1
+
+    -- 전체 서버에 알림 (클라이언트에서 축하 UI 표시용)
+    local RoundInfo = game:GetService("ReplicatedStorage"):FindFirstChild("RoundInfo")
+    RoundInfo:FireAllClients("PlayerWon", player.Name, wins.Value)
+
+    print(player.Name .. " 클리어! 총 " .. wins.Value .. "승")
+end
+                </lua-code-block>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">GetAttribute / SetAttribute</div>
+                    <div class="detail-desc">플레이어에 임시 데이터를 저장하는 방법. "HasWon"이라는 플래그를 붙여서 같은 라운드에서 중복 클리어를 방지합니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">FireAllClients</div>
+                    <div class="detail-desc">서버 → 모든 클라이언트에 메시지 전송. "○○님이 클리어했습니다!" 같은 알림을 모두에게 보낼 때 사용합니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: 타이머 시스템 개요 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 2</span>
+            <h2 class="title-section mb-6">라운드 타이머</h2>
+            <p class="text-ink-light mb-8">
+                화면 상단 가운데에 표시되는 카운트다운. 시간이 0이 되면 자동으로 다음 맵으로 넘어갑니다.
+            </p>
+
+            <div class="timer-demo">
+                <div class="timer-display">8:00</div>
+                <div class="timer-label">라운드 남은 시간</div>
+            </div>
+
+            <div class="flow-diagram mt-8">
+                <div class="flow-step">
+                    <div class="flow-num">1</div>
+                    <div class="flow-text">
+                        <strong>라운드 시작</strong>
+                        <span>타이머 = ROUND_TIME (480초)</span>
+                    </div>
+                </div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step">
+                    <div class="flow-num">2</div>
+                    <div class="flow-text">
+                        <strong>매초 감소</strong>
+                        <span>타이머 -= 1, UI 업데이트</span>
+                    </div>
+                </div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step">
+                    <div class="flow-num">3</div>
+                    <div class="flow-text">
+                        <strong>타이머 = 0</strong>
+                        <span>라운드 종료, 맵 교체</span>
+                    </div>
+                </div>
+                <div class="flow-arrow">&rarr;</div>
+                <div class="flow-step">
+                    <div class="flow-num">4</div>
+                    <div class="flow-text">
+                        <strong>대기 시간</strong>
+                        <span>5초 후 새 라운드 시작</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 타이머 서버 코드 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 2 코드</span>
+            <h2 class="title-section mb-6">타이머 서버 코드</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 타이머 부분" show-line-numbers>
+-- =============================================
+-- 설정값
+-- =============================================
+local ROUND_TIME = 480    -- 라운드 시간 (초) — 실제 TOH는 8분!
+local INTERMISSION = 5    -- 라운드 사이 대기 시간
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TimerUpdate = ReplicatedStorage:FindFirstChild("TimerUpdate")
+
+-- =============================================
+-- 타이머 루프: 매초 클라이언트에 남은 시간 전송
+-- =============================================
+local function startTimer()
+    for remaining = ROUND_TIME, 0, -1 do
+        -- 분:초 형식으로 변환
+        local minutes = math.floor(remaining / 60)
+        local seconds = remaining % 60
+        local timeText = string.format("%d:%02d", minutes, seconds)
+
+        -- 모든 클라이언트에 시간 전송
+        TimerUpdate:FireAllClients(timeText, remaining)
+
+        task.wait(1)
+    end
+end
+                </lua-code-block>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">for remaining = 120, 0, -1</div>
+                    <div class="detail-desc">120부터 0까지 1씩 감소하는 역순 for문. 매 반복마다 task.wait(1)로 1초씩 대기합니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">string.format("%d:%02d")</div>
+                    <div class="detail-desc">%d = 숫자, %02d = 2자리(앞에 0 채움). 예: 1:05, 0:30 형태로 표시됩니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: 타이머 클라이언트 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">클라이언트</span>
+            <h2 class="title-section mb-6">타이머 UI (클라이언트)</h2>
+            <p class="text-ink-light mb-8">서버에서 보낸 시간을 화면에 표시합니다.</p>
+
+            <div class="system-card">
+                <lua-code-block title="GameUI (LocalScript) - 타이머 부분" show-line-numbers>
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- =============================================
+-- 타이머 UI 생성
+-- =============================================
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "GameHUD"
+screenGui.Parent = playerGui
+
+local timerLabel = Instance.new("TextLabel")
+timerLabel.Name = "Timer"
+timerLabel.Size = UDim2.new(0, 200, 0, 60)
+timerLabel.Position = UDim2.new(0.5, -100, 0, 20)  -- 상단 가운데
+timerLabel.BackgroundTransparency = 1
+timerLabel.TextColor3 = Color3.new(1, 1, 1)
+timerLabel.TextSize = 48
+timerLabel.Font = Enum.Font.GothamBold
+timerLabel.TextStrokeTransparency = 0.3   -- 글자 테두리 (가독성)
+timerLabel.Text = "8:00"
+timerLabel.Parent = screenGui
+
+-- =============================================
+-- 서버에서 시간 받으면 UI 업데이트
+-- =============================================
+local TimerUpdate = ReplicatedStorage:WaitForChild("TimerUpdate")
+
+TimerUpdate.OnClientEvent:Connect(function(timeText, remaining)
+    timerLabel.Text = timeText
+
+    -- 30초 이하면 빨간색으로 경고
+    if remaining &lt;= 30 then
+        timerLabel.TextColor3 = Color3.fromRGB(255, 80, 80)
+    else
+        timerLabel.TextColor3 = Color3.new(1, 1, 1)
+    end
+end)
+                </lua-code-block>
+            </div>
+
+            <HintBox type="tip" title="UDim2 위치 계산">
+                <code>UDim2.new(0.5, -100, 0, 20)</code> = 화면 가로 50% 지점에서 왼쪽으로 100px 이동, 위에서 20px.<br>
+                이렇게 하면 200px 너비의 라벨이 정확히 화면 가운데에 배치됩니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: 맵 로테이션 개요 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 3</span>
+            <h2 class="title-section mb-6">맵 로테이션 (자동 교체)</h2>
+            <p class="text-ink-light mb-8">
+                타이머가 끝나면 현재 타워를 제거하고, 새로운 타워를 랜덤으로 불러옵니다.
+            </p>
+
+            <div class="rotation-demo">
+                <div class="rotation-step">
+                    <div class="rotation-icon">&#x1f3d7;</div>
+                    <div class="rotation-label">ServerStorage<br><strong>Maps 폴더</strong></div>
+                    <div class="rotation-desc">Tower1, Tower2, Tower3... 원본 보관</div>
+                </div>
+                <div class="rotation-arrow">&rarr;</div>
+                <div class="rotation-step active-step">
+                    <div class="rotation-icon">&#x1f3ae;</div>
+                    <div class="rotation-label">Workspace<br><strong>ActiveMap</strong></div>
+                    <div class="rotation-desc">Clone해서 여기에 배치 = 게임에 등장</div>
+                </div>
+                <div class="rotation-arrow">&rarr;</div>
+                <div class="rotation-step">
+                    <div class="rotation-icon">&#x1f5d1;</div>
+                    <div class="rotation-label">라운드 종료<br><strong>Destroy</strong></div>
+                    <div class="rotation-desc">ActiveMap 비우고 새 타워 Clone</div>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="Clone vs 원본 이동">
+                원본을 직접 Workspace로 옮기면 한 번 쓰고 끝입니다.<br>
+                <strong>:Clone()</strong>으로 복사본을 만들어야 매 라운드마다 재사용할 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: 맵 로테이션 코드 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 3 코드</span>
+            <h2 class="title-section mb-6">맵 로테이션 서버 코드</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 맵 로테이션 부분" show-line-numbers>
+local ServerStorage = game:GetService("ServerStorage")
+local mapsFolder = ServerStorage:WaitForChild("Maps")
+local activeMapFolder = workspace:WaitForChild("ActiveMap")
+
+local lastMapName = nil  -- 같은 맵 연속 방지
+
+-- =============================================
+-- 랜덤 맵 선택 (직전 맵 제외)
+-- =============================================
+local function pickRandomMap()
+    local maps = mapsFolder:GetChildren()
+
+    -- 맵이 1개뿐이면 그냥 반환
+    if #maps &lt;= 1 then
+        return maps[1]
+    end
+
+    -- 직전 맵과 다른 맵이 나올 때까지 반복
+    local chosen
+    repeat
+        chosen = maps[math.random(1, #maps)]
+    until chosen.Name ~= lastMapName
+
+    lastMapName = chosen.Name
+    return chosen
+end
+
+-- =============================================
+-- 맵 배치: Clone → ActiveMap에 넣기
+-- =============================================
+local function loadMap()
+    -- 기존 맵 제거
+    for _, child in activeMapFolder:GetChildren() do
+        child:Destroy()
+    end
+
+    -- 새 맵 복사 후 배치
+    local mapTemplate = pickRandomMap()
+    local newMap = mapTemplate:Clone()
+    newMap.Parent = activeMapFolder
+
+    print("맵 로드: " .. newMap.Name)
+    return newMap
+end
+                </lua-code-block>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">GetChildren()</div>
+                    <div class="detail-desc">Maps 폴더 안의 모든 Tower 모델을 테이블(배열)로 가져옵니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">math.random(1, #maps)</div>
+                    <div class="detail-desc">#maps = 테이블 길이. 1부터 맵 개수 사이의 랜덤 숫자를 뽑습니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">repeat ... until</div>
+                    <div class="detail-desc">조건이 true가 될 때까지 반복. 직전 맵과 다른 맵이 선택될 때까지 다시 뽑습니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 메인 게임 루프 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">핵심 로직</span>
+            <h2 class="title-section mb-6">메인 게임 루프</h2>
+            <p class="text-ink-light mb-8">
+                모든 시스템을 하나로 연결하는 <strong>무한 반복 루프</strong>입니다. 게임의 심장입니다.
+            </p>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 메인 루프" show-line-numbers>
+-- =============================================
+-- 메인 게임 루프: 게임 시작 시 자동 실행
+-- =============================================
+local function gameLoop()
+    while true do
+        -- [1] 대기 시간 (인터미션)
+        print("=== 인터미션 ===")
+        RoundInfo:FireAllClients("Intermission", INTERMISSION)
+        task.wait(INTERMISSION)
+
+        -- [2] 새 맵 로드
+        local currentMap = loadMap()
+
+        -- [3] 모든 플레이어를 타워 시작점으로 텔레포트
+        local spawnPoint = currentMap:FindFirstChild("SpawnPoint")
+        for _, player in Players:GetPlayers() do
+            local character = player.Character
+            if character then
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = spawnPoint.CFrame + Vector3.new(0, 3, 0)
+                end
+            end
+            -- 이번 라운드 클리어 플래그 초기화
+            player:SetAttribute("HasWon", false)
+        end
+
+        -- [4] WinPart 연결
+        local winPart = currentMap:FindFirstChild("WinPart")
+        local winConnection
+        if winPart then
+            winConnection = winPart.Touched:Connect(function(hit)
+                local player = Players:GetPlayerFromCharacter(hit.Parent)
+                if player then
+                    onPlayerWin(player)
+                end
+            end)
+        end
+
+        -- [5] 타이머 시작 (480초 카운트다운)
+        RoundInfo:FireAllClients("RoundStart", currentMap.Name)
+        startTimer()
+
+        -- [6] 라운드 종료: WinPart 연결 해제
+        if winConnection then
+            winConnection:Disconnect()
+        end
+
+        print("=== 라운드 종료 ===")
+    end
+end
+
+-- 게임 시작!
+gameLoop()
+                </lua-code-block>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 게임 루프 해설 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">코드 해설</span>
+            <h2 class="title-section mb-6">게임 루프 흐름 분석</h2>
+
+            <div class="loop-analysis">
+                <div class="loop-step">
+                    <div class="loop-num">1</div>
+                    <div class="loop-content">
+                        <h4>인터미션 (대기)</h4>
+                        <p>5초간 "다음 라운드 준비 중..." 표시. 플레이어가 로비에서 쉬는 시간입니다.</p>
+                        <code>task.wait(INTERMISSION)</code>
+                    </div>
+                </div>
+                <div class="loop-step">
+                    <div class="loop-num">2</div>
+                    <div class="loop-content">
+                        <h4>맵 로드</h4>
+                        <p>ServerStorage에서 랜덤 타워를 Clone해서 Workspace에 배치합니다.</p>
+                        <code>loadMap() &rarr; ActiveMap에 배치</code>
+                    </div>
+                </div>
+                <div class="loop-step">
+                    <div class="loop-num">3</div>
+                    <div class="loop-content">
+                        <h4>텔레포트</h4>
+                        <p>모든 플레이어를 타워의 SpawnPoint로 이동시킵니다.</p>
+                        <code>hrp.CFrame = spawnPoint.CFrame + Vector3.new(0, 3, 0)</code>
+                    </div>
+                </div>
+                <div class="loop-step">
+                    <div class="loop-num">4</div>
+                    <div class="loop-content">
+                        <h4>WinPart 이벤트 연결</h4>
+                        <p>꼭대기 파트에 Touched 이벤트를 연결해서 클리어 감지를 시작합니다.</p>
+                        <code>winPart.Touched:Connect(...)</code>
+                    </div>
+                </div>
+                <div class="loop-step">
+                    <div class="loop-num">5</div>
+                    <div class="loop-content">
+                        <h4>타이머 작동</h4>
+                        <p>480초(8분) 카운트다운. 이 시간 동안 플레이어가 타워를 오릅니다.</p>
+                        <code>startTimer() &mdash; 480초(8분)간 for문 실행</code>
+                    </div>
+                </div>
+                <div class="loop-step">
+                    <div class="loop-num">6</div>
+                    <div class="loop-content">
+                        <h4>라운드 종료</h4>
+                        <p>이벤트 연결 해제 후 다시 1번으로 돌아갑니다.</p>
+                        <code>winConnection:Disconnect()</code>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="info" title="Disconnect가 중요한 이유">
+                라운드마다 Touched 이벤트를 새로 연결하므로, 이전 라운드의 연결을 <strong>반드시 해제</strong>해야 합니다.<br>
+                그렇지 않으면 이벤트가 중복 실행되어 한 번 터치에 여러 번 클리어될 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: 높이 추적 시스템 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 4</span>
+            <h2 class="title-section mb-6">높이 추적 시스템</h2>
+            <p class="text-ink-light mb-8">
+                화면 우측에 표시되는 실시간 진행 바. 각 플레이어가 타워의 몇 %까지 올라갔는지 추적합니다.
+            </p>
+
+            <div class="height-demo">
+                <div class="height-bar-demo">
+                    <div class="hb-tower">
+                        <div class="hb-fill" style="height: 70%"></div>
+                        <div class="hb-marker" style="bottom: 70%">
+                            <span>Player1</span>
+                        </div>
+                        <div class="hb-marker secondary" style="bottom: 45%">
+                            <span>Player2</span>
+                        </div>
+                        <div class="hb-marker secondary" style="bottom: 20%">
+                            <span>Player3</span>
+                        </div>
+                    </div>
+                    <div class="hb-labels">
+                        <span>100% (꼭대기)</span>
+                        <span>0% (시작점)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">계산 방법</div>
+                    <div class="detail-desc">
+                        <code>진행도 = (현재높이 - 시작높이) / (꼭대기높이 - 시작높이)</code><br>
+                        SpawnPoint의 Y좌표 = 시작, WinPart의 Y좌표 = 꼭대기로 계산합니다.
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">업데이트 주기</div>
+                    <div class="detail-desc">
+                        0.5초마다 모든 플레이어의 높이를 체크해서 클라이언트에 전송합니다.<br>
+                        너무 자주 보내면 서버 부하, 너무 느리면 끊겨 보임 &rarr; <strong>0.5초가 적당</strong>.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: 높이 추적 서버 코드 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 4 코드</span>
+            <h2 class="title-section mb-6">높이 추적 서버 코드</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 높이 추적 부분" show-line-numbers>
+local HeightUpdate = ReplicatedStorage:FindFirstChild("HeightUpdate")
+
+-- =============================================
+-- 높이 추적: 별도 스레드에서 0.5초마다 실행
+-- =============================================
+local function trackHeights(currentMap)
+    local spawnPoint = currentMap:FindFirstChild("SpawnPoint")
+    local winPart = currentMap:FindFirstChild("WinPart")
+    if not spawnPoint or not winPart then return end
+
+    local baseY = spawnPoint.Position.Y    -- 시작점 높이
+    local topY = winPart.Position.Y        -- 꼭대기 높이
+    local totalHeight = topY - baseY       -- 타워 전체 높이
+
+    -- 별도 스레드로 실행 (메인 루프를 막지 않기 위해)
+    task.spawn(function()
+        while currentMap.Parent ~= nil do  -- 맵이 존재하는 동안
+            local heightData = &#123;&#125;
+
+            for _, player in Players:GetPlayers() do
+                local character = player.Character
+                if character then
+                    local hrp = character:FindFirstChild("HumanoidRootPart")
+                    if hrp then
+                        -- 진행도 계산 (0~1 사이로 제한)
+                        local progress = (hrp.Position.Y - baseY) / totalHeight
+                        progress = math.clamp(progress, 0, 1)
+
+                        table.insert(heightData, &#123;
+                            name = player.Name,
+                            progress = progress
+                        &#125;)
+                    end
+                end
+            end
+
+            -- 모든 클라이언트에 높이 데이터 전송
+            HeightUpdate:FireAllClients(heightData)
+            task.wait(0.5)
+        end
+    end)
+end
+                </lua-code-block>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">task.spawn</div>
+                    <div class="detail-desc">별도 스레드(코루틴)에서 실행. 메인 게임 루프와 동시에 돌아가야 하므로 spawn으로 분리합니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">math.clamp(progress, 0, 1)</div>
+                    <div class="detail-desc">값을 0~1 범위로 제한. 타워 아래로 떨어지면 0, 위를 넘으면 1로 고정합니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">currentMap.Parent ~= nil</div>
+                    <div class="detail-desc">맵이 Destroy되면 Parent가 nil이 됩니다. 이걸 체크해서 라운드 종료 시 자동으로 루프를 멈춥니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: 높이 추적 클라이언트 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">클라이언트</span>
+            <h2 class="title-section mb-6">높이 바 UI (클라이언트)</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameUI (LocalScript) - 높이 바 부분" show-line-numbers>
+-- =============================================
+-- 높이 바 UI: 화면 우측에 세로 바 생성
+-- =============================================
+local heightFrame = Instance.new("Frame")
+heightFrame.Name = "HeightBar"
+heightFrame.Size = UDim2.new(0, 40, 0.6, 0)      -- 너비 40px, 높이 60%
+heightFrame.Position = UDim2.new(1, -60, 0.2, 0)  -- 우측 끝에서 60px 안쪽
+heightFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+heightFrame.BackgroundTransparency = 0.3
+heightFrame.Parent = screenGui
+
+-- 모서리 둥글게
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 8)
+corner.Parent = heightFrame
+
+-- =============================================
+-- 서버에서 높이 데이터 받으면 마커 업데이트
+-- =============================================
+local markers = &#123;&#125;  -- 플레이어별 마커 저장
+
+HeightUpdate.OnClientEvent:Connect(function(heightData)
+    -- 기존 마커 전부 숨기기
+    for _, marker in markers do
+        marker.Visible = false
+    end
+
+    for _, data in heightData do
+        -- 마커가 없으면 새로 생성
+        if not markers[data.name] then
+            local marker = Instance.new("TextLabel")
+            marker.Size = UDim2.new(1.5, 0, 0, 16)
+            marker.BackgroundColor3 = Color3.fromRGB(61, 255, 162)
+            marker.TextSize = 10
+            marker.Font = Enum.Font.GothamBold
+            marker.TextColor3 = Color3.new(0, 0, 0)
+            marker.Parent = heightFrame
+
+            local markerCorner = Instance.new("UICorner")
+            markerCorner.CornerRadius = UDim.new(0, 4)
+            markerCorner.Parent = marker
+
+            markers[data.name] = marker
+        end
+
+        local marker = markers[data.name]
+        marker.Text = data.name
+        marker.Visible = true
+        -- progress(0~1)를 바 위치로 변환 (아래=0, 위=1)
+        marker.Position = UDim2.new(-0.25, 0, 1 - data.progress, -8)
+    end
+end)
+                </lua-code-block>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 16: 텔레포트 상세 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">보충 설명</span>
+            <h2 class="title-section mb-6">텔레포트 &amp; 캐릭터 관리</h2>
+            <p class="text-ink-light mb-8">플레이어를 타워로 보내고, 죽으면 로비로 복귀시키는 로직입니다.</p>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 텔레포트 유틸리티" show-line-numbers>
+-- =============================================
+-- 플레이어를 특정 위치로 텔레포트
+-- =============================================
+local function teleportPlayer(player, targetCFrame)
+    local character = player.Character
+    if not character then return end
+
+    local hrp = character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    -- 살짝 위로 올려서 바닥에 끼이는 것 방지
+    hrp.CFrame = targetCFrame + Vector3.new(0, 3, 0)
+end
+
+-- =============================================
+-- 라운드 중 사망 시 로비로 복귀
+-- =============================================
+local lobbySpawn = workspace:WaitForChild("Lobby"):FindFirstChild("SpawnLocation")
+
+local function setupDeathHandler(player)
+    player.CharacterAdded:Connect(function(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        humanoid.Died:Connect(function()
+            -- 3초 후 리스폰되면 로비에서 시작
+            -- (로블록스 기본 리스폰이 SpawnLocation 사용)
+        end)
+    end)
+end
+                </lua-code-block>
+            </div>
+
+            <HintBox type="tip" title="왜 Vector3.new(0, 3, 0)을 더하나요?">
+                텔레포트할 때 캐릭터가 바닥 안에 끼일 수 있습니다.<br>
+                Y축으로 3 스터드 위에 배치하면 자연스럽게 착지합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: WinPart 연결 패턴 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">디자인 패턴</span>
+            <h2 class="title-section mb-6">이벤트 연결/해제 패턴</h2>
+            <p class="text-ink-light mb-8">
+                매 라운드마다 이벤트를 연결하고 해제하는 것은 게임 개발의 핵심 패턴입니다.
+            </p>
+
+            <div class="pattern-compare">
+                <div class="pattern-box bad">
+                    <h4>잘못된 방법</h4>
+                    <lua-code-block title="이벤트가 계속 쌓임">
+-- 라운드마다 Connect만 하고 해제 안 함
+winPart.Touched:Connect(function(hit)
+    onPlayerWin(player)
+end)
+-- 3라운드 후: 한 번 터치에 3번 실행!
+                    </lua-code-block>
+                </div>
+                <div class="pattern-box good">
+                    <h4>올바른 방법</h4>
+                    <lua-code-block title="연결 저장 후 해제">
+-- 연결을 변수에 저장
+local conn = winPart.Touched:Connect(function(hit)
+    onPlayerWin(player)
+end)
+
+-- 라운드 끝나면 해제
+conn:Disconnect()
+                    </lua-code-block>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="메모리 누수 주의">
+                이벤트 연결(:Connect)은 해제(:Disconnect)하지 않으면 <strong>계속 메모리에 남아있습니다</strong>.<br>
+                매 라운드, 매 맵마다 이벤트를 새로 연결한다면 반드시 이전 연결을 해제하세요.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 전체 GameManager 정리 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">전체 구조</span>
+            <h2 class="title-section mb-6">GameManager 전체 흐름 정리</h2>
+
+            <div class="full-flow">
+                <div class="flow-section">
+                    <div class="flow-section-title">초기화 (게임 시작 시 1번)</div>
+                    <div class="flow-items">
+                        <div class="flow-chip">서비스 가져오기 (GetService)</div>
+                        <div class="flow-chip">RemoteEvent 참조</div>
+                        <div class="flow-chip">PlayerAdded → Leaderstats 생성</div>
+                    </div>
+                </div>
+
+                <div class="flow-divider"></div>
+
+                <div class="flow-section">
+                    <div class="flow-section-title">게임 루프 (while true do)</div>
+                    <div class="flow-items">
+                        <div class="flow-chip chip-1">인터미션 5초</div>
+                        <div class="flow-chip chip-2">맵 로드 (Clone)</div>
+                        <div class="flow-chip chip-3">플레이어 텔레포트</div>
+                        <div class="flow-chip chip-4">WinPart 이벤트 연결</div>
+                        <div class="flow-chip chip-5">높이 추적 시작 (task.spawn)</div>
+                        <div class="flow-chip chip-6">타이머 480초(8분)</div>
+                        <div class="flow-chip chip-7">이벤트 해제 &amp; 맵 제거</div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="info" title="이 모든 것이 Script 1개">
+                GameManager는 <strong>하나의 서버 스크립트</strong>에 모든 로직이 들어갑니다.<br>
+                함수로 잘 분리되어 있으므로 읽기 쉽고 수정도 편리합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 19: Tower 모델 제작 팁 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">맵 제작</span>
+            <h2 class="title-section mb-6">Tower 모델 제작 가이드</h2>
+            <p class="text-ink-light mb-8">
+                ServerStorage/Maps 폴더에 넣을 타워 모델을 만드는 방법입니다.
+            </p>
+
+            <div class="tower-guide">
+                <div class="tower-rule">
+                    <div class="rule-num">1</div>
+                    <div class="rule-content">
+                        <h4>Model로 그룹화</h4>
+                        <p>모든 파트를 선택 → 우클릭 → <strong>Group as Model</strong>. 이름을 "Tower1", "Tower2" 등으로 지정합니다.</p>
+                    </div>
+                </div>
+                <div class="tower-rule">
+                    <div class="rule-num">2</div>
+                    <div class="rule-content">
+                        <h4>SpawnPoint 배치</h4>
+                        <p>타워 맨 아래에 <strong>SpawnPoint</strong>라는 이름의 파트를 배치합니다. 플레이어 시작 위치입니다.</p>
+                    </div>
+                </div>
+                <div class="tower-rule">
+                    <div class="rule-num">3</div>
+                    <div class="rule-content">
+                        <h4>WinPart 배치</h4>
+                        <p>타워 맨 꼭대기에 <strong>WinPart</strong>라는 이름의 파트를 배치합니다. 여기 닿으면 클리어!</p>
+                        <p class="text-ink-light text-sm mt-1">Transparency = 0.5로 반투명하게 만들면 시각적으로 좋습니다.</p>
+                    </div>
+                </div>
+                <div class="tower-rule">
+                    <div class="rule-num">4</div>
+                    <div class="rule-content">
+                        <h4>Anchored 확인</h4>
+                        <p>모든 파트가 <strong>Anchored = true</strong>인지 확인합니다. 안 하면 게임 시작 시 파트가 떨어집니다.</p>
+                    </div>
+                </div>
+                <div class="tower-rule">
+                    <div class="rule-num">5</div>
+                    <div class="rule-content">
+                        <h4>ServerStorage로 이동</h4>
+                        <p>완성된 모델을 드래그해서 <strong>ServerStorage/Maps</strong> 폴더 안에 넣습니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 20: 정리 & 다음 시간 예고 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">정리</span>
+                <h2 class="title-section mb-6">오늘 배운 것</h2>
+
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-icon">&#x1f3c6;</div>
+                        <h4>Leaderstats</h4>
+                        <p>Wins, Level 점수 시스템<br>Tab 키로 확인 가능</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">&#x23f1;</div>
+                        <h4>타이머 &amp; 라운드</h4>
+                        <p>480초(8분) 카운트다운<br>서버→클라 실시간 전송</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">&#x1f504;</div>
+                        <h4>맵 로테이션</h4>
+                        <p>Clone으로 복사 배치<br>랜덤 + 중복 방지</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-icon">&#x1f4ca;</div>
+                        <h4>높이 추적</h4>
+                        <p>실시간 진행도 바<br>task.spawn 별도 스레드</p>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <HintBox type="info" title="다음 시간 예고: 12주차 B">
+                        <strong>상점 시스템</strong> (변형 모드 구매), <strong>음악 토글</strong>, <strong>게임 출시</strong>까지!<br>
+                        오늘 만든 시스템 위에 UI와 상점을 얹어서 완성합니다.
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+
+    <!-- ==================== 스타일 ==================== -->
+    <style>
+        /* ===== 아키텍처 다이어그램 ===== */
+        .arch-diagram {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .arch-layer {
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+        }
+
+        .server-layer { background: #1a1625; color: white; }
+        .client-layer { background: #f0fdf4; border: 2px solid #bbf7d0; }
+        .storage-layer { background: #fef3c7; border: 2px solid #fde68a; }
+
+        .arch-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            opacity: 0.7;
+        }
+
+        .arch-boxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .arch-box {
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .arch-box strong { display: block; margin-bottom: 0.25rem; }
+        .arch-box span { font-size: 0.75rem; opacity: 0.7; }
+
+        .box-core { background: rgba(61, 255, 162, 0.15); border: 1px solid rgba(61, 255, 162, 0.3); }
+        .box-data { background: rgba(107, 207, 255, 0.15); border: 1px solid rgba(107, 207, 255, 0.3); }
+        .box-ui { background: white; border: 1px solid #d1d5db; color: #1a1625; }
+        .box-map { background: white; border: 1px solid #fbbf24; color: #1a1625; }
+
+        .arch-arrow {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--ink-light);
+            padding: 0.25rem 0;
+        }
+
+        .arch-arrow span {
+            background: var(--ink-pale);
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+        }
+
+        /* ===== 폴더 트리 ===== */
+        .folder-tree {
+            background: #1a1625;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .folder-item { padding-left: 0; }
+        .folder-item.l1 { padding-left: 1.5rem; }
+        .folder-item.l2 { padding-left: 3rem; }
+        .folder-item.l3 { padding-left: 4.5rem; }
+        .folder-item.root { color: #fbbf24; font-weight: 700; }
+        .folder-item.folder::before { content: "📁 "; }
+        .folder-item.script::before { content: "📜 "; }
+        .folder-item.script-local::before { content: "📘 "; }
+        .folder-item.model::before { content: "🏗️ "; }
+        .folder-item.remote::before { content: "📡 "; }
+
+        .tag-server, .tag-local, .tag-remote, .tag-model, .tag-info {
+            font-size: 0.65rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        .tag-server { background: rgba(61, 255, 162, 0.2); color: #3DFFA2; }
+        .tag-local { background: rgba(107, 207, 255, 0.2); color: #6BCFFF; }
+        .tag-remote { background: rgba(255, 217, 61, 0.2); color: #FFD93D; }
+        .tag-model { background: rgba(255, 107, 107, 0.2); color: #FF6B6B; }
+        .tag-info { background: rgba(255, 255, 255, 0.1); color: #94a3b8; }
+
+        /* ===== 시스템 카드 ===== */
+        .system-card {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            border: 1px solid var(--ink-pale);
+            overflow: hidden;
+        }
+
+        .system-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--ink-pale);
+        }
+
+        .system-icon { font-size: 2rem; }
+        .system-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; }
+        .system-header p { font-size: 0.8rem; color: var(--ink-light); margin: 0; }
+
+        /* ===== 상세 설명 그리드 ===== */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .detail-item {
+            background: #f8f5f1;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--neon-sky);
+            margin-bottom: 0.4rem;
+        }
+
+        .detail-desc {
+            font-size: 0.82rem;
+            color: var(--ink-medium);
+            line-height: 1.5;
+        }
+
+        /* ===== 타이머 데모 ===== */
+        .timer-demo {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            background: #1a1625;
+            display: inline-block;
+            padding: 0.5rem 2rem;
+            border-radius: 12px;
+        }
+
+        .timer-label {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--ink-light);
+        }
+
+        /* ===== 플로우 다이어그램 ===== */
+        .flow-diagram {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .flow-num {
+            width: 28px;
+            height: 28px;
+            background: var(--ink-deep);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .flow-text strong { display: block; font-size: 0.8rem; }
+        .flow-text span { font-size: 0.7rem; color: var(--ink-light); }
+        .flow-arrow { font-size: 1.2rem; color: var(--ink-light); }
+
+        /* ===== 맵 로테이션 데모 ===== */
+        .rotation-demo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+
+        .rotation-step {
+            text-align: center;
+            padding: 1.25rem;
+            background: white;
+            border-radius: 12px;
+            border: 2px solid var(--ink-pale);
+            min-width: 160px;
+        }
+
+        .rotation-step.active-step { border-color: var(--neon-mint); background: #f0fdf4; }
+        .rotation-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .rotation-label { font-size: 0.85rem; line-height: 1.4; }
+        .rotation-desc { font-size: 0.7rem; color: var(--ink-light); margin-top: 0.4rem; }
+        .rotation-arrow { font-size: 1.5rem; color: var(--ink-light); }
+
+        /* ===== 높이 바 데모 ===== */
+        .height-demo {
+            display: flex;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .height-bar-demo {
+            display: flex;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .hb-tower {
+            width: 50px;
+            height: 300px;
+            background: rgba(30, 30, 30, 0.8);
+            border-radius: 8px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .hb-fill {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, rgba(61, 255, 162, 0.3), rgba(61, 255, 162, 0.1));
+            border-radius: 0 0 8px 8px;
+        }
+
+        .hb-marker {
+            position: absolute;
+            left: 110%;
+            background: #3DFFA2;
+            color: #1a1625;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .hb-marker.secondary { background: #6BCFFF; }
+
+        .hb-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--ink-light);
+            padding: 0 0.5rem;
+        }
+
+        /* ===== 루프 분석 ===== */
+        .loop-analysis {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .loop-step {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .loop-num {
+            width: 32px;
+            height: 32px;
+            background: var(--ink-deep);
+            color: var(--neon-mint);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .loop-content h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+        .loop-content p { margin: 0 0 0.25rem; font-size: 0.82rem; color: var(--ink-medium); }
+        .loop-content code { font-size: 0.75rem; color: var(--neon-sky); }
+
+        /* ===== 패턴 비교 ===== */
+        .pattern-compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .pattern-box {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .pattern-box h4 {
+            padding: 0.75rem 1rem;
+            margin: 0;
+            font-size: 0.85rem;
+        }
+
+        .pattern-box.bad h4 { background: rgba(255, 107, 107, 0.15); color: #FF6B6B; }
+        .pattern-box.good h4 { background: rgba(61, 255, 162, 0.15); color: #22c55e; }
+
+        /* ===== 타워 가이드 ===== */
+        .tower-guide {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .tower-rule {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            background: white;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .rule-num {
+            width: 32px;
+            height: 32px;
+            background: var(--roblox-red);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .rule-content h4 { margin: 0 0 0.25rem; font-size: 0.95rem; }
+        .rule-content p { margin: 0; font-size: 0.82rem; color: var(--ink-medium); line-height: 1.5; }
+
+        /* ===== 전체 흐름 ===== */
+        .full-flow {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--ink-pale);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .flow-section-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+            color: var(--ink-medium);
+        }
+
+        .flow-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .flow-chip {
+            background: #f8f5f1;
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .flow-divider {
+            height: 1px;
+            background: var(--ink-pale);
+            margin: 1rem 0;
+        }
+
+        .chip-1 { border-left: 3px solid #94a3b8; }
+        .chip-2 { border-left: 3px solid #fbbf24; }
+        .chip-3 { border-left: 3px solid #6BCFFF; }
+        .chip-4 { border-left: 3px solid #3DFFA2; }
+        .chip-5 { border-left: 3px solid #a78bfa; }
+        .chip-6 { border-left: 3px solid #FF6B6B; }
+        .chip-7 { border-left: 3px solid #f97316; }
+
+        /* ===== 요약 그리드 ===== */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 12px;
+            border: 1px solid var(--ink-pale);
+            text-align: center;
+        }
+
+        .summary-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .summary-item h4 { font-size: 0.9rem; margin: 0 0 0.4rem; }
+        .summary-item p { font-size: 0.75rem; color: var(--ink-light); margin: 0; line-height: 1.4; }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 768px) {
+            .arch-boxes,
+            .detail-grid,
+            .pattern-compare,
+            .summary-grid { grid-template-columns: 1fr; }
+
+            .flow-diagram,
+            .rotation-demo { flex-direction: column; align-items: center; }
+
+            .flow-arrow,
+            .rotation-arrow { transform: rotate(90deg); }
+        }
+    </style>
+</LessonLayout>

@@ -1,0 +1,1342 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+---
+
+<LessonLayout title="Tower of Hell - 상점 · 음악 · 출시" lessonNumber={12} totalSlides={18}>
+
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">12주차 B</span>
+                <h1 class="title-display mb-4">
+                    상점 · 음악 · 출시<br>
+                    <span class="text-neon-mint">게임 완성하기</span>
+                </h1>
+                <p class="text-ink-light text-lg max-w-2xl mx-auto mb-8">
+                    지난 시간에 만든 게임 시스템 위에 <strong>상점 UI</strong>, <strong>음악 토글</strong>을 추가하고,<br>
+                    최종적으로 게임을 <strong>출시</strong>하는 방법까지 알아봅니다.
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Shop System</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Music Toggle</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">Game Publishing</span>
+                </div>
+                <HintBox type="info" title="이번 수업 목표">
+                    변형 모드 상점 (무적, 과속, 무중력 등), 배경음악 재생/정지 토글,<br>
+                    그리고 게임 출시를 위한 썸네일 · 아이콘 · Public 설정을 다룹니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 상점 시스템 개요 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 5</span>
+            <h2 class="title-section mb-6">상점 시스템 설계</h2>
+            <p class="text-ink-light mb-8">
+                Tower of Hell의 "변형 모드" 상점입니다. 코인으로 효과를 구매하면 일정 시간 동안 적용됩니다.
+            </p>
+
+            <div class="shop-preview">
+                <div class="shop-header-bar">
+                    <div class="shop-tab active">상점</div>
+                    <div class="shop-tab">효과</div>
+                    <div class="shop-tab">설정</div>
+                </div>
+                <div class="shop-items-preview">
+                    <div class="shop-item-card">
+                        <div class="item-icon">&#x1f6e1;</div>
+                        <div class="item-name">무적 상태</div>
+                        <div class="item-price">500 &#x1fa99;</div>
+                    </div>
+                    <div class="shop-item-card">
+                        <div class="item-icon">&#x27a1;</div>
+                        <div class="item-name">과속</div>
+                        <div class="item-price">100 &#x1fa99;</div>
+                    </div>
+                    <div class="shop-item-card">
+                        <div class="item-icon">&#x2b06;</div>
+                        <div class="item-name">무중력</div>
+                        <div class="item-price">130 &#x1fa99;</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">서버-클라 통신</div>
+                    <div class="detail-desc"><strong>RemoteFunction</strong>: 클라이언트가 "이 아이템 사줘" 요청 → 서버가 코인 확인 → 결과 반환. 요청+응답이 한 쌍이므로 RemoteFunction을 씁니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">효과 지속 시간</div>
+                    <div class="detail-desc"><strong>task.delay</strong>로 N초 후 효과를 해제합니다. 중복 구매 시 기존 타이머를 취소하고 새로 시작합니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: 상점 아이템 정의 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 5 코드</span>
+            <h2 class="title-section mb-6">아이템 테이블 정의 (서버)</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 상점 아이템 정의" show-line-numbers>
+-- =============================================
+-- 상점 아이템 목록
+-- =============================================
+-- 테이블(딕셔너리) = &#123; 키 = 값 &#125; 형태로 아이템 정보 저장
+local ITEMS = &#123;
+    invincible = &#123;
+        name = "무적 상태",
+        price = 500,       -- 실제 TOH와 동일 가격!
+        duration = 30,     -- 30초간 유지
+        apply = function(character)
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                -- ForceField = 로블록스 기본 무적 효과
+                local ff = Instance.new("ForceField")
+                ff.Name = "ShopForceField"
+                ff.Parent = character
+            end
+        end,
+        remove = function(character)
+            local ff = character:FindFirstChild("ShopForceField")
+            if ff then ff:Destroy() end
+        end
+    &#125;,
+
+    speed = &#123;
+        name = "과속",
+        price = 100,       -- 실제 TOH "High Speed" = 100코인
+        duration = 60,     -- 60초간 유지 (실제 TOH는 라운드 끝까지)
+        apply = function(character)
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 32  -- 기본 16의 2배
+            end
+        end,
+        remove = function(character)
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 16  -- 원래대로
+            end
+        end
+    &#125;,
+
+    gravity = &#123;
+        name = "무중력",
+        price = 130,       -- 실제 TOH "Low Gravity" = 130코인
+        duration = 45,     -- 45초간 유지 (실제 TOH는 라운드 끝까지)
+        apply = function(character)
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.UseJumpPower = true
+                humanoid.JumpPower = 100  -- 기본 50의 2배
+            end
+        end,
+        remove = function(character)
+            local humanoid = character:FindFirstChild("Humanoid")
+            if humanoid then
+                humanoid.JumpPower = 50  -- 원래대로
+            end
+        end
+    &#125;,
+&#125;
+                </lua-code-block>
+            </div>
+
+            <HintBox type="tip" title="함수도 테이블에 넣을 수 있다!">
+                Lua에서는 함수도 값입니다. <code>apply = function(character) ... end</code>처럼 테이블 안에 함수를 넣으면,<br>
+                <code>ITEMS.speed.apply(character)</code>로 호출할 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 상점 구매 처리 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 5 계속</span>
+            <h2 class="title-section mb-6">구매 요청 처리 (서버)</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameManager.lua - 구매 처리" show-line-numbers>
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local PurchaseRF = ReplicatedStorage:WaitForChild("PurchaseItem")
+
+-- 플레이어별 활성 효과 저장
+local activeEffects = &#123;&#125;
+
+-- =============================================
+-- 구매 요청 처리: 클라이언트 → 서버
+-- =============================================
+PurchaseRF.OnServerInvoke = function(player, itemId)
+    -- 1. 아이템 존재 확인
+    local item = ITEMS[itemId]
+    if not item then
+        return false, "존재하지 않는 아이템"
+    end
+
+    -- 2. 코인 확인
+    local leaderstats = player:FindFirstChild("leaderstats")
+    local coins = leaderstats and leaderstats:FindFirstChild("Coins")
+    if not coins or coins.Value &lt; item.price then
+        return false, "코인이 부족합니다"
+    end
+
+    -- 3. 코인 차감
+    coins.Value -= item.price
+
+    -- 4. 기존 같은 효과가 있으면 제거
+    if activeEffects[player.UserId] and activeEffects[player.UserId][itemId] then
+        local old = activeEffects[player.UserId][itemId]
+        task.cancel(old.thread)
+        item.remove(player.Character)
+    end
+
+    -- 5. 효과 적용
+    local character = player.Character
+    if character then
+        item.apply(character)
+    end
+
+    -- 6. 일정 시간 후 자동 해제
+    local thread = task.delay(item.duration, function()
+        if player.Character then
+            item.remove(player.Character)
+        end
+        if activeEffects[player.UserId] then
+            activeEffects[player.UserId][itemId] = nil
+        end
+    end)
+
+    -- 효과 정보 저장
+    if not activeEffects[player.UserId] then
+        activeEffects[player.UserId] = &#123;&#125;
+    end
+    activeEffects[player.UserId][itemId] = &#123; thread = thread &#125;
+
+    return true, item.name .. " 적용! (" .. item.duration .. "초)"
+end
+                </lua-code-block>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: 상점 구매 흐름 해설 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">코드 해설</span>
+            <h2 class="title-section mb-6">구매 흐름 단계별 분석</h2>
+
+            <div class="purchase-flow">
+                <div class="pf-step">
+                    <div class="pf-side client-side">클라이언트</div>
+                    <div class="pf-content">
+                        <strong>구매 버튼 클릭</strong>
+                        <code>PurchaseRF:InvokeServer("speed")</code>
+                    </div>
+                </div>
+                <div class="pf-arrow">&darr;</div>
+                <div class="pf-step">
+                    <div class="pf-side server-side">서버</div>
+                    <div class="pf-content">
+                        <strong>아이템 확인</strong>
+                        <span>ITEMS["speed"]가 존재하는지 검증</span>
+                    </div>
+                </div>
+                <div class="pf-arrow">&darr;</div>
+                <div class="pf-step">
+                    <div class="pf-side server-side">서버</div>
+                    <div class="pf-content">
+                        <strong>코인 확인 &amp; 차감</strong>
+                        <span>잔액 &ge; 가격이면 차감, 아니면 실패 반환</span>
+                    </div>
+                </div>
+                <div class="pf-arrow">&darr;</div>
+                <div class="pf-step">
+                    <div class="pf-side server-side">서버</div>
+                    <div class="pf-content">
+                        <strong>효과 적용 + 타이머 설정</strong>
+                        <span>WalkSpeed 변경, task.delay로 자동 해제 예약</span>
+                    </div>
+                </div>
+                <div class="pf-arrow">&darr;</div>
+                <div class="pf-step">
+                    <div class="pf-side client-side">클라이언트</div>
+                    <div class="pf-content">
+                        <strong>결과 수신</strong>
+                        <code>local ok, msg = PurchaseRF:InvokeServer("speed")</code>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="왜 서버에서 처리하나요?">
+                클라이언트에서 직접 코인을 차감하면 <strong>해커가 코인을 무한으로 늘릴 수 있습니다</strong>.<br>
+                반드시 서버에서 코인 확인 → 차감 → 효과 적용을 해야 안전합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: 상점 UI (클라이언트) ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">클라이언트</span>
+            <h2 class="title-section mb-6">상점 UI 코드</h2>
+            <p class="text-ink-light mb-8">
+                좌하단 "상점" 버튼을 누르면 아이템 목록이 펼쳐지는 UI입니다.
+            </p>
+
+            <div class="system-card">
+                <lua-code-block title="GameUI (LocalScript) - 상점 UI 부분" show-line-numbers>
+local PurchaseRF = ReplicatedStorage:WaitForChild("PurchaseItem")
+
+-- =============================================
+-- 상점 토글 버튼 (좌하단)
+-- =============================================
+local shopButton = Instance.new("TextButton")
+shopButton.Name = "ShopToggle"
+shopButton.Size = UDim2.new(0, 80, 0, 40)
+shopButton.Position = UDim2.new(0, 20, 1, -60)  -- 좌하단
+shopButton.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
+shopButton.Text = "상점"
+shopButton.TextSize = 18
+shopButton.Font = Enum.Font.GothamBold
+shopButton.TextColor3 = Color3.new(0, 0, 0)
+shopButton.Parent = screenGui
+
+-- 모서리 둥글게
+Instance.new("UICorner", shopButton).CornerRadius = UDim.new(0, 8)
+
+-- =============================================
+-- 상점 패널 (토글로 열고 닫기)
+-- =============================================
+local shopPanel = Instance.new("Frame")
+shopPanel.Name = "ShopPanel"
+shopPanel.Size = UDim2.new(0, 300, 0, 400)
+shopPanel.Position = UDim2.new(0, 20, 1, -470)
+shopPanel.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+shopPanel.BackgroundTransparency = 0.1
+shopPanel.Visible = false  -- 처음엔 숨김
+shopPanel.Parent = screenGui
+Instance.new("UICorner", shopPanel).CornerRadius = UDim.new(0, 12)
+
+local isShopOpen = false
+shopButton.MouseButton1Click:Connect(function()
+    isShopOpen = not isShopOpen
+    shopPanel.Visible = isShopOpen
+end)
+                </lua-code-block>
+            </div>
+
+            <HintBox type="info" title="Instance.new 단축 문법">
+                <code>Instance.new("UICorner", shopButton)</code> — 두 번째 인자로 Parent를 바로 지정할 수 있습니다.<br>
+                별도로 <code>.Parent = shopButton</code>을 쓰지 않아도 됩니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 상점 아이템 카드 생성 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">클라이언트 계속</span>
+            <h2 class="title-section mb-6">아이템 카드 동적 생성</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameUI (LocalScript) - 아이템 카드 부분" show-line-numbers>
+-- =============================================
+-- 아이템 목록 (클라이언트용 - 가격/이름만)
+-- =============================================
+local shopItems = &#123;
+    &#123; id = "invincible", name = "무적 상태",  price = 500, icon = "🛡️" &#125;,
+    &#123; id = "speed",      name = "과속",        price = 100, icon = "➡️" &#125;,
+    &#123; id = "gravity",    name = "무중력",      price = 130, icon = "⬆️" &#125;,
+&#125;
+
+-- =============================================
+-- UIListLayout: 카드를 세로로 자동 정렬
+-- =============================================
+local listLayout = Instance.new("UIListLayout")
+listLayout.Padding = UDim.new(0, 8)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Parent = shopPanel
+
+-- =============================================
+-- 각 아이템별 구매 카드 생성
+-- =============================================
+for i, item in shopItems do
+    local card = Instance.new("TextButton")
+    card.Size = UDim2.new(1, -16, 0, 60)
+    card.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    card.Text = item.icon .. " " .. item.name .. " - " .. item.price .. " 코인"
+    card.TextColor3 = Color3.new(1, 1, 1)
+    card.TextSize = 14
+    card.Font = Enum.Font.GothamBold
+    card.LayoutOrder = i
+    card.Parent = shopPanel
+    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
+
+    -- 클릭 시 서버에 구매 요청
+    card.MouseButton1Click:Connect(function()
+        card.Text = "구매 중..."
+        local success, message = PurchaseRF:InvokeServer(item.id)
+
+        if success then
+            card.Text = "✅ " .. message
+        else
+            card.Text = "❌ " .. message
+        end
+
+        -- 2초 후 원래 텍스트로 복원
+        task.delay(2, function()
+            card.Text = item.icon .. " " .. item.name .. " - " .. item.price .. " 코인"
+        end)
+    end)
+end
+                </lua-code-block>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: 코인 획득 방법 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">보충 설명</span>
+            <h2 class="title-section mb-6">코인은 어디서 오나?</h2>
+            <p class="text-ink-light mb-8">
+                상점이 있으려면 재화가 필요합니다. Tower of Hell에서 코인을 얻는 방법을 설계합니다.
+            </p>
+
+            <div class="coin-sources">
+                <div class="coin-source">
+                    <div class="cs-icon">&#x1f3c6;</div>
+                    <div class="cs-content">
+                        <h4>타워 클리어 보상</h4>
+                        <p>꼭대기 도달 시 <strong>+50 코인</strong></p>
+                        <code>coins.Value += 50</code>
+                    </div>
+                </div>
+                <div class="coin-source">
+                    <div class="cs-icon">&#x23f1;</div>
+                    <div class="cs-content">
+                        <h4>라운드 참여 보상</h4>
+                        <p>라운드 끝까지 생존 시 <strong>+10 코인</strong></p>
+                        <code>coins.Value += 10</code>
+                    </div>
+                </div>
+                <div class="coin-source">
+                    <div class="cs-icon">&#x1f4b0;</div>
+                    <div class="cs-content">
+                        <h4>높이 보너스</h4>
+                        <p>진행도 50% 이상 시 <strong>+5 코인</strong></p>
+                        <code>if progress >= 0.5 then coins.Value += 5 end</code>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="Leaderstats에 Coins 추가">
+                12주차 A에서 만든 <code>setupLeaderstats</code> 함수에 Coins IntValue를 추가하면 됩니다.<br>
+                Wins, Level과 같은 방식으로 <code>Instance.new("IntValue")</code>를 하나 더 만드세요.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: 음악 시스템 개요 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">시스템 6</span>
+            <h2 class="title-section mb-6">배경음악 시스템</h2>
+            <p class="text-ink-light mb-8">
+                우측 하단의 음악 재생/정지 버튼. 클라이언트 전용이므로 LocalScript만으로 구현합니다.
+            </p>
+
+            <div class="music-demo">
+                <div class="music-btn playing">
+                    <span class="music-icon">&#x266b;</span>
+                    <span class="music-label">Interstellar Sky</span>
+                    <span class="music-status">&#x25b6; 재생 중</span>
+                </div>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">Sound 객체</div>
+                    <div class="detail-desc">SoundService 또는 Workspace에 Sound를 넣고, <code>SoundId</code>에 Roblox 오디오 ID를 설정합니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Looped = true</div>
+                    <div class="detail-desc">BGM이므로 반복 재생이 필요합니다. Sound의 <code>Looped</code> 속성을 true로 설정합니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">클라이언트 전용</div>
+                    <div class="detail-desc">음악 재생/정지는 개인 설정이므로 서버에 보낼 필요 없이 LocalScript에서 처리합니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: 음악 코드 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">클라이언트</span>
+            <h2 class="title-section mb-6">음악 토글 코드</h2>
+
+            <div class="system-card">
+                <lua-code-block title="GameUI (LocalScript) - 음악 부분" show-line-numbers>
+-- =============================================
+-- 배경음악 설정
+-- =============================================
+local SoundService = game:GetService("SoundService")
+
+local bgm = Instance.new("Sound")
+bgm.Name = "BGM"
+bgm.SoundId = "rbxassetid://1234567890"  -- 원하는 오디오 ID
+bgm.Volume = 0.3
+bgm.Looped = true
+bgm.Parent = SoundService
+bgm:Play()
+
+local isPlaying = true
+
+-- =============================================
+-- 음악 토글 버튼 (우하단)
+-- =============================================
+local musicButton = Instance.new("TextButton")
+musicButton.Name = "MusicToggle"
+musicButton.Size = UDim2.new(0, 40, 0, 40)
+musicButton.Position = UDim2.new(1, -60, 1, -60)  -- 우하단
+musicButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+musicButton.BackgroundTransparency = 0.3
+musicButton.Text = "♫"
+musicButton.TextSize = 22
+musicButton.TextColor3 = Color3.new(1, 1, 1)
+musicButton.Parent = screenGui
+Instance.new("UICorner", musicButton).CornerRadius = UDim.new(0, 20)
+
+-- =============================================
+-- 클릭하면 재생/정지 토글
+-- =============================================
+musicButton.MouseButton1Click:Connect(function()
+    isPlaying = not isPlaying
+
+    if isPlaying then
+        bgm:Resume()
+        musicButton.Text = "♫"
+        musicButton.BackgroundTransparency = 0.3
+    else
+        bgm:Pause()
+        musicButton.Text = "🔇"
+        musicButton.BackgroundTransparency = 0.6
+    end
+end)
+                </lua-code-block>
+            </div>
+
+            <div class="detail-grid mt-6">
+                <div class="detail-item">
+                    <div class="detail-label">:Play() vs :Resume()</div>
+                    <div class="detail-desc">Play = 처음부터 재생, Resume = 일시정지된 곳부터 이어서 재생. 토글에는 Resume/Pause를 씁니다.</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">rbxassetid://</div>
+                    <div class="detail-desc">Roblox 라이브러리에서 오디오를 검색 → ID를 복사 → SoundId에 붙여넣기합니다.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 여러 곡 순환 재생 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">심화</span>
+            <h2 class="title-section mb-6">여러 곡 순환 재생</h2>
+            <p class="text-ink-light mb-8">
+                한 곡만 계속 반복하면 지루합니다. 여러 곡을 자동으로 순환 재생하는 방법입니다.
+            </p>
+
+            <div class="system-card">
+                <lua-code-block title="GameUI (LocalScript) - 플레이리스트" show-line-numbers>
+-- =============================================
+-- 플레이리스트: 여러 곡 순환 재생
+-- =============================================
+local playlist = &#123;
+    &#123; id = "rbxassetid://1111111111", name = "Interstellar Sky" &#125;,
+    &#123; id = "rbxassetid://2222222222", name = "Neon Lights" &#125;,
+    &#123; id = "rbxassetid://3333333333", name = "Tower Rush" &#125;,
+&#125;
+
+local currentIndex = 1
+
+local function playNext()
+    local track = playlist[currentIndex]
+    bgm.SoundId = track.id
+    bgm:Play()
+
+    -- 곡 이름 표시 (있다면)
+    -- musicLabel.Text = track.name
+
+    -- 곡이 끝나면 다음 곡으로
+    bgm.Ended:Wait()
+
+    -- 다음 인덱스 (마지막이면 처음으로)
+    currentIndex = currentIndex % #playlist + 1
+end
+
+-- 별도 스레드에서 순환 재생
+task.spawn(function()
+    while true do
+        if isPlaying then
+            playNext()
+        else
+            task.wait(0.5)  -- 정지 상태면 대기
+        end
+    end
+end)
+                </lua-code-block>
+            </div>
+
+            <HintBox type="info" title="% 연산자로 순환하기">
+                <code>currentIndex % #playlist + 1</code><br>
+                인덱스가 3일 때: 3 % 3 + 1 = 1 &rarr; 다시 첫 곡으로! 배열 순환의 표준 패턴입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 전체 UI 배치도 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">UI 레이아웃</span>
+            <h2 class="title-section mb-6">전체 화면 UI 배치</h2>
+            <p class="text-ink-light mb-8">지금까지 만든 모든 UI 요소의 위치를 정리합니다.</p>
+
+            <div class="screen-layout">
+                <div class="sl-screen">
+                    <div class="sl-element sl-timer">
+                        <strong>Timer</strong>
+                        <span>UDim2.new(0.5, -100, 0, 20)</span>
+                    </div>
+                    <div class="sl-element sl-leaderboard">
+                        <strong>Leaderboard</strong>
+                        <span>(Tab 키 = 로블록스 기본)</span>
+                    </div>
+                    <div class="sl-element sl-heightbar">
+                        <strong>HeightBar</strong>
+                        <span>UDim2.new(1, -60, 0.2, 0)</span>
+                    </div>
+                    <div class="sl-element sl-shop">
+                        <strong>상점 버튼</strong>
+                        <span>UDim2.new(0, 20, 1, -60)</span>
+                    </div>
+                    <div class="sl-element sl-level">
+                        <strong>레벨 표시</strong>
+                        <span>UDim2.new(0.5, 0, 1, -40)</span>
+                    </div>
+                    <div class="sl-element sl-music">
+                        <strong>♫</strong>
+                        <span>UDim2.new(1, -60, 1, -60)</span>
+                    </div>
+                    <div class="sl-game-area">게임 화면</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: 게임 출시 준비 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">게임 출시</span>
+            <h2 class="title-section mb-6">출시 전 체크리스트</h2>
+            <p class="text-ink-light mb-8">
+                게임을 세상에 공개하기 전에 확인해야 할 것들입니다.
+            </p>
+
+            <div class="checklist">
+                <div class="check-item">
+                    <div class="check-box">&#x2610;</div>
+                    <div class="check-content">
+                        <h4>맵 3개 이상 준비</h4>
+                        <p>ServerStorage/Maps에 최소 3개의 Tower 모델이 있는지 확인</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-box">&#x2610;</div>
+                    <div class="check-content">
+                        <h4>모든 파트 Anchored</h4>
+                        <p>타워의 모든 파트가 Anchored = true인지 확인. 하나라도 빠지면 무너짐</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-box">&#x2610;</div>
+                    <div class="check-content">
+                        <h4>SpawnPoint / WinPart 이름 확인</h4>
+                        <p>각 타워에 정확한 이름의 파트가 있는지 대소문자까지 확인</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-box">&#x2610;</div>
+                    <div class="check-content">
+                        <h4>RemoteEvent/Function 생성</h4>
+                        <p>ReplicatedStorage에 TimerUpdate, HeightUpdate, RoundInfo, PurchaseItem이 있는지</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-box">&#x2610;</div>
+                    <div class="check-content">
+                        <h4>로비 SpawnLocation</h4>
+                        <p>Workspace/Lobby에 SpawnLocation이 있어야 리스폰 시 로비에서 시작</p>
+                    </div>
+                </div>
+                <div class="check-item">
+                    <div class="check-box">&#x2610;</div>
+                    <div class="check-content">
+                        <h4>테스트 플레이</h4>
+                        <p>Play 버튼으로 실행 → 타이머, 텔레포트, 클리어, 상점 모두 테스트</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: 게임 설정 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Game Settings</span>
+            <h2 class="title-section mb-6">게임 설정 (Game Settings)</h2>
+            <p class="text-ink-light mb-8">
+                로블록스 스튜디오 상단 메뉴 → <strong>File → Game Settings</strong>에서 설정합니다.
+            </p>
+
+            <div class="settings-guide">
+                <div class="setting-section">
+                    <h4>Basic Info</h4>
+                    <div class="setting-items">
+                        <div class="setting-row">
+                            <span class="setting-key">Name</span>
+                            <span class="setting-val">게임 이름 (예: "Tower of Hell: My Edition")</span>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-key">Description</span>
+                            <span class="setting-val">게임 설명 (어떤 게임인지 2~3줄로)</span>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-key">Genre</span>
+                            <span class="setting-val">Adventure 또는 All 선택</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <h4>Icon &amp; Thumbnails</h4>
+                    <div class="setting-items">
+                        <div class="setting-row">
+                            <span class="setting-key">Game Icon</span>
+                            <span class="setting-val">512x512 PNG. 게임 목록에 표시되는 아이콘</span>
+                        </div>
+                        <div class="setting-row">
+                            <span class="setting-key">Thumbnails</span>
+                            <span class="setting-val">1920x1080 PNG. 게임 페이지 상단 이미지 (최대 10장)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <h4>Permissions</h4>
+                    <div class="setting-items">
+                        <div class="setting-row highlight">
+                            <span class="setting-key">Playability</span>
+                            <span class="setting-val"><strong>Public</strong>으로 변경해야 다른 사람이 플레이 가능!</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: 썸네일 만들기 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">디자인</span>
+            <h2 class="title-section mb-6">좋은 썸네일 만드는 법</h2>
+            <p class="text-ink-light mb-8">
+                썸네일은 플레이어가 게임을 클릭할지 결정하는 첫인상입니다.
+            </p>
+
+            <div class="thumbnail-tips">
+                <div class="thumb-tip">
+                    <div class="thumb-num">1</div>
+                    <div class="thumb-content">
+                        <h4>게임 안에서 스크린샷 찍기</h4>
+                        <p>멋진 각도에서 타워 전체가 보이게 카메라를 배치하고 스크린샷을 찍습니다.</p>
+                        <span class="thumb-how">View &rarr; Screenshot 또는 PrintScreen 키</span>
+                    </div>
+                </div>
+                <div class="thumb-tip">
+                    <div class="thumb-num">2</div>
+                    <div class="thumb-content">
+                        <h4>텍스트 넣기</h4>
+                        <p>게임 이름을 크고 굵게! 그림판이나 Canva로 텍스트를 추가합니다.</p>
+                        <span class="thumb-how">무료 도구: Canva, 그림판 3D, Photopea</span>
+                    </div>
+                </div>
+                <div class="thumb-tip">
+                    <div class="thumb-num">3</div>
+                    <div class="thumb-content">
+                        <h4>밝고 눈에 띄는 색상</h4>
+                        <p>어두운 배경 + 밝은 텍스트가 잘 보입니다. 네온 색상 추천!</p>
+                        <span class="thumb-how">빨강/노랑/초록 계열이 시선을 끌어요</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 16: Publish 방법 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">출시</span>
+            <h2 class="title-section mb-6">게임 퍼블리시 (Publish)</h2>
+
+            <div class="publish-steps">
+                <div class="pub-step">
+                    <div class="pub-num">1</div>
+                    <div class="pub-content">
+                        <h4>File &rarr; Publish to Roblox</h4>
+                        <p>처음이면 "Create New" 선택. 이미 퍼블리시했으면 "Overwrite" 선택.</p>
+                    </div>
+                </div>
+                <div class="pub-step">
+                    <div class="pub-num">2</div>
+                    <div class="pub-content">
+                        <h4>Game Settings &rarr; Permissions</h4>
+                        <p><strong>Playability = Public</strong>으로 설정. 이것 안 하면 본인만 플레이 가능!</p>
+                    </div>
+                </div>
+                <div class="pub-step">
+                    <div class="pub-num">3</div>
+                    <div class="pub-content">
+                        <h4>링크 공유</h4>
+                        <p>roblox.com &rarr; Create &rarr; 내 게임 클릭 &rarr; URL 복사해서 친구에게 공유!</p>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="Publish vs Save">
+                <strong>Save (Ctrl+S)</strong> = 로컬 저장만. 다른 사람은 접근 불가.<br>
+                <strong>Publish</strong> = Roblox 서버에 업로드. Public이면 누구나 플레이 가능!
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: 추가 아이디어 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">확장 아이디어</span>
+            <h2 class="title-section mb-6">더 추가할 수 있는 것들</h2>
+            <p class="text-ink-light mb-8">
+                기본 시스템을 완성했다면, 이런 기능들을 추가해서 게임을 더 풍성하게 만들어보세요.
+            </p>
+
+            <div class="ideas-grid">
+                <div class="idea-card">
+                    <div class="idea-difficulty easy">쉬움</div>
+                    <h4>안개 효과</h4>
+                    <p>Lighting &rarr; Atmosphere에서 Density를 높이면 안개가 생깁니다. 상점 아이템으로 팔 수도 있어요.</p>
+                </div>
+                <div class="idea-card">
+                    <div class="idea-difficulty easy">쉬움</div>
+                    <h4>색 반전</h4>
+                    <p>Lighting에 ColorCorrectionEffect를 넣고 Saturation = -1로 설정하면 흑백 모드!</p>
+                </div>
+                <div class="idea-card">
+                    <div class="idea-difficulty medium">보통</div>
+                    <h4>확장 모드</h4>
+                    <p>캐릭터 크기를 1.5배로 키우는 효과. Humanoid의 BodyHeightScale, BodyWidthScale 등을 조절합니다.</p>
+                </div>
+                <div class="idea-card">
+                    <div class="idea-difficulty medium">보통</div>
+                    <h4>투명인간</h4>
+                    <p>캐릭터의 모든 BasePart를 for문으로 찾아서 Transparency = 1로 변경합니다.</p>
+                </div>
+                <div class="idea-card">
+                    <div class="idea-difficulty hard">도전</div>
+                    <h4>더블 점프</h4>
+                    <p>UserInputService로 점프 키 감지 → 공중에서 한 번 더 점프. Humanoid.StateChanged 이벤트 활용.</p>
+                </div>
+                <div class="idea-card">
+                    <div class="idea-difficulty hard">도전</div>
+                    <h4>DataStore 저장</h4>
+                    <p>DataStoreService로 Wins, Coins를 서버에 저장 → 다음에 접속해도 데이터 유지!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 최종 정리 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">축하합니다!</span>
+                <h2 class="title-section mb-6">12주 커리큘럼 완료</h2>
+
+                <div class="final-summary">
+                    <div class="fs-row">
+                        <div class="fs-month">1개월차</div>
+                        <div class="fs-content">변수, 함수, 이벤트, 조건문 &mdash; Lua 기초 문법</div>
+                    </div>
+                    <div class="fs-row">
+                        <div class="fs-month">2개월차</div>
+                        <div class="fs-content">반복문, Humanoid, GUI, Leaderstats &mdash; 게임 로직</div>
+                    </div>
+                    <div class="fs-row">
+                        <div class="fs-month">3개월차</div>
+                        <div class="fs-content">Tool, 사운드, 환경, 엔진 마스터 &mdash; 실전 프로젝트</div>
+                    </div>
+                    <div class="fs-row highlight">
+                        <div class="fs-month">최종</div>
+                        <div class="fs-content">Tower of Hell 게임 설계부터 출시까지!</div>
+                    </div>
+                </div>
+
+                <div class="mt-8">
+                    <HintBox type="tip" title="여기서 끝이 아닙니다">
+                        이제 여러분은 <strong>자신만의 게임을 만들 수 있는 기초</strong>를 갖추었습니다.<br>
+                        Tower of Hell을 더 발전시키거나, 완전히 새로운 게임에 도전해보세요!<br>
+                        로블록스 개발자 문서: <strong>create.roblox.com/docs</strong>
+                    </HintBox>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Lit 컴포넌트 로드 -->
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+
+    <!-- ==================== 스타일 ==================== -->
+    <style>
+        /* ===== 상점 프리뷰 ===== */
+        .shop-preview {
+            background: #1a1625;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .shop-header-bar {
+            display: flex;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .shop-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .shop-tab.active {
+            color: white;
+            border-bottom: 2px solid var(--neon-mint);
+        }
+
+        .shop-items-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            padding: 1rem;
+        }
+
+        .shop-item-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .item-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .item-name { color: white; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .item-price { color: #FFD93D; font-size: 0.75rem; }
+
+        /* ===== 상세 설명 그리드 ===== */
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .detail-item {
+            background: #f8f5f1;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--neon-sky);
+            margin-bottom: 0.4rem;
+        }
+
+        .detail-desc {
+            font-size: 0.82rem;
+            color: var(--ink-medium);
+            line-height: 1.5;
+        }
+
+        /* ===== 시스템 카드 ===== */
+        .system-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--ink-pale);
+            overflow: hidden;
+        }
+
+        /* ===== 구매 흐름 ===== */
+        .purchase-flow {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pf-step {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .pf-side {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .client-side { background: rgba(107, 207, 255, 0.15); color: #6BCFFF; }
+        .server-side { background: rgba(61, 255, 162, 0.15); color: #22c55e; }
+
+        .pf-content strong { display: block; font-size: 0.85rem; }
+        .pf-content span { font-size: 0.75rem; color: var(--ink-light); }
+        .pf-content code { font-size: 0.7rem; color: var(--neon-sky); }
+        .pf-arrow { color: var(--ink-light); font-size: 1.2rem; }
+
+        /* ===== 코인 소스 ===== */
+        .coin-sources {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .coin-source {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: white;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .cs-icon { font-size: 2rem; flex-shrink: 0; }
+        .cs-content h4 { margin: 0 0 0.2rem; font-size: 0.95rem; }
+        .cs-content p { margin: 0 0 0.2rem; font-size: 0.82rem; color: var(--ink-medium); }
+        .cs-content code { font-size: 0.75rem; color: var(--neon-sky); }
+
+        /* ===== 음악 데모 ===== */
+        .music-demo {
+            display: flex;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .music-btn {
+            background: #1a1625;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .music-icon { font-size: 1.5rem; }
+        .music-label { font-weight: 600; }
+        .music-status { font-size: 0.75rem; color: var(--neon-mint); }
+
+        /* ===== 화면 레이아웃 ===== */
+        .screen-layout {
+            display: flex;
+            justify-content: center;
+        }
+
+        .sl-screen {
+            width: 100%;
+            max-width: 600px;
+            height: 350px;
+            background: #1a1625;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sl-game-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.1);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .sl-element {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 0.4rem 0.6rem;
+            color: white;
+            font-size: 0.65rem;
+            text-align: center;
+        }
+
+        .sl-element strong { display: block; font-size: 0.7rem; margin-bottom: 0.15rem; }
+        .sl-element span { opacity: 0.5; font-size: 0.55rem; }
+
+        .sl-timer { top: 10px; left: 50%; transform: translateX(-50%); background: rgba(255, 255, 255, 0.15); }
+        .sl-leaderboard { top: 10px; right: 10px; }
+        .sl-heightbar { right: 15px; top: 30%; height: 40%; width: 35px; }
+        .sl-shop { bottom: 10px; left: 10px; background: rgba(255, 193, 7, 0.3); border-color: rgba(255, 193, 7, 0.5); }
+        .sl-level { bottom: 10px; left: 50%; transform: translateX(-50%); }
+        .sl-music { bottom: 10px; right: 10px; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
+
+        /* ===== 체크리스트 ===== */
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .check-item {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .check-box { font-size: 1.2rem; flex-shrink: 0; }
+        .check-content h4 { margin: 0 0 0.15rem; font-size: 0.9rem; }
+        .check-content p { margin: 0; font-size: 0.8rem; color: var(--ink-light); }
+
+        /* ===== 게임 설정 ===== */
+        .settings-guide {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .setting-section {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+            overflow: hidden;
+        }
+
+        .setting-section h4 {
+            padding: 0.6rem 1rem;
+            margin: 0;
+            font-size: 0.85rem;
+            background: #f8f5f1;
+            border-bottom: 1px solid var(--ink-pale);
+        }
+
+        .setting-items { padding: 0.5rem; }
+
+        .setting-row {
+            display: flex;
+            gap: 1rem;
+            padding: 0.4rem 0.5rem;
+            align-items: center;
+        }
+
+        .setting-row.highlight { background: rgba(255, 217, 61, 0.1); border-radius: 4px; }
+
+        .setting-key {
+            font-weight: 700;
+            font-size: 0.82rem;
+            min-width: 100px;
+            flex-shrink: 0;
+        }
+
+        .setting-val {
+            font-size: 0.8rem;
+            color: var(--ink-medium);
+        }
+
+        /* ===== 썸네일 팁 ===== */
+        .thumbnail-tips {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .thumb-tip {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .thumb-num {
+            width: 32px;
+            height: 32px;
+            background: var(--roblox-red);
+            color: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .thumb-content h4 { margin: 0 0 0.2rem; font-size: 0.9rem; }
+        .thumb-content p { margin: 0; font-size: 0.82rem; color: var(--ink-medium); }
+        .thumb-how { display: block; font-size: 0.7rem; color: var(--neon-sky); margin-top: 0.3rem; }
+
+        /* ===== 퍼블리시 스텝 ===== */
+        .publish-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .pub-step {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            background: white;
+            padding: 1rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .pub-num {
+            width: 36px;
+            height: 36px;
+            background: var(--neon-mint);
+            color: #1a1625;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .pub-content h4 { margin: 0 0 0.2rem; font-size: 0.95rem; }
+        .pub-content p { margin: 0; font-size: 0.82rem; color: var(--ink-medium); }
+
+        /* ===== 아이디어 그리드 ===== */
+        .ideas-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        .idea-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .idea-difficulty {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .idea-difficulty.easy { background: rgba(61, 255, 162, 0.15); color: #22c55e; }
+        .idea-difficulty.medium { background: rgba(255, 217, 61, 0.15); color: #d97706; }
+        .idea-difficulty.hard { background: rgba(255, 107, 107, 0.15); color: #FF6B6B; }
+
+        .idea-card h4 { margin: 0 0 0.3rem; font-size: 0.9rem; }
+        .idea-card p { margin: 0; font-size: 0.78rem; color: var(--ink-medium); line-height: 1.4; }
+
+        /* ===== 최종 요약 ===== */
+        .final-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-width: 500px;
+            margin: 1.5rem auto;
+        }
+
+        .fs-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--ink-pale);
+        }
+
+        .fs-row.highlight {
+            background: rgba(61, 255, 162, 0.08);
+            border-color: var(--neon-mint);
+        }
+
+        .fs-month {
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--neon-sky);
+            min-width: 70px;
+            flex-shrink: 0;
+        }
+
+        .fs-content {
+            font-size: 0.82rem;
+            color: var(--ink-medium);
+        }
+
+        /* ===== 반응형 ===== */
+        @media (max-width: 768px) {
+            .shop-items-preview,
+            .ideas-grid { grid-template-columns: 1fr; }
+
+            .detail-grid { grid-template-columns: 1fr; }
+
+            .setting-row { flex-direction: column; gap: 0.2rem; }
+        }
+    </style>
+</LessonLayout>

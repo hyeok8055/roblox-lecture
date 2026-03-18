@@ -6,7 +6,8 @@
 ## PinchTab 아키텍처
 
 - **대시보드 (포트 9867)**: 인스턴스 관리 (생성/목록/삭제)
-- **인스턴스 (포트 9868+)**: 실제 브라우저 제어 (탐색/클릭/텍스트 등)
+- **claude-code 인스턴스 (포트 9870)**: Claude Code 전용 브라우저 (headless)
+- **default 인스턴스 (포트 9868)**: 사용자용 (건드리지 말 것)
 
 ## 사전 확인 (매 세션 시작 시)
 
@@ -14,18 +15,19 @@
 # 1. PinchTab 실행 확인
 curl -s http://localhost:9867/health
 
-# 2. 실행 중인 인스턴스 확인
+# 2. claude-code 인스턴스 확인
 curl -s http://localhost:9867/instances
 ```
 
-인스턴스가 없으면:
+claude-code 프로필 인스턴스(prof_28e17439)가 없으면:
 ```bash
 curl -s -X POST http://localhost:9867/instances/start \
   -H "Content-Type: application/json" \
-  -d '{"mode":"headless"}'
+  -d '{"profileId":"prof_28e17439","mode":"headless"}'
 ```
 
-응답에서 `port` 값 확인 → 이후 모든 브라우저 제어는 해당 포트로 요청.
+응답에서 `port` 값 확인. **기본적으로 포트 9870 사용.**
+**주의: default 프로필(9868)은 사용자 전용이므로 절대 사용하지 말 것.**
 
 ## API 레퍼런스 (인스턴스 포트 기준)
 
@@ -131,7 +133,8 @@ curl -s http://localhost:{port}/pdf -o page.pdf
 - **ref 값은 매 snapshot마다 바뀔 수 있다** → action 전에 항상 최신 snapshot 확인
 - **`/text`가 `/snapshot`보다 토큰 효율적** → 내용만 읽을 때는 text 우선
 - **`filter=interactive`** → 클릭/입력할 때만 사용, 전체 구조는 filter 없이
-- **인스턴스 포트**를 먼저 확인하고 사용 (보통 9868이지만 변경될 수 있음)
+- **claude-code 포트 9870 사용** (변경된 경우 instances API로 확인)
+- **default 포트 9868은 사용 금지** (사용자 전용)
 
 ## 유저 요청 예시
 
