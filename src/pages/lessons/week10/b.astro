@@ -1171,7 +1171,7 @@ end)`;
                     <div class="grid md:grid-cols-2 gap-4 text-sm text-ink-light">
                         <div class="bg-white/60 rounded-xl p-4">
                             <div class="font-bold mb-2">🧱 반복 계단 생성기</div>
-                            <p>클릭시작파트와 E시작파트를 따로 두고, 트리거 방식에 따라 다른 계단 패턴을 촤라라락 생성한다.</p>
+                            <p>클릭 3개, E키 3개로 나눠 총 6개 바리에이션을 따로 두고, 직선·지그재그·나선 계단을 각각 독립 예제로 바로 시험할 수 있게 만든다.</p>
                         </div>
                         <div class="bg-white/60 rounded-xl p-4">
                             <div class="font-bold mb-2">💣 밀쳐내는 대포알</div>
@@ -1200,25 +1200,25 @@ end)`;
                     <h3 class="font-bold text-lg mb-3">왜 넣으면 좋은가?</h3>
                     <p class="text-sm text-ink-light mb-4">
                         점프맵은 계단 하나하나를 손으로 놓다 보면 금방 지루해져요.
-                        이 보너스 예제는 <strong>클릭형 / E형</strong> 트리거를 따로 두고,
-                        같은 루프 로직으로 직선, 지그재그, 나선형 계단을 빠르게 시험할 수 있게 합니다.
+                        그래서 이번 보너스 예제는 <strong>6개 바리에이션을 완전히 분리</strong>해서,
+                        트리거 방식과 계단 패턴을 학생들이 한눈에 비교할 수 있게 만들었습니다.
                     </p>
                     <div class="grid grid-cols-2 gap-3 text-sm">
                         <div class="bg-amber-50 rounded-xl p-3">
-                            <div class="font-bold mb-1">클릭 예제</div>
-                            <div class="text-ink-light">클릭시작파트를 누르면 직선 / 지그재그 계단이 번갈아 생성된다.</div>
+                            <div class="font-bold mb-1">클릭 3종</div>
+                            <div class="text-ink-light">클릭_직선시작파트, 클릭_지그재그시작파트, 클릭_나선시작파트를 각각 따로 눌러 본다.</div>
                         </div>
                         <div class="bg-blue-50 rounded-xl p-3">
-                            <div class="font-bold mb-1">E 예제</div>
-                            <div class="text-ink-light">E시작파트 근처에서 E를 누르면 오른쪽 / 왼쪽 나선 계단이 생성된다.</div>
+                            <div class="font-bold mb-1">E 3종</div>
+                            <div class="text-ink-light">E_직선시작파트, E_지그재그시작파트, E_나선시작파트를 각각 따로 시험한다.</div>
                         </div>
                         <div class="bg-green-50 rounded-xl p-3">
-                            <div class="font-bold mb-1">바꿔 볼 값</div>
-                            <div class="text-ink-light">계단 수, 높이, 옆 이동폭, 회전 각도</div>
+                            <div class="font-bold mb-1">바꿔 볼 상수</div>
+                            <div class="text-ink-light">BUILD_DELAY_SECONDS, AUTO_HIDE_SECONDS, stepCount, rise, forward, sideOffset, turnDegrees</div>
                         </div>
                         <div class="bg-rose-50 rounded-xl p-3">
                             <div class="font-bold mb-1">수업 포인트</div>
-                            <div class="text-ink-light">"같은 루프인데 결과 모양이 달라짐"을 보여 주기 좋다.</div>
+                            <div class="text-ink-light">같은 반복문이라도 조건문과 상수 값이 달라지면 결과 계단 모양이 완전히 달라진다는 걸 보여 주기 좋다.</div>
                         </div>
                     </div>
                 </div>
@@ -1229,23 +1229,36 @@ end)`;
                         <div>📁 Workspace</div>
                         <div class="ml-4">📂 반복계단생성기</div>
                         <div class="ml-8">📄 Script</div>
-                        <div class="ml-8">📦 클릭시작파트 + ClickDetector</div>
-                        <div class="ml-8">📦 E시작파트 + ProximityPrompt</div>
-                        <div class="ml-8">📂 클릭생성계단 / E생성계단</div>
+                        <div class="ml-8">📦 클릭_직선시작파트 + ClickDetector</div>
+                        <div class="ml-8">📦 클릭_지그재그시작파트 + ClickDetector</div>
+                        <div class="ml-8">📦 클릭_나선시작파트 + ClickDetector</div>
+                        <div class="ml-8">📦 E_직선시작파트 + ProximityPrompt</div>
+                        <div class="ml-8">📦 E_지그재그시작파트 + ProximityPrompt</div>
+                        <div class="ml-8">📦 E_나선시작파트 + ProximityPrompt</div>
+                        <div class="ml-8">📂 계단_클릭_직선 / 계단_클릭_지그재그 / 계단_클릭_나선</div>
+                        <div class="ml-8">📂 계단_E_직선 / 계단_E_지그재그 / 계단_E_나선</div>
                     </div>
                     <div class="bg-slate-900 text-slate-100 rounded-xl p-4 text-xs font-mono space-y-1">
                         <div>clickDetector.MouseClick:Connect(...)</div>
                         <div>prompt.Triggered:Connect(...)</div>
+                        <div>if variation.mode == "click" then</div>
+                        <div class="ml-4">ClickDetector 사용</div>
+                        <div>else</div>
+                        <div class="ml-4">ProximityPrompt 사용</div>
+                        <div>end</div>
                         <div>if preset.pattern == "zigzag" then</div>
                         <div class="ml-4">sideOffset = ...</div>
+                        <div>end</div>
+                        <div>if preset.turnDegrees ~= 0 then</div>
+                        <div class="ml-4">cursor = cursor * CFrame.Angles(...)</div>
                         <div>end</div>
                         <div>for stepIndex = 1, preset.stepCount do</div>
                         <div class="ml-4">createStep(...)</div>
                         <div>end</div>
                     </div>
                     <HintBox type="tip" title="오비 제작 팁">
-                        클릭형 트리거와 E형 트리거를 나눠 두면
-                        "같은 반복문인데 시작 조건과 결과 패턴이 다르다"는 걸 훨씬 설명하기 쉽습니다.
+                        6개를 한 파트에 합쳐 두는 것보다,
+                        시작 파트와 결과 폴더를 완전히 나누면 학생들이 "이 버튼은 이 계단만 만든다"를 바로 이해합니다.
                     </HintBox>
                 </div>
             </div>

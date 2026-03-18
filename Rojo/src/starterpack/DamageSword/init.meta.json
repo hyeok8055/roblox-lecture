@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "3번: 데미지 검 - 완성형! canDamage 패턴",
-    "CanBeDropped": false
-  }
-}

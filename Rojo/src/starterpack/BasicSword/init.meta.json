@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "1번: 기본 검 - print만 해요!",
-    "CanBeDropped": false
-  }
-}

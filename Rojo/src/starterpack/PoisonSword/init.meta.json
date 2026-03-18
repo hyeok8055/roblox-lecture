@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "5번: 독 검 - 5초간 지속 데미지!",
-    "CanBeDropped": false
-  }
-}

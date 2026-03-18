@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "2번: 이벤트 감지 검 - 3가지 이벤트 비교!",
-    "CanBeDropped": false
-  }
-}

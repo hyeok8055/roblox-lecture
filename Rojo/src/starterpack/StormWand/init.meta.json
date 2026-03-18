@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "폭풍 지팡이 - 범위 30 데미지!",
-    "CanBeDropped": false
-  }
-}

@@ -1,9 +1,0 @@
-{
-  "ClassName": "ProximityPrompt",
-  "Properties": {
-    "ActionText": "소환",
-    "ObjectText": "발판",
-    "MaxActivationDistance": 10,
-    "HoldDuration": 0
-  }
-}

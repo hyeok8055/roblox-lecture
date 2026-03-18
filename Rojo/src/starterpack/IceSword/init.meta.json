@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "7번: 얼음 검 - 3초간 적을 동결!",
-    "CanBeDropped": false
-  }
-}

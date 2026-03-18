@@ -1,7 +1,0 @@
-{
-  "className": "Tool",
-  "properties": {
-    "ToolTip": "4번: 스피드 검 - 들면 2.5배 빠름!",
-    "CanBeDropped": false
-  }
-}
