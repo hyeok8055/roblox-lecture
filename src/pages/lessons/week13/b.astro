@@ -1,0 +1,781 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+---
+
+<LessonLayout title="TOH 스텟 트리 - UI 구현 & 음악 플레이어" lessonNumber={13} totalSlides={18}>
+
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">13주차 B</span>
+                <h1 class="title-display mb-4">
+                    스텟 트리 UI<br>
+                    <span class="text-neon-sky">&amp; 음악 플레이어</span>
+                </h1>
+                <p class="text-ink-light text-lg max-w-2xl mx-auto mb-8">
+                    레벨 호버 → 경험치 바, 레벨 클릭 → 스텟 트리 UI<br>
+                    + 곡 제목 표시되는 음악 플레이어까지 만듭니다.
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">경험치 바</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">스텟 트리 UI</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">TweenService</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">음악 플레이어</span>
+                </div>
+                <HintBox type="info" title="이번 수업 목표">
+                    A차시에서 만든 서버 로직을 <strong>눈에 보이는 UI</strong>로 연결합니다.<br>
+                    경험치 바, 스텟 트리 애니메이션, 음악 플레이어까지 완성합니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 레벨 UI 현재 상태 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 1 — 경험치 바</span>
+            <h2 class="title-section mb-6">현재 레벨 UI</h2>
+
+            <div class="bg-ink-deep rounded-xl p-6 mb-6 text-center">
+                <div class="inline-block">
+                    <div class="text-white text-sm mb-2">현재 HUD 하단</div>
+                    <div class="bg-black/30 rounded-xl px-6 py-3 inline-block">
+                        <span class="text-white font-bold text-lg">Level 0</span>
+                    </div>
+                    <div class="text-gray-400 text-xs mt-2">← 이게 전부. 경험치? 안 보임</div>
+                </div>
+            </div>
+
+            <div class="bg-ink-deep rounded-xl p-6 text-center">
+                <div class="inline-block">
+                    <div class="text-neon-mint text-sm mb-2 font-bold">마우스 올리면 이렇게!</div>
+                    <div class="bg-black/30 rounded-xl px-6 py-3 inline-block" style="min-width:200px;">
+                        <span class="text-white font-bold text-lg">Level 5</span>
+                        <div class="mt-2 relative h-3 bg-gray-700 rounded-full overflow-hidden" style="width:180px;">
+                            <div class="absolute top-0 left-0 h-full rounded-full" style="width:65%;background:linear-gradient(90deg,#6BCFFF,#3DFFA2);"></div>
+                        </div>
+                        <div class="text-gray-300 text-xs mt-1">650 / 1000 XP</div>
+                    </div>
+                    <div class="text-neon-mint text-xs mt-2">★ 2 포인트 사용 가능</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: 경험치 바 코드 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 1 — 경험치 바</span>
+            <h2 class="title-section mb-6">경험치 바 UI 코드</h2>
+
+            <lua-code-block title="레벨 라벨에 호버 기능 추가" show-line-numbers>
+-- 경험치 바 프레임 (평소엔 숨김)
+local xpBarFrame = Instance.new("Frame")
+xpBarFrame.Size = UDim2.new(0, 200, 0, 40)
+xpBarFrame.Position = UDim2.new(0.5, -100, 1, -80)
+xpBarFrame.BackgroundTransparency = 1  -- 숨김
+xpBarFrame.Parent = screenGui
+
+local xpBarBg = Instance.new("Frame")
+xpBarBg.Size = UDim2.new(1, 0, 0, 8)
+xpBarBg.Position = UDim2.new(0, 0, 0.5, 0)
+xpBarBg.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+xpBarBg.Parent = xpBarFrame
+Instance.new("UICorner", xpBarBg).CornerRadius = UDim.new(1, 0)
+
+local xpBarFill = Instance.new("Frame")
+xpBarFill.Size = UDim2.new(0, 0, 1, 0)  -- 시작은 0%
+xpBarFill.BackgroundColor3 = Color3.fromRGB(107, 207, 255)
+xpBarFill.Parent = xpBarBg
+Instance.new("UICorner", xpBarFill).CornerRadius = UDim.new(1, 0)
+Instance.new("UIGradient", xpBarFill).Color =
+    ColorSequence.new(Color3.fromRGB(107,207,255), Color3.fromRGB(61,255,162))
+
+local xpText = Instance.new("TextLabel")
+xpText.Size = UDim2.new(1, 0, 0, 16)
+xpText.Position = UDim2.new(0, 0, 0.5, 8)
+xpText.Text = "0 / 100 XP"
+xpText.TextColor3 = Color3.fromRGB(180, 180, 180)
+xpText.TextSize = 11
+xpText.Font = Enum.Font.GothamBold
+xpText.BackgroundTransparency = 1
+xpText.Parent = xpBarFrame
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 호버 이벤트 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 1 — 경험치 바</span>
+            <h2 class="title-section mb-6">마우스 호버 이벤트</h2>
+
+            <lua-code-block title="MouseEnter / MouseLeave" show-line-numbers>
+local xpBarVisible = false
+
+levelLabel.MouseEnter:Connect(function()
+    xpBarVisible = true
+    -- 부드럽게 나타남
+    local tween = TweenService:Create(xpBarFrame,
+        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        &#123; BackgroundTransparency = 0 &#125;
+    )
+    tween:Play()
+    -- 자식들도 보이게
+    for _, child in xpBarFrame:GetDescendants() do
+        if child:IsA("Frame") then
+            TweenService:Create(child, TweenInfo.new(0.2),
+                &#123; BackgroundTransparency = 0 &#125;):Play()
+        elseif child:IsA("TextLabel") then
+            TweenService:Create(child, TweenInfo.new(0.2),
+                &#123; TextTransparency = 0 &#125;):Play()
+        end
+    end
+end)
+
+levelLabel.MouseLeave:Connect(function()
+    xpBarVisible = false
+    task.delay(0.3, function()
+        if xpBarVisible then return end  -- 다시 들어왔으면 유지
+        -- 부드럽게 사라짐
+        for _, child in xpBarFrame:GetDescendants() do
+            if child:IsA("Frame") then
+                TweenService:Create(child, TweenInfo.new(0.2),
+                    &#123; BackgroundTransparency = 1 &#125;):Play()
+            elseif child:IsA("TextLabel") then
+                TweenService:Create(child, TweenInfo.new(0.2),
+                    &#123; TextTransparency = 1 &#125;):Play()
+            end
+        end
+    end)
+end)
+            </lua-code-block>
+
+            <HintBox type="tip" title="EasingStyle.Back">
+                <code>Back</code> 스타일은 약간 튕기는 효과입니다.
+                경험치 바가 톡 튀어나오는 느낌을 줍니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: XP 업데이트 수신 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 1 — 경험치 바</span>
+            <h2 class="title-section mb-6">XP 데이터 수신 &amp; 바 업데이트</h2>
+
+            <lua-code-block title="StatSync 이벤트 처리" show-line-numbers>
+local currentStatData = nil
+
+StatSync.OnClientEvent:Connect(function(data)
+    currentStatData = data
+
+    -- 경험치 바 업데이트
+    local progress = data.xpProgress  -- 0 ~ 1
+    TweenService:Create(xpBarFill, TweenInfo.new(0.5),
+        &#123; Size = UDim2.new(progress, 0, 1, 0) &#125;
+    ):Play()
+
+    -- 포인트 텍스트
+    if data.statPoints > 0 then
+        levelLabel.Text = "Level " .. level.Value .. "  ★" .. data.statPoints
+        levelLabel.TextColor3 = Color3.fromRGB(61, 255, 162)
+    else
+        levelLabel.Text = "Level " .. level.Value
+        levelLabel.TextColor3 = Color3.new(1, 1, 1)
+    end
+end)
+            </lua-code-block>
+
+            <HintBox type="info" title="포인트가 있으면 초록색">
+                사용 가능한 포인트가 있으면 레벨 텍스트가 <strong style="color:#3DFFA2;">초록색 + ★</strong>으로 변합니다.<br>
+                "여기 찍을 거 있어요!" 라는 시각적 힌트입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: 스텟 트리 UI 개요 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">스텟 트리 — UI 구조</h2>
+            <p class="text-ink-light mb-4">레벨을 <strong>클릭</strong>하면 아래에서 위로 펼쳐지는 트리 패널</p>
+
+            <div class="bg-ink-deep rounded-xl p-6 mb-6 font-mono text-sm text-white" style="line-height: 1.8;">
+                <pre style="margin:0; white-space:pre; overflow-x:auto;">
+┌─────────────────────────────────────────┐
+│                                         │
+│   [속도+10%] [점프+20] [코인+25%] [시간+40초]  │  ← Tier 5
+│       │         │         │         │   │
+│   [속도+8%]  [점프+15] [코인+20%] [시간+30초]  │  ← Tier 4
+│       │         │         │         │   │
+│   [속도+6%]  [점프+10] [코인+15%] [시간+20초]  │  ← Tier 3
+│       │         │         │         │   │
+│   [속도+4%]  [점프+7]  [코인+10%] [시간+15초]  │  ← Tier 2
+│       │         │         │         │   │
+│   [속도+2%]  [점프+3]  [코인+5%]  [시간+10초]  │  ← Tier 1
+│       ╲         │         │        ╱    │
+│              [ Level 5 ★ 2 ]            │  ← 클릭 트리거
+│                                         │
+│              ┌──────────┐               │
+│              │ 650/1000 │               │  ← 경험치 바
+│              └──────────┘               │
+└─────────────────────────────────────────┘</pre>
+            </div>
+
+            <HintBox type="info" title="UI 계층">
+                ScreenGui → TreeFrame (ScrollingFrame) → BranchFrame × 4 → NodeButton × 5
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 트리 프레임 생성 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">트리 프레임 생성</h2>
+
+            <lua-code-block title="트리 메인 프레임" show-line-numbers>
+local treeFrame = Instance.new("Frame")
+treeFrame.Name = "StatTree"
+treeFrame.Size = UDim2.new(0, 400, 0, 450)
+treeFrame.Position = UDim2.new(0.5, -200, 1, 0)  -- 화면 아래 숨김
+treeFrame.AnchorPoint = Vector2.new(0, 1)
+treeFrame.BackgroundColor3 = Color3.fromRGB(20, 16, 30)
+treeFrame.BackgroundTransparency = 0.1
+treeFrame.Visible = false
+treeFrame.Parent = screenGui
+Instance.new("UICorner", treeFrame).CornerRadius = UDim.new(0, 16)
+
+-- 제목
+local treeTitle = Instance.new("TextLabel")
+treeTitle.Size = UDim2.new(1, 0, 0, 36)
+treeTitle.Text = "스텟 트리  ★ 0 포인트"
+treeTitle.TextColor3 = Color3.fromRGB(255, 217, 61)
+treeTitle.TextSize = 16
+treeTitle.Font = Enum.Font.GothamBold
+treeTitle.BackgroundTransparency = 1
+treeTitle.Parent = treeFrame
+
+-- 브랜치 컨테이너
+local branchContainer = Instance.new("Frame")
+branchContainer.Size = UDim2.new(1, -20, 1, -46)
+branchContainer.Position = UDim2.new(0, 10, 0, 40)
+branchContainer.BackgroundTransparency = 1
+branchContainer.Parent = treeFrame
+
+local branchLayout = Instance.new("UIListLayout")
+branchLayout.FillDirection = Enum.FillDirection.Horizontal
+branchLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+branchLayout.Padding = UDim.new(0, 8)
+branchLayout.Parent = branchContainer
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: 브랜치 & 노드 생성 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">브랜치 &amp; 노드 생성</h2>
+
+            <lua-code-block title="4개 브랜치 × 5노드 생성" show-line-numbers>
+local BRANCHES = &#123;
+    &#123; name = "Speed", icon = "🏃", color = Color3.fromRGB(107, 207, 255) &#125;,
+    &#123; name = "Jump",  icon = "⬆️", color = Color3.fromRGB(61, 255, 162) &#125;,
+    &#123; name = "Coin",  icon = "🪙", color = Color3.fromRGB(255, 217, 61) &#125;,
+    &#123; name = "Time",  icon = "⏱️", color = Color3.fromRGB(199, 146, 234) &#125;,
+&#125;
+
+local nodeButtons = &#123;&#125;  -- &#123; [nodeId] = button &#125;
+
+for _, branch in BRANCHES do
+    local col = Instance.new("Frame")
+    col.Size = UDim2.new(0, 85, 1, 0)
+    col.BackgroundTransparency = 1
+    col.Parent = branchContainer
+
+    -- 아래(Tier1)부터 위(Tier5)로 쌓기
+    local colLayout = Instance.new("UIListLayout")
+    colLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    colLayout.Padding = UDim.new(0, 6)
+    colLayout.Parent = col
+
+    for tier = 1, 5 do
+        local nodeId = string.lower(string.sub(branch.name, 1, -1))
+        -- spd1, jmp1, coin1, time1 ...
+        local btn = Instance.new("TextButton")
+        btn.Name = nodeId .. tier
+        btn.Size = UDim2.new(1, 0, 0, 70)
+        btn.BackgroundColor3 = Color3.fromRGB(45, 38, 64)
+        btn.TextColor3 = Color3.new(1, 1, 1)
+        btn.TextSize = 11
+        btn.Font = Enum.Font.GothamBold
+        btn.LayoutOrder = 6 - tier  -- 역순 (Tier5가 위)
+        btn.Parent = col
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 10)
+
+        nodeButtons[btn.Name] = btn
+    end
+end
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: 노드 상태 업데이트 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">노드 상태 업데이트</h2>
+
+            <lua-code-block title="트리 UI 갱신" show-line-numbers>
+local function updateTreeUI()
+    if not currentStatData then return end
+    local allocated = currentStatData.allocated
+    local points = currentStatData.statPoints
+
+    treeTitle.Text = "스텟 트리  ★ " .. points .. " 포인트"
+
+    for nodeId, btn in nodeButtons do
+        if allocated[nodeId] then
+            -- 이미 찍은 노드: 밝은 색 + 체크
+            btn.BackgroundColor3 = Color3.fromRGB(61, 255, 162)
+            btn.TextColor3 = Color3.fromRGB(26, 22, 37)
+            btn.Text = "✓ " .. getNodeLabel(nodeId)
+        elseif canAllocate(nodeId, allocated) and points > 0 then
+            -- 찍을 수 있는 노드: 테두리 강조
+            btn.BackgroundColor3 = Color3.fromRGB(55, 48, 80)
+            btn.TextColor3 = Color3.fromRGB(255, 217, 61)
+            btn.Text = "+ " .. getNodeLabel(nodeId)
+        else
+            -- 잠긴 노드: 어둡게
+            btn.BackgroundColor3 = Color3.fromRGB(35, 30, 50)
+            btn.TextColor3 = Color3.fromRGB(100, 100, 100)
+            btn.Text = "🔒 " .. getNodeLabel(nodeId)
+        end
+    end
+end
+            </lua-code-block>
+
+            <div class="flex gap-4 mt-4">
+                <div class="flex-1 bg-ink-deep rounded-xl p-3 text-center">
+                    <div class="inline-block px-4 py-2 rounded-lg" style="background:#3DFFA2;color:#1a1625;font-weight:700;">✓ 속도+2%</div>
+                    <p class="text-white text-xs mt-2">찍은 노드</p>
+                </div>
+                <div class="flex-1 bg-ink-deep rounded-xl p-3 text-center">
+                    <div class="inline-block px-4 py-2 rounded-lg" style="background:#373050;color:#FFD93D;font-weight:700;">+ 점프+7</div>
+                    <p class="text-white text-xs mt-2">찍을 수 있는 노드</p>
+                </div>
+                <div class="flex-1 bg-ink-deep rounded-xl p-3 text-center">
+                    <div class="inline-block px-4 py-2 rounded-lg" style="background:#231E32;color:#646464;font-weight:700;">🔒 코인+15%</div>
+                    <p class="text-white text-xs mt-2">잠긴 노드</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: 트리 열기/닫기 애니메이션 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">트리 열기/닫기 애니메이션</h2>
+
+            <lua-code-block title="레벨 클릭 → 트리 토글" show-line-numbers>
+local treeOpen = false
+
+levelLabel.MouseButton1Click:Connect(function()
+    treeOpen = not treeOpen
+
+    if treeOpen then
+        updateTreeUI()
+        treeFrame.Visible = true
+        -- 아래에서 위로 슬라이드
+        treeFrame.Position = UDim2.new(0.5, -200, 1, 0)
+        TweenService:Create(treeFrame,
+            TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            &#123; Position = UDim2.new(0.5, -200, 1, -60) &#125;
+        ):Play()
+    else
+        -- 아래로 슬라이드하며 닫힘
+        local tween = TweenService:Create(treeFrame,
+            TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            &#123; Position = UDim2.new(0.5, -200, 1, 0) &#125;
+        )
+        tween:Play()
+        tween.Completed:Connect(function()
+            if not treeOpen then
+                treeFrame.Visible = false
+            end
+        end)
+    end
+end)
+            </lua-code-block>
+
+            <HintBox type="tip" title="EasingStyle 비교">
+                <strong>Back</strong>: 톡 튀어나오는 느낌 (열 때 사용)<br>
+                <strong>Quad</strong>: 부드럽게 감속 (닫을 때 사용)<br>
+                열 때와 닫을 때 다른 스타일을 쓰면 자연스럽습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 노드 클릭 처리 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">노드 클릭 → 서버 요청</h2>
+
+            <lua-code-block title="노드 버튼 클릭 이벤트" show-line-numbers>
+for nodeId, btn in nodeButtons do
+    btn.MouseButton1Click:Connect(function()
+        -- 이미 찍었거나 잠긴 상태면 무시
+        if not canAllocate(nodeId, currentStatData.allocated) then
+            return
+        end
+        if currentStatData.statPoints &lt;= 0 then return end
+
+        -- 서버에 투자 요청
+        btn.Text = "..."
+        local success, message = AllocateStatRF:InvokeServer(nodeId)
+
+        if success then
+            -- 성공 이펙트: 반짝
+            btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            task.delay(0.15, function()
+                updateTreeUI()
+            end)
+            -- 효과음
+            local sfx = Instance.new("Sound")
+            sfx.SoundId = "rbxassetid://6042053626"
+            sfx.Volume = 0.5
+            sfx.Parent = SoundService
+            sfx:Play()
+            sfx.Ended:Connect(function() sfx:Destroy() end)
+        else
+            -- 실패: 빨간 깜빡
+            btn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+            task.delay(0.5, function()
+                updateTreeUI()
+            end)
+        end
+    end)
+end
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 연결선 그리기 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 스텟 트리 UI</span>
+            <h2 class="title-section mb-6">노드 연결선 그리기</h2>
+
+            <lua-code-block title="세로 연결선 (가느다란 Frame)" show-line-numbers>
+-- 각 브랜치의 노드 사이에 세로선 추가
+local function drawConnectors(col)
+    for i = 1, 4 do  -- Tier 1~4 사이
+        local line = Instance.new("Frame")
+        line.Size = UDim2.new(0, 2, 0, 6)
+        line.BackgroundColor3 = Color3.fromRGB(100, 90, 130)
+        line.BorderSizePixel = 0
+        line.LayoutOrder = (6 - i) * 10 + 5  -- 노드 사이에 배치
+        line.AnchorPoint = Vector2.new(0.5, 0)
+        line.Position = UDim2.new(0.5, 0, 0, 0)
+        line.Parent = col
+    end
+end
+
+-- 레벨 → Tier 1 연결선 (대각선 효과)
+-- 실제로는 4개의 짧은 프레임으로 표현
+for i, branch in BRANCHES do
+    local line = Instance.new("Frame")
+    line.Size = UDim2.new(0, 2, 0, 20)
+    line.BackgroundColor3 = branch.color
+    line.BackgroundTransparency = 0.5
+    -- 위치는 각 브랜치 하단에서 레벨 노드까지
+    line.Parent = treeFrame
+end
+            </lua-code-block>
+
+            <HintBox type="info" title="완벽하지 않아도 OK">
+                Roblox UI에서 대각선을 그리는 건 까다롭습니다.
+                세로선만 그려도 트리 느낌이 충분히 나옵니다.
+                나중에 <code>UIStroke</code>나 이미지로 더 예쁘게 만들 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: 음악 플레이어 UI ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 음악 플레이어</span>
+            <h2 class="title-section mb-6">음악 플레이어 UI</h2>
+            <p class="text-ink-light mb-4">곡 제목 + 재생/정지 버튼이 보이는 플레이어</p>
+
+            <div class="bg-ink-deep rounded-xl p-6 mb-6 text-center">
+                <div class="inline-flex items-center gap-3 px-5 py-3 rounded-xl" style="background:#231E32;border:1px solid rgba(255,255,255,0.1);">
+                    <span class="text-white text-sm font-medium">Evan's Adventure</span>
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full" style="background:#3DFFA2;color:#1a1625;font-weight:700;font-size:14px;cursor:pointer;">▶</span>
+                </div>
+                <div class="text-gray-400 text-xs mt-3">← 실제 TOH와 동일한 형태</div>
+            </div>
+
+            <lua-code-block title="음악 플레이어 프레임 생성" show-line-numbers>
+-- 재생목록
+local PLAYLIST = &#123;
+    &#123; name = "Evan's Adventure",   id = "rbxassetid://1846862087" &#125;,
+    &#123; name = "Sunshine Paradise",  id = "rbxassetid://1837849285" &#125;,
+    &#123; name = "Bright &amp; Cheerful",  id = "rbxassetid://1845554017" &#125;,
+&#125;
+
+local currentTrack = 1
+
+-- 음악 플레이어 프레임
+local musicFrame = Instance.new("Frame")
+musicFrame.Size = UDim2.new(0, 220, 0, 36)
+musicFrame.Position = UDim2.new(0.5, -110, 1, -20)
+musicFrame.BackgroundColor3 = Color3.fromRGB(35, 30, 50)
+musicFrame.Parent = screenGui
+Instance.new("UICorner", musicFrame).CornerRadius = UDim.new(0, 18)
+Instance.new("UIStroke", musicFrame).Color = Color3.fromRGB(60, 55, 80)
+
+-- 곡 제목
+local songLabel = Instance.new("TextLabel")
+songLabel.Size = UDim2.new(1, -50, 1, 0)
+songLabel.Position = UDim2.new(0, 12, 0, 0)
+songLabel.Text = PLAYLIST[1].name
+songLabel.TextColor3 = Color3.new(1, 1, 1)
+songLabel.TextSize = 12
+songLabel.Font = Enum.Font.GothamMedium
+songLabel.TextXAlignment = Enum.TextXAlignment.Left
+songLabel.BackgroundTransparency = 1
+songLabel.Parent = musicFrame
+
+-- 재생/정지 버튼
+local playBtn = Instance.new("TextButton")
+playBtn.Size = UDim2.new(0, 28, 0, 28)
+playBtn.Position = UDim2.new(1, -34, 0.5, -14)
+playBtn.Text = "▶"
+playBtn.TextSize = 14
+playBtn.Font = Enum.Font.GothamBold
+playBtn.TextColor3 = Color3.fromRGB(26, 22, 37)
+playBtn.BackgroundColor3 = Color3.fromRGB(61, 255, 162)
+playBtn.Parent = musicFrame
+Instance.new("UICorner", playBtn).CornerRadius = UDim.new(1, 0)
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: 음악 재생 로직 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 음악 플레이어</span>
+            <h2 class="title-section mb-6">재생/정지 &amp; 다음 곡</h2>
+
+            <lua-code-block title="BGM 재생 로직" show-line-numbers>
+local bgm = Instance.new("Sound")
+bgm.SoundId = PLAYLIST[1].id
+bgm.Volume = 0.3
+bgm.Looped = false  -- 곡 끝나면 다음 곡으로
+bgm.Parent = SoundService
+bgm:Play()
+
+local isPlaying = true
+
+-- 재생/정지 토글
+playBtn.MouseButton1Click:Connect(function()
+    isPlaying = not isPlaying
+    if isPlaying then
+        bgm:Resume()
+        playBtn.Text = "▶"
+        playBtn.BackgroundColor3 = Color3.fromRGB(61, 255, 162)
+    else
+        bgm:Pause()
+        playBtn.Text = "■"
+        playBtn.BackgroundColor3 = Color3.fromRGB(255, 107, 107)
+    end
+end)
+
+-- 곡 끝나면 다음 곡 자동 재생
+bgm.Ended:Connect(function()
+    currentTrack = currentTrack % #PLAYLIST + 1
+    bgm.SoundId = PLAYLIST[currentTrack].id
+    songLabel.Text = PLAYLIST[currentTrack].name
+    if isPlaying then
+        bgm:Play()
+    end
+end)
+            </lua-code-block>
+
+            <HintBox type="info" title="자동 다음 곡">
+                <code>Looped = false</code>로 설정하고, <code>Ended</code> 이벤트에서 다음 곡으로 넘깁니다.
+                <code>currentTrack % #PLAYLIST + 1</code>은 1→2→3→1 순환하는 공식입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: canAllocate 함수 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 4 — 유틸리티</span>
+            <h2 class="title-section mb-6">전제조건 체크 함수</h2>
+
+            <lua-code-block title="canAllocate() — 클라이언트 판단용" show-line-numbers>
+-- 노드 라벨 가져오기
+local NODE_LABELS = &#123;
+    spd1="속도+2%", spd2="속도+4%", spd3="속도+6%",
+    spd4="속도+8%", spd5="속도+10%",
+    jmp1="점프+3",  jmp2="점프+7",  jmp3="점프+10",
+    jmp4="점프+15", jmp5="점프+20",
+    coin1="코인+5%",  coin2="코인+10%", coin3="코인+15%",
+    coin4="코인+20%", coin5="코인+25%",
+    time1="시간+10초", time2="시간+15초", time3="시간+20초",
+    time4="시간+30초", time5="시간+40초",
+&#125;
+
+local function getNodeLabel(nodeId)
+    return NODE_LABELS[nodeId] or nodeId
+end
+
+local function canAllocate(nodeId, allocated)
+    -- 이미 찍었으면 불가
+    if allocated[nodeId] then return false end
+
+    -- Tier 1이면 무조건 가능
+    local tier = tonumber(string.sub(nodeId, -1))
+    if tier == 1 then return true end
+
+    -- 하위 티어가 찍혀있어야 함
+    local prevId = string.sub(nodeId, 1, -2) .. (tier - 1)
+    return allocated[prevId] == true
+end
+            </lua-code-block>
+
+            <HintBox type="warning" title="클라이언트에서도 체크하는 이유">
+                서버에서 최종 검증하지만, 클라이언트에서도 미리 체크하면<br>
+                잠긴 노드 클릭 시 불필요한 서버 요청을 보내지 않습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 16: 효과 연출 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 4 — 연출</span>
+            <h2 class="title-section mb-6">레벨업 연출 효과</h2>
+
+            <lua-code-block title="레벨업 알림 연출" show-line-numbers>
+RoundInfo.OnClientEvent:Connect(function(msgType, ...)
+    if msgType == "LevelUp" then
+        local newLevel, statPoints = ...
+
+        -- 레벨업 텍스트 표시
+        showAnnouncement(
+            "LEVEL UP!  Lv." .. newLevel .. "  ★+" .. statPoints .. " 포인트",
+            4
+        )
+
+        -- 레벨 텍스트 반짝임
+        for i = 1, 3 do
+            levelLabel.TextColor3 = Color3.fromRGB(255, 217, 61)
+            task.wait(0.15)
+            levelLabel.TextColor3 = Color3.fromRGB(61, 255, 162)
+            task.wait(0.15)
+        end
+
+        -- 경험치 바 리셋 애니메이션
+        TweenService:Create(xpBarFill, TweenInfo.new(0.3),
+            &#123; Size = UDim2.new(0, 0, 1, 0) &#125;
+        ):Play()
+    end
+end)
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: 전체 HUD 레이아웃 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">Part 5 — 완성</span>
+            <h2 class="title-section mb-6">최종 HUD 레이아웃</h2>
+
+            <div class="bg-ink-deep rounded-xl p-6 font-mono text-sm text-white" style="line-height: 1.8;">
+                <pre style="margin:0; white-space:pre; overflow-x:auto;">
+┌──────────────────────────────────────────────────────┐
+│                                                      │
+│              ┌─────────┐     ┌──────────────┐        │
+│              │  7:32    │     │ Wins Lv Coins│        │
+│              │ (타이머) │     │ (리더보드)   │   ┌─┐  │
+│              └─────────┘     └──────────────┘   │T│  │
+│                                                 │O│  │
+│          ┌─────────────────────────┐            │P│  │
+│          │  [spd] [jmp] [coin] [time]  │  스텟   │ │  │
+│          │   ...   ...   ...   ...  │  트리    │●│  │
+│          │  [spd] [jmp] [coin] [time]  │  (클릭시)│ │  │
+│          └─────────────────────────┘            │B│  │
+│                                                 │A│  │
+│ ┌────┐                                         │S│  │
+│ │상점│  0 Coins      Level 5 ★2          [M]   │E│  │
+│ └────┘              ┌──────────┐               └─┘  │
+│                     │ 650/1000  │  (호버시)          │
+│                     └──────────┘                     │
+│           ┌──────────────────────┐                   │
+│           │ Evan's Adventure  ▶  │  음악 플레이어    │
+│           └──────────────────────┘                   │
+└──────────────────────────────────────────────────────┘</pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 마무리 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-quiz mb-6">완성!</span>
+                <h2 class="title-display mb-4">
+                    <span class="text-neon-mint">스텟 트리 시스템</span><br>
+                    완성!
+                </h2>
+                <p class="text-ink-light text-lg max-w-2xl mx-auto mb-8">
+                    이제 우리 TOH에는 레벨업 보상, 스텟 트리, 음악 플레이어까지 있습니다.
+                </p>
+                <div class="space-y-3 text-left max-w-lg mx-auto">
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-neon-mint text-xl">✓</span>
+                        <span class="text-white"><strong>레벨 시스템</strong> — XP → 레벨업 → 스텟 포인트</span>
+                    </div>
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-neon-mint text-xl">✓</span>
+                        <span class="text-white"><strong>스텟 트리</strong> — 4브랜치 × 5단계 = 20노드 영구 강화</span>
+                    </div>
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-neon-mint text-xl">✓</span>
+                        <span class="text-white"><strong>경험치 바</strong> — 호버 시 XP 진행도 표시</span>
+                    </div>
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-3">
+                        <span class="text-neon-mint text-xl">✓</span>
+                        <span class="text-white"><strong>음악 플레이어</strong> — 곡 제목 + 재생/정지 + 자동 다음 곡</span>
+                    </div>
+                </div>
+
+                <HintBox type="tip" title="더 해볼 것들">
+                    • DataStore로 스텟 영구 저장<br>
+                    • 브랜치 추가 (체력, 크기 등)<br>
+                    • 스텟 초기화 기능 (코인으로 리셋)
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
+
+<style>
+    table td, table th {
+        border-bottom: 1px solid rgba(26,22,37,0.1);
+    }
+</style>

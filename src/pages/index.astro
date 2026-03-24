@@ -32,12 +32,17 @@ const curriculum = [
     { week: 11, part: 'B', title: '엔진 마스터', desc: 'GetService, Instance, Humanoid, TweenInfo, Constraint 종합', active: true, path: '/lessons/week11/b' },
     { week: 12, part: 'A', title: 'Tower of Hell 시스템', desc: '리더보드, 타이머, 맵 로테이션, 높이 추적', active: true, path: '/lessons/week12/a' },
     { week: 12, part: 'B', title: '상점 · 음악 · 출시', desc: '변형 모드 상점, BGM 토글, 게임 퍼블리시', active: true, path: '/lessons/week12/b' },
+
+    // 4개월차: 고도화
+    { week: 13, part: 'A', title: '스텟 트리 — 설계', desc: '레벨 시스템, 스텟 포인트, 서버 검증', active: true, path: '/lessons/week13/a' },
+    { week: 13, part: 'B', title: '스텟 트리 — UI & 음악', desc: '경험치 바, 트리 UI, 음악 플레이어', active: true, path: '/lessons/week13/b' },
 ];
 
 // 월별로 그룹화
 const month1 = curriculum.slice(0, 8);   // 1~4주
 const month2 = curriculum.slice(8, 16);  // 5~8주
 const month3 = curriculum.slice(16, 24); // 9~12주
+const month4 = curriculum.slice(24);     // 13주~
 ---
 
 <BaseLayout title="로블록스 과외">
@@ -265,7 +270,74 @@ const month3 = curriculum.slice(16, 24); // 9~12주
                         )
                     ))}
                 </div>
+
+                <!-- TOH 아키텍처 보너스 차시 카드 -->
+                <div class="mt-6">
+                    <a
+                        href="/lessons/week12/bonus"
+                        class="lesson-card group block"
+                    >
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="w-full flex items-center gap-3">
+                                <div class="w-12 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br from-neon-mint to-neon-sky text-sm">
+                                    +
+                                </div>
+                                <div>
+                                    <span class="badge badge-lesson text-xs">보너스</span>
+                                </div>
+                            </div>
+                            <span class="badge badge-success text-xs whitespace-nowrap">수강 가능</span>
+                        </div>
+                        <h3 class="font-bold text-ink-deep mb-1 group-hover:text-neon-sky transition-colors">
+                            Tower of Hell 아키텍처 완전 가이드
+                        </h3>
+                        <p class="text-sm text-ink-light">전체 구조도, 게임 루프, 서버-클라이언트 통신, 커스터마이징 가이드</p>
+                    </a>
+                </div>
             </section>
+
+            <!-- 4개월차 -->
+            {month4.length > 0 && (
+            <section class="mb-12">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="badge badge-lesson">4개월차</span>
+                    <h2 class="title-section">고도화</h2>
+                    <span class="text-sm text-ink-light">(13주~)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {month4.map(lesson => (
+                        lesson.active ? (
+                            <a
+                                href={lesson.path}
+                                class="lesson-card group"
+                            >
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center text-white font-bold bg-gradient-to-br from-ink-deep to-ink-medium text-sm">
+                                        {lesson.week}{lesson.part}
+                                    </div>
+                                    <span class="badge badge-success text-xs">수강 가능</span>
+                                </div>
+                                <h3 class="font-bold text-ink-deep mb-1 group-hover:text-neon-sky transition-colors">
+                                    {lesson.title}
+                                </h3>
+                                <p class="text-sm text-ink-light">{lesson.desc}</p>
+                            </a>
+                        ) : (
+                            <div class="lesson-card opacity-50">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="w-12 h-10 rounded-xl flex items-center justify-center bg-gray-300 text-white font-bold text-sm">
+                                        {lesson.week}{lesson.part}
+                                    </div>
+                                    <span class="material-symbols-outlined text-gray-300">lock</span>
+                                </div>
+                                <h3 class="font-bold text-ink-deep mb-1">{lesson.title}</h3>
+                                <p class="text-sm text-ink-light">{lesson.desc}</p>
+                            </div>
+                        )
+                    ))}
+                </div>
+            </section>
+            )}
         </main>
 
         <!-- 푸터 -->

@@ -1,0 +1,846 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+---
+
+<LessonLayout title="TOH 스텟 트리 - 레벨 & 상점 설계" lessonNumber={13} totalSlides={18}>
+
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">13주차 A</span>
+                <h1 class="title-display mb-4">
+                    TOH 스텟 트리<br>
+                    <span class="text-neon-mint">레벨 &amp; 상점 설계</span>
+                </h1>
+                <p class="text-ink-light text-lg max-w-2xl mx-auto mb-8">
+                    레벨업 시스템을 확장하고, 스텟 포인트로<br>
+                    속도·점프·코인·시간을 영구 강화하는 시스템을 만듭니다.
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">레벨 시스템</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">스텟 포인트</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">스텟 트리</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">서버 보안</span>
+                </div>
+                <HintBox type="info" title="이번 수업 목표">
+                    기존 TOH의 레벨 시스템을 확장합니다.<br>
+                    레벨업 시 <strong>스텟 포인트</strong>를 얻고, 4개 브랜치(속도/점프/코인/시간)에 투자하는 <strong>스텟 트리</strong>를 설계합니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 현재 시스템 복습 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 현재 시스템 분석</span>
+            <h2 class="title-section mb-6">현재 레벨 시스템 복습</h2>
+
+            <lua-code-block title="기존 GameManager — giveXP()" show-line-numbers>
+local function giveXP(player, amount)
+    playerXP[player.UserId] += amount
+    local level = player.leaderstats.Level
+    local requiredXP = (level.Value + 1) * CONFIG.LEVEL_XP_BASE
+    while playerXP[player.UserId] >= requiredXP do
+        playerXP[player.UserId] -= requiredXP
+        level.Value += 1
+        requiredXP = (level.Value + 1) * CONFIG.LEVEL_XP_BASE
+    end
+end
+            </lua-code-block>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-mint font-bold mb-2">현재 동작</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• 코인 획득 = XP 획득</li>
+                        <li>• 필요 XP = (레벨+1) × 100</li>
+                        <li>• 레벨업 시 아무 보상 없음</li>
+                    </ul>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-coral font-bold mb-2">문제점</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• 레벨이 올라도 <strong>달라지는 게 없다</strong></li>
+                        <li>• 플레이어가 레벨에 관심을 안 가짐</li>
+                        <li>• 경험치 바도 안 보임 — 진행도 모름</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: 새 시스템 개요 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 설계</span>
+            <h2 class="title-section mb-6">새 레벨 시스템 설계</h2>
+
+            <div class="bg-ink-deep rounded-xl p-6 mb-6">
+                <div class="flow-horizontal">
+                    <span class="flow-step" style="background:#6BCFFF;color:#1a1625;">코인 획득<br><small>= XP 획득</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#FFD93D;color:#1a1625;">XP 바 채움<br><small>호버 시 표시</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#3DFFA2;color:#1a1625;">레벨업!<br><small>+1 스텟 포인트</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#C792EA;color:#1a1625;">트리에 투자<br><small>영구 강화</small></span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <HintBox type="info" title="마우스 올리면">
+                    레벨 표시에 마우스를 올리면 <strong>경험치 바</strong>가 나타납니다.<br>
+                    현재 XP / 필요 XP를 시각적으로 확인할 수 있습니다.
+                </HintBox>
+                <HintBox type="tip" title="클릭하면">
+                    레벨 표시를 <strong>클릭</strong>하면 <strong>스텟 트리</strong>가 위로 펼쳐집니다.<br>
+                    보유 포인트를 원하는 스텟에 투자할 수 있습니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 스텟 트리 전체 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 설계</span>
+            <h2 class="title-section mb-6">스텟 트리 전체 구조</h2>
+
+            <div class="bg-ink-deep rounded-xl p-6 mb-6">
+                <div class="stat-tree-preview">
+                    <div class="tree-tier">
+                        <span class="tree-node tier5">속도+10%</span>
+                        <span class="tree-node tier5">점프+20</span>
+                        <span class="tree-node tier5">코인+25%</span>
+                        <span class="tree-node tier5">시간+40초</span>
+                    </div>
+                    <div class="tree-connectors">│ │ │ │</div>
+                    <div class="tree-tier">
+                        <span class="tree-node tier4">속도+8%</span>
+                        <span class="tree-node tier4">점프+15</span>
+                        <span class="tree-node tier4">코인+20%</span>
+                        <span class="tree-node tier4">시간+30초</span>
+                    </div>
+                    <div class="tree-connectors">│ │ │ │</div>
+                    <div class="tree-tier">
+                        <span class="tree-node tier3">속도+6%</span>
+                        <span class="tree-node tier3">점프+10</span>
+                        <span class="tree-node tier3">코인+15%</span>
+                        <span class="tree-node tier3">시간+20초</span>
+                    </div>
+                    <div class="tree-connectors">│ │ │ │</div>
+                    <div class="tree-tier">
+                        <span class="tree-node tier2">속도+4%</span>
+                        <span class="tree-node tier2">점프+7</span>
+                        <span class="tree-node tier2">코인+10%</span>
+                        <span class="tree-node tier2">시간+15초</span>
+                    </div>
+                    <div class="tree-connectors">│ │ │ │</div>
+                    <div class="tree-tier">
+                        <span class="tree-node tier1">속도+2%</span>
+                        <span class="tree-node tier1">점프+3</span>
+                        <span class="tree-node tier1">코인+5%</span>
+                        <span class="tree-node tier1">시간+10초</span>
+                    </div>
+                    <div class="tree-connectors">╲ │ │ ╱</div>
+                    <div class="tree-root">
+                        <span class="tree-level-node">레벨 0 ★ 0 pts</span>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="info" title="4개 브랜치 × 5단계 = 20노드">
+                <strong>속도</strong>: WalkSpeed 영구 증가 |
+                <strong>점프</strong>: JumpPower 영구 증가 |
+                <strong>코인</strong>: 획득 코인 배율 증가 |
+                <strong>시간</strong>: 라운드 시작 시 보너스 시간<br>
+                아래부터 순서대로 찍어야 윗단계가 해금됩니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: 스텟 데이터 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">스텟 트리 데이터 구조</h2>
+
+            <lua-code-block title="STAT_TREE 정의" show-line-numbers>
+local STAT_TREE = &#123;
+    -- 속도 브랜치
+    &#123; id = "spd1", branch = "Speed", tier = 1, label = "속도+2%",  effect = 0.02 &#125;,
+    &#123; id = "spd2", branch = "Speed", tier = 2, label = "속도+4%",  effect = 0.04 &#125;,
+    &#123; id = "spd3", branch = "Speed", tier = 3, label = "속도+6%",  effect = 0.06 &#125;,
+    &#123; id = "spd4", branch = "Speed", tier = 4, label = "속도+8%",  effect = 0.08 &#125;,
+    &#123; id = "spd5", branch = "Speed", tier = 5, label = "속도+10%", effect = 0.10 &#125;,
+
+    -- 점프 브랜치
+    &#123; id = "jmp1", branch = "Jump", tier = 1, label = "점프+3",   effect = 3  &#125;,
+    &#123; id = "jmp2", branch = "Jump", tier = 2, label = "점프+7",   effect = 7  &#125;,
+    &#123; id = "jmp3", branch = "Jump", tier = 3, label = "점프+10",  effect = 10 &#125;,
+    &#123; id = "jmp4", branch = "Jump", tier = 4, label = "점프+15",  effect = 15 &#125;,
+    &#123; id = "jmp5", branch = "Jump", tier = 5, label = "점프+20",  effect = 20 &#125;,
+
+    -- 코인 브랜치
+    &#123; id = "coin1", branch = "Coin", tier = 1, label = "코인+5%",  effect = 0.05 &#125;,
+    &#123; id = "coin2", branch = "Coin", tier = 2, label = "코인+10%", effect = 0.10 &#125;,
+    &#123; id = "coin3", branch = "Coin", tier = 3, label = "코인+15%", effect = 0.15 &#125;,
+    &#123; id = "coin4", branch = "Coin", tier = 4, label = "코인+20%", effect = 0.20 &#125;,
+    &#123; id = "coin5", branch = "Coin", tier = 5, label = "코인+25%", effect = 0.25 &#125;,
+
+    -- 시간 브랜치
+    &#123; id = "time1", branch = "Time", tier = 1, label = "시간+10초", effect = 10 &#125;,
+    &#123; id = "time2", branch = "Time", tier = 2, label = "시간+15초", effect = 15 &#125;,
+    &#123; id = "time3", branch = "Time", tier = 3, label = "시간+20초", effect = 20 &#125;,
+    &#123; id = "time4", branch = "Time", tier = 4, label = "시간+30초", effect = 30 &#125;,
+    &#123; id = "time5", branch = "Time", tier = 5, label = "시간+40초", effect = 40 &#125;,
+&#125;
+            </lua-code-block>
+
+            <HintBox type="tip" title="왜 테이블로 관리?">
+                모든 노드 정보를 하나의 테이블에 모아두면, 나중에 노드를 추가/삭제하기 쉽습니다.
+                id로 구분하고, tier로 해금 순서를 정합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: 플레이어 스텟 저장 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">플레이어별 스텟 저장</h2>
+
+            <lua-code-block title="playerStats 구조" show-line-numbers>
+-- 플레이어별 스텟 데이터
+local playerStats = &#123;&#125;
+
+local function initPlayerStats(player)
+    playerStats[player.UserId] = &#123;
+        statPoints = 0,        -- 미사용 포인트
+        allocated = &#123;&#125;,       -- &#123; spd1 = true, spd2 = true, ... &#125;
+    &#125;
+end
+
+-- 기존 setupLeaderstats에 추가
+local function setupLeaderstats(player)
+    -- ... 기존 Wins, Coins, Level ...
+    initPlayerStats(player)
+end
+            </lua-code-block>
+
+            <div class="bg-ink-deep rounded-xl p-4 mt-4">
+                <h4 class="text-neon-gold font-bold mb-2">allocated 테이블 예시</h4>
+                <lua-code-block title="레벨 8 플레이어 예시">
+allocated = &#123;
+    spd1 = true,  -- 속도+2% ✓
+    spd2 = true,  -- 속도+4% ✓
+    spd3 = true,  -- 속도+6% ✓
+    jmp1 = true,  -- 점프+3 ✓
+    jmp2 = true,  -- 점프+7 ✓
+    coin1 = true, -- 코인+5% ✓
+    coin2 = true, -- 코인+10% ✓
+    time1 = true, -- 시간+10초 ✓
+&#125;
+-- statPoints = 0 (8포인트 전부 사용)
+                </lua-code-block>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 레벨업 시 포인트 지급 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">레벨업 시 포인트 지급</h2>
+
+            <lua-code-block title="giveXP() 수정" show-line-numbers>
+local function giveXP(player, amount)
+    playerXP[player.UserId] += amount
+    local level = player.leaderstats.Level
+    local requiredXP = (level.Value + 1) * CONFIG.LEVEL_XP_BASE
+
+    while playerXP[player.UserId] >= requiredXP do
+        playerXP[player.UserId] -= requiredXP
+        level.Value += 1
+
+        -- ★ 새로 추가: 레벨업 보상
+        local stats = playerStats[player.UserId]
+        if stats then
+            stats.statPoints += 1
+        end
+
+        -- 클라이언트에 레벨업 알림
+        RoundInfo:FireClient(player, "LevelUp", level.Value, stats.statPoints)
+
+        requiredXP = (level.Value + 1) * CONFIG.LEVEL_XP_BASE
+    end
+
+    -- XP 진행도를 클라이언트에 전송
+    local progress = playerXP[player.UserId] / requiredXP
+    RoundInfo:FireClient(player, "XPUpdate", progress, playerXP[player.UserId], requiredXP)
+end
+            </lua-code-block>
+
+            <HintBox type="warning" title="핵심 변경">
+                <strong>2가지</strong>가 추가됩니다:<br>
+                1. 레벨업 시 <code>statPoints += 1</code><br>
+                2. XP 변경 시 클라이언트에 <code>진행도(0~1)</code> 전송 → 경험치 바 표시용
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: 스텟 할당 서버 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">스텟 할당 — 서버 검증</h2>
+
+            <lua-code-block title="AllocateStat RemoteFunction" show-line-numbers>
+AllocateStatRF.OnServerInvoke = function(player, nodeId)
+    -- [1] 타입 검증
+    if typeof(nodeId) ~= "string" then
+        return false, "잘못된 요청"
+    end
+
+    local stats = playerStats[player.UserId]
+    if not stats then return false, "데이터 없음" end
+
+    -- [2] 포인트 확인
+    if stats.statPoints &lt;= 0 then
+        return false, "포인트 부족"
+    end
+
+    -- [3] 노드 유효성
+    local node = nil
+    for _, n in STAT_TREE do
+        if n.id == nodeId then node = n; break end
+    end
+    if not node then return false, "존재하지 않는 노드" end
+
+    -- [4] 이미 찍었는지
+    if stats.allocated[nodeId] then
+        return false, "이미 투자함"
+    end
+
+    -- [5] 전제조건: 하위 티어를 먼저 찍었는지
+    if node.tier > 1 then
+        local prevId = string.sub(nodeId, 1, -2) .. (node.tier - 1)
+        if not stats.allocated[prevId] then
+            return false, "하위 노드를 먼저 투자하세요"
+        end
+    end
+
+    -- [6] 투자 실행
+    stats.statPoints -= 1
+    stats.allocated[nodeId] = true
+    applyStats(player)
+    return true, node.label .. " 적용!"
+end
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: 서버 검증 해설 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">6단계 검증 — 왜 필요한가?</h2>
+
+            <div class="space-y-3">
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-coral flex items-center justify-center text-ink-deep font-bold">1</div>
+                    <div class="text-white">
+                        <strong>타입 검증</strong> — 해커가 숫자나 테이블을 보낼 수 있음. 문자열만 허용
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-coral flex items-center justify-center text-ink-deep font-bold">2</div>
+                    <div class="text-white">
+                        <strong>포인트 확인</strong> — 0포인트인데 찍는 걸 막음
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-coral flex items-center justify-center text-ink-deep font-bold">3</div>
+                    <div class="text-white">
+                        <strong>노드 유효성</strong> — 존재하지 않는 노드 id를 보내는 걸 막음
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-coral flex items-center justify-center text-ink-deep font-bold">4</div>
+                    <div class="text-white">
+                        <strong>중복 방지</strong> — 같은 노드를 두 번 찍는 걸 막음
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-coral flex items-center justify-center text-ink-deep font-bold">5</div>
+                    <div class="text-white">
+                        <strong>전제조건</strong> — spd3을 찍으려면 spd2가 먼저 있어야 함
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-mint flex items-center justify-center text-ink-deep font-bold">6</div>
+                    <div class="text-white">
+                        <strong>투자 실행</strong> — 모든 검증 통과 후 포인트 차감 + 효과 적용
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="절대 규칙">
+                클라이언트가 "spd1 찍었다"고 보내는 걸 <strong>절대 믿으면 안 됩니다</strong>.
+                서버가 직접 확인하고 적용해야 합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: applyStats ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">스텟 적용 함수</h2>
+
+            <lua-code-block title="applyStats()" show-line-numbers>
+local BASE_WALK_SPEED = 16
+local BASE_JUMP_POWER = 50
+
+local function applyStats(player)
+    local stats = playerStats[player.UserId]
+    if not stats then return end
+
+    local character = player.Character
+    if not character then return end
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+
+    -- 속도 계산: 기본값 × (1 + 모든 속도 효과 합산)
+    local speedBonus = 0
+    local jumpBonus = 0
+    for _, node in STAT_TREE do
+        if stats.allocated[node.id] then
+            if node.branch == "Speed" then
+                speedBonus += node.effect
+            elseif node.branch == "Jump" then
+                jumpBonus += node.effect
+            end
+        end
+    end
+
+    humanoid.WalkSpeed = BASE_WALK_SPEED * (1 + speedBonus)
+    humanoid.JumpPower = BASE_JUMP_POWER + jumpBonus
+    humanoid.UseJumpPower = true
+end
+
+-- 캐릭터 스폰될 때마다 적용
+player.CharacterAdded:Connect(function()
+    task.wait(0.1) -- Humanoid 로드 대기
+    applyStats(player)
+end)
+            </lua-code-block>
+
+            <HintBox type="info" title="영구 적용">
+                리스폰할 때마다 <code>applyStats</code>를 다시 호출합니다.
+                죽어도 스텟은 유지됩니다 — 진짜 영구 강화입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 코인 부스트 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 구현</span>
+            <h2 class="title-section mb-6">코인 부스트 &amp; 시간 보너스</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <lua-code-block title="코인 부스트 적용" show-line-numbers>
+local function getCoinMultiplier(player)
+    local stats = playerStats[player.UserId]
+    if not stats then return 1 end
+    local bonus = 0
+    for _, node in STAT_TREE do
+        if stats.allocated[node.id]
+            and node.branch == "Coin" then
+            bonus += node.effect
+        end
+    end
+    return 1 + bonus -- 1.0 ~ 1.75
+end
+
+-- giveCoins 수정
+local function giveCoins(player, amount)
+    local multiplier = getCoinMultiplier(player)
+    local final = math.floor(amount * multiplier)
+    coins.Value += final
+    giveXP(player, final)
+end
+                    </lua-code-block>
+                </div>
+                <div>
+                    <lua-code-block title="시간 보너스 적용" show-line-numbers>
+local function getTimeBonus(player)
+    local stats = playerStats[player.UserId]
+    if not stats then return 0 end
+    local bonus = 0
+    for _, node in STAT_TREE do
+        if stats.allocated[node.id]
+            and node.branch == "Time" then
+            bonus += node.effect
+        end
+    end
+    return bonus -- 0 ~ 115초
+end
+
+-- startTimer 수정
+local function startTimer()
+    -- 접속 중인 플레이어의 최대 시간 보너스
+    local maxBonus = 0
+    for _, plr in Players:GetPlayers() do
+        local b = getTimeBonus(plr)
+        if b > maxBonus then maxBonus = b end
+    end
+    currentRemainingTime = CONFIG.ROUND_TIME + maxBonus
+end
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 상점 기존 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 상점 고도화</span>
+            <h2 class="title-section mb-6">기존 상점 아이템 복습</h2>
+
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-sm" style="border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--ink-deep); color: white;">
+                            <th class="p-3 text-left rounded-tl-lg">아이템</th>
+                            <th class="p-3 text-center">가격</th>
+                            <th class="p-3 text-center">유형</th>
+                            <th class="p-3 text-left rounded-tr-lg">효과</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">추가 시간</td><td class="p-3 text-center">50</td><td class="p-3 text-center">즉시</td><td class="p-3">타이머 +120초</td></tr>
+                        <tr><td class="p-3">과속</td><td class="p-3 text-center">100</td><td class="p-3 text-center">버프</td><td class="p-3">WalkSpeed ×1.5 (60초)</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">무중력</td><td class="p-3 text-center">130</td><td class="p-3 text-center">버프</td><td class="p-3">JumpPower ×2 (45초)</td></tr>
+                        <tr><td class="p-3">안개 / 색반전</td><td class="p-3 text-center">150</td><td class="p-3 text-center">방해</td><td class="p-3">Lighting 이펙트 (60초)</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">더블 점프</td><td class="p-3 text-center">300</td><td class="p-3 text-center">버프</td><td class="p-3">공중 2단 점프 (60초)</td></tr>
+                        <tr><td class="p-3">무적 상태</td><td class="p-3 text-center">500</td><td class="p-3 text-center">버프</td><td class="p-3">ForceField (30초)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <HintBox type="info" title="상점 vs 스텟 트리">
+                상점 = <strong>코인으로 사는 일시적 버프</strong> (소모품)<br>
+                스텟 트리 = <strong>레벨 포인트로 찍는 영구 강화</strong><br>
+                둘은 공존합니다. 스텟으로 속도+30%를 올리고, 상점에서 과속을 사면 더 빨라집니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: 상점 + 스텟 시너지 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 상점 고도화</span>
+            <h2 class="title-section mb-6">상점 아이템 + 스텟 시너지</h2>
+
+            <lua-code-block title="과속 아이템 — 스텟 반영" show-line-numbers>
+speed = &#123;
+    name = "과속",
+    price = 100,
+    duration = 60,
+    apply = function(character)
+        local humanoid = character:FindFirstChild("Humanoid")
+        -- 현재 WalkSpeed를 기억 (스텟 적용된 값)
+        character:SetAttribute("PreBuffSpeed", humanoid.WalkSpeed)
+        humanoid.WalkSpeed = humanoid.WalkSpeed * 1.5
+    end,
+    remove = function(character)
+        local humanoid = character:FindFirstChild("Humanoid")
+        -- 스텟 적용 상태로 복원 (16이 아님!)
+        humanoid.WalkSpeed = character:GetAttribute("PreBuffSpeed")
+            or humanoid.WalkSpeed / 1.5
+    end,
+&#125;
+            </lua-code-block>
+
+            <HintBox type="warning" title="주의: 기본값 하드코딩 금지">
+                <code>humanoid.WalkSpeed = 16</code>으로 복원하면 스텟 보너스가 날아갑니다!<br>
+                반드시 <strong>버프 전 값을 저장</strong>해두고 복원해야 합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: RemoteEvent 추가 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 4 — 통신 구조</span>
+            <h2 class="title-section mb-6">새 Remote 추가</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-mint font-bold mb-2">기존 Remote (4개)</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• TimerUpdate (RemoteEvent)</li>
+                        <li>• HeightUpdate (RemoteEvent)</li>
+                        <li>• RoundInfo (RemoteEvent)</li>
+                        <li>• PurchaseItem (RemoteFunction)</li>
+                    </ul>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-gold font-bold mb-2">새로 추가 (2개)</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• <strong>AllocateStat</strong> (RemoteFunction)<br>
+                            <small class="text-gray-400">클라이언트 → 서버: 스텟 노드 투자 요청</small></li>
+                        <li>• <strong>StatSync</strong> (RemoteEvent)<br>
+                            <small class="text-gray-400">서버 → 클라이언트: 스텟 데이터 동기화</small></li>
+                    </ul>
+                </div>
+            </div>
+
+            <lua-code-block title="Rojo 모델 추가">
+-- toh-replicatedStorage/
+--   AllocateStat.model.json  → RemoteFunction
+--   StatSync.model.json      → RemoteEvent
+--
+-- Studio에서도 가능:
+-- ReplicatedStorage.TOH_Remotes 안에 수동 추가
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: StatSync ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 4 — 통신 구조</span>
+            <h2 class="title-section mb-6">스텟 데이터 동기화</h2>
+
+            <lua-code-block title="서버 → 클라이언트 동기화" show-line-numbers>
+local function syncStats(player)
+    local stats = playerStats[player.UserId]
+    if not stats then return end
+
+    -- 클라이언트에 전체 스텟 데이터 전송
+    StatSync:FireClient(player, &#123;
+        statPoints = stats.statPoints,
+        allocated = stats.allocated,
+        xpProgress = playerXP[player.UserId]
+            / ((player.leaderstats.Level.Value + 1) * CONFIG.LEVEL_XP_BASE),
+    &#125;)
+end
+
+-- 동기화 시점:
+-- 1. 플레이어 접속 시 (PlayerAdded)
+-- 2. 레벨업 시 (giveXP 안에서)
+-- 3. 스텟 할당 후 (AllocateStat 안에서)
+-- 4. 코인 변경 시 (giveCoins 안에서)
+            </lua-code-block>
+
+            <HintBox type="info" title="왜 전체 데이터를 보내나?">
+                allocated 테이블을 통째로 보내면 클라이언트가 트리 UI를 정확하게 그릴 수 있습니다.
+                노드별로 잠금/해금/찍은 상태를 판단할 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 16: 밸런스 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">Part 5 — 밸런스</span>
+            <h2 class="title-section mb-6">밸런스 설계</h2>
+
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-sm" style="border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--ink-deep); color: white;">
+                            <th class="p-3 text-left rounded-tl-lg">레벨</th>
+                            <th class="p-3 text-center">누적 XP</th>
+                            <th class="p-3 text-center">포인트</th>
+                            <th class="p-3 text-left rounded-tr-lg">가능한 조합 예시</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">Lv 1</td><td class="p-3 text-center">100</td><td class="p-3 text-center">1</td><td class="p-3">속도+2% 하나</td></tr>
+                        <tr><td class="p-3">Lv 5</td><td class="p-3 text-center">1,500</td><td class="p-3 text-center">5</td><td class="p-3">속도3단 + 점프1단 + 코인1단</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">Lv 10</td><td class="p-3 text-center">5,500</td><td class="p-3 text-center">10</td><td class="p-3">한 브랜치 올클 + 나머지 분배</td></tr>
+                        <tr><td class="p-3">Lv 20</td><td class="p-3 text-center">21,000</td><td class="p-3 text-center">20</td><td class="p-3">전 브랜치 올클리어! (풀트리)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <HintBox type="tip" title="밸런스 핵심">
+                풀트리(20노드)를 찍으려면 <strong>레벨 20</strong>이 필요합니다.<br>
+                실제 TOH는 레벨 80에 풀트리 — 우리는 학습용으로 20으로 설정했습니다.<br>
+                <code>CONFIG.LEVEL_XP_BASE</code>를 조절하면 레벨업 속도를 바꿀 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: 전체 시스템 구조도 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">Part 5 — 정리</span>
+            <h2 class="title-section mb-6">전체 시스템 구조도</h2>
+
+            <div class="bg-ink-deep rounded-xl p-6 mb-6">
+                <div class="arch-diagram">
+                    <div class="arch-zone">
+                        <div class="arch-zone-title" style="color:#3DFFA2;">서버 (GameManager + ShopHandler)</div>
+                        <div class="arch-connectors">
+                            <div class="arch-conn"><span class="arch-conn-from">giveXP()</span> → XP 증가 → 레벨업 시 <span class="arch-conn-to">statPoints += 1</span></div>
+                            <div class="arch-conn"><span class="arch-conn-from">AllocateStat</span> → 6단계 검증 → <span class="arch-conn-to">applyStats()</span></div>
+                            <div class="arch-conn"><span class="arch-conn-from">syncStats()</span> → StatSync → <span class="arch-conn-to">클라이언트 UI 업데이트</span></div>
+                        </div>
+                    </div>
+                    <div class="arch-zone">
+                        <div class="arch-zone-title" style="color:#6BCFFF;">클라이언트 (GameUI)</div>
+                        <div class="arch-connectors">
+                            <div class="arch-conn"><span class="arch-conn-to">레벨 호버</span> → 경험치 바 표시 (XP progress)</div>
+                            <div class="arch-conn"><span class="arch-conn-to">레벨 클릭</span> → 스텟 트리 열기 → [+] 클릭 → <span class="arch-conn-from">AllocateStat 요청</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 다음 차시 예고 ==================== -->
+    <section class="slide">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">다음 시간</span>
+                <h2 class="title-display mb-4">
+                    B차시 — <span class="text-neon-mint">스텟 트리 UI</span><br>
+                    <span class="text-neon-sky">&amp; 음악 플레이어</span>
+                </h2>
+                <div class="space-y-4 text-left max-w-lg mx-auto mt-8">
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-neon-mint flex items-center justify-center text-ink-deep font-bold">1</div>
+                        <div class="text-white">레벨 호버 → <strong>경험치 바 UI</strong> 구현</div>
+                    </div>
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-neon-sky flex items-center justify-center text-ink-deep font-bold">2</div>
+                        <div class="text-white">레벨 클릭 → <strong>스텟 트리 UI</strong> (위로 펼쳐지는 애니메이션)</div>
+                    </div>
+                    <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-neon-gold flex items-center justify-center text-ink-deep font-bold">3</div>
+                        <div class="text-white"><strong>음악 플레이어</strong> — 곡 제목 + 재생/정지 버튼</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
+
+<style>
+    table td, table th {
+        border-bottom: 1px solid rgba(26,22,37,0.1);
+    }
+
+    /* 플로우 다이어그램 */
+    .flow-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .flow-step {
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        color: #fdfcfb;
+        min-width: 80px;
+    }
+    .flow-arrow {
+        color: #6BCFFF;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+
+    /* 아키텍처 다이어그램 */
+    .arch-diagram {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .arch-zone {
+        background: #2d2640;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+    .arch-zone-title {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+    }
+    .arch-connectors {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .arch-conn {
+        font-size: 0.78rem;
+        color: #E8E6E3;
+    }
+    .arch-conn-from { color: #3DFFA2; font-weight: 700; }
+    .arch-conn-to { color: #6BCFFF; font-weight: 700; }
+
+    /* 스텟 트리 프리뷰 */
+    .stat-tree-preview {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    .tree-tier {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+    .tree-node {
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-align: center;
+        min-width: 70px;
+        color: #1a1625;
+    }
+    .tier1 { background: #6BCFFF; }
+    .tier2 { background: #7DD8A6; }
+    .tier3 { background: #A8D86E; }
+    .tier4 { background: #D4C44A; }
+    .tier5 { background: #FFD93D; }
+    .tree-connectors {
+        color: #676E95;
+        font-size: 0.9rem;
+        text-align: center;
+        letter-spacing: 5.2em;
+        line-height: 1;
+    }
+    .tree-root {
+        margin-top: 4px;
+    }
+    .tree-level-node {
+        display: inline-block;
+        padding: 8px 24px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #C792EA, #6BCFFF);
+        color: #1a1625;
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+</style>

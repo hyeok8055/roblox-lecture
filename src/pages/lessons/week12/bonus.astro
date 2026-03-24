@@ -1,0 +1,1387 @@
+---
+import LessonLayout from '../../../layouts/LessonLayout.astro';
+import HintBox from '../../../components/astro/HintBox.astro';
+---
+
+<LessonLayout title="Tower of Hell - 아키텍처 완전 가이드" lessonNumber={12} totalSlides={30}>
+
+    <!-- ==================== 슬라이드 1: 인트로 ==================== -->
+    <section class="slide active">
+        <div class="max-w-4xl mx-auto px-6 py-12 flex flex-col items-center justify-center min-h-[80vh]">
+            <div class="text-center animate-in">
+                <span class="badge badge-roblox mb-6">보너스 차시</span>
+                <h1 class="title-display mb-4">
+                    Tower of Hell<br>
+                    <span class="text-neon-mint">아키텍처 완전 가이드</span>
+                </h1>
+                <p class="text-ink-light text-lg max-w-2xl mx-auto mb-8">
+                    우리가 만든 게임의 내부 구조를 완전히 해부하고,<br>
+                    자유롭게 커스터마이징할 수 있는 실력을 기르자
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 mb-8">
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">구조 분석</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">시스템 설계</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">커스터마이징</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-ink-deep text-white">고도화</span>
+                </div>
+                <HintBox type="info" title="이 차시에서 배우는 것">
+                    12주차에 만든 Tower of Hell의 <strong>3개 스크립트</strong>가 어떻게 유기적으로 연결되는지,
+                    각 시스템의 동작 원리와 확장 방법을 상세히 다룹니다.
+                </HintBox>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 2: 프로젝트 파일 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 전체 구조</span>
+            <h2 class="title-section mb-6">프로젝트 파일 구조</h2>
+            <p class="text-ink-light mb-6">Rojo 프로젝트의 각 파일이 Studio의 어디에 배치되는지 확인하세요.</p>
+
+            <lua-code-block title="Rojo → Studio 매핑" show-line-numbers>
+-- Rojo 파일                          → Studio 위치
+-- ──────────────────────────────────────────────────────
+-- toh-server/
+--   GameManager.server.luau          → ServerScriptService.GameManager
+--   ShopHandler.server.luau          → ServerScriptService.ShopHandler
+--
+-- toh-client/
+--   GameUI.client.luau               → StarterPlayer.StarterPlayerScripts.GameUI
+--
+-- toh-replicatedStorage/
+--   TimerUpdate.model.json           → ReplicatedStorage.TOH_Remotes.TimerUpdate
+--   HeightUpdate.model.json          → ReplicatedStorage.TOH_Remotes.HeightUpdate
+--   RoundInfo.model.json             → ReplicatedStorage.TOH_Remotes.RoundInfo
+--   PurchaseItem.model.json          → ReplicatedStorage.TOH_Remotes.PurchaseItem
+--
+-- build-12주차.project.json          → Workspace (Lobby, ActiveMap, Baseplate)
+--                                    → ServerStorage.Maps (빈 폴더)
+            </lua-code-block>
+
+            <HintBox type="info" title="핵심 포인트">
+                스크립트는 <strong>3개</strong>뿐입니다: GameManager(서버), ShopHandler(서버), GameUI(클라이언트).
+                이 3개가 4개의 Remote를 통해 서로 통신합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 3: Roblox 서비스 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 전체 구조</span>
+            <h2 class="title-section mb-6">Roblox 서비스 구조도</h2>
+
+            <!-- 서비스 구조도 (HTML) -->
+            <div class="diagram-box mb-6">
+                <div class="diagram-row">
+                    <div class="diagram-service">
+                        <div class="diagram-label">ServerScriptService</div>
+                        <div class="diagram-label-sub">서버 전용</div>
+                        <div class="diagram-children">
+                            <span class="diagram-node node-server">GameManager<br><small>메인 게임 루프</small></span>
+                            <span class="diagram-node node-server">ShopHandler<br><small>상점 시스템</small></span>
+                        </div>
+                    </div>
+                    <div class="diagram-service">
+                        <div class="diagram-label">ReplicatedStorage</div>
+                        <div class="diagram-label-sub">서버+클라이언트 공유</div>
+                        <div class="diagram-children">
+                            <span class="diagram-node node-remote">TOH_Remotes</span>
+                            <div class="diagram-sub-children">
+                                <span class="diagram-chip">TimerUpdate</span>
+                                <span class="diagram-chip">HeightUpdate</span>
+                                <span class="diagram-chip">RoundInfo</span>
+                                <span class="diagram-chip">PurchaseItem</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="diagram-row">
+                    <div class="diagram-service">
+                        <div class="diagram-label">StarterPlayer</div>
+                        <div class="diagram-label-sub">클라이언트 스크립트</div>
+                        <div class="diagram-children">
+                            <span class="diagram-node node-client">GameUI<br><small>전체 UI + 더블점프</small></span>
+                        </div>
+                    </div>
+                    <div class="diagram-service">
+                        <div class="diagram-label">ServerStorage</div>
+                        <div class="diagram-label-sub">서버 전용 저장소</div>
+                        <div class="diagram-children">
+                            <span class="diagram-node" style="background:#3d3654;">Maps 폴더 → RoLive Map</span>
+                        </div>
+                    </div>
+                    <div class="diagram-service">
+                        <div class="diagram-label">Workspace</div>
+                        <div class="diagram-label-sub">게임 월드</div>
+                        <div class="diagram-children" style="flex-direction:row;gap:6px;">
+                            <span class="diagram-chip">Lobby</span>
+                            <span class="diagram-chip">ActiveMap</span>
+                            <span class="diagram-chip">Baseplate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="tip" title="색상 구분">
+                <strong style="color:#3DFFA2;">초록</strong> = 서버 스크립트,
+                <strong style="color:#6BCFFF;">파랑</strong> = 클라이언트 스크립트,
+                <strong style="color:#FFD93D;">노랑</strong> = 공유 통신 채널
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 4: 서버-클라이언트 통신 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 전체 구조</span>
+            <h2 class="title-section mb-6">서버-클라이언트 통신 구조</h2>
+
+            <!-- 서버-클라이언트 통신 시퀀스 (HTML) -->
+            <div class="diagram-box mb-6">
+                <div class="seq-diagram">
+                    <div class="seq-participants">
+                        <span class="seq-actor node-server">GameManager<br><small>(서버)</small></span>
+                        <span class="seq-actor node-server">ShopHandler<br><small>(서버)</small></span>
+                        <span class="seq-actor node-client">GameUI<br><small>(클라이언트)</small></span>
+                    </div>
+                    <div class="seq-messages">
+                        <div class="seq-msg">
+                            <span class="seq-from">GM</span>
+                            <span class="seq-arrow">→</span>
+                            <span class="seq-to">GUI</span>
+                            <span class="seq-label">TimerUpdate("7:32", 452)</span>
+                        </div>
+                        <div class="seq-msg">
+                            <span class="seq-from">GM</span>
+                            <span class="seq-arrow">→</span>
+                            <span class="seq-to">GUI</span>
+                            <span class="seq-label">HeightUpdate(heightData)</span>
+                        </div>
+                        <div class="seq-msg">
+                            <span class="seq-from">GM</span>
+                            <span class="seq-arrow">→</span>
+                            <span class="seq-to">GUI</span>
+                            <span class="seq-label">RoundInfo("RoundStart", "맵이름")</span>
+                        </div>
+                        <div class="seq-msg seq-msg-reverse">
+                            <span class="seq-from">GUI</span>
+                            <span class="seq-arrow">→</span>
+                            <span class="seq-to">SH</span>
+                            <span class="seq-label">PurchaseItem("speed")</span>
+                        </div>
+                        <div class="seq-msg seq-msg-reverse">
+                            <span class="seq-from">SH</span>
+                            <span class="seq-arrow">→</span>
+                            <span class="seq-to">GUI</span>
+                            <span class="seq-label" style="color:#3DFFA2;">return true, "과속 적용!"</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-mint font-bold mb-2">RemoteEvent (일방통행)</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• TimerUpdate — 타이머 텍스트 + 남은 시간</li>
+                        <li>• HeightUpdate — 모든 플레이어 높이 데이터</li>
+                        <li>• RoundInfo — 라운드 상태 알림</li>
+                    </ul>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-sky font-bold mb-2">RemoteFunction (양방향)</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• PurchaseItem — 클라이언트가 요청, 서버가 처리 후 결과 반환</li>
+                        <li>• 반환값: (success: boolean, message: string)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 5: 게임 루프 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lesson mb-4">Part 1 — 전체 구조</span>
+            <h2 class="title-section mb-6">게임 루프 플로우</h2>
+
+            <!-- 게임 루프 플로우 (HTML) -->
+            <div class="diagram-box mb-6">
+                <div class="flow-horizontal">
+                    <span class="flow-step" style="background:#FFD93D;color:#1a1625;">Intermission<br><small>8초 대기</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#2d2640;">MapLoad<br><small>맵 Clone</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#2d2640;">Teleport<br><small>스폰 이동</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#3DFFA2;color:#1a1625;">Playing<br><small>480초 타이머</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#2d2640;">RoundEnd<br><small>타이머종료/클리어</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#6BCFFF;color:#1a1625;">Rewards<br><small>보상 지급</small></span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step" style="background:#2d2640;">Lobby<br><small>로비 복귀</small></span>
+                    <span class="flow-arrow">↩</span>
+                </div>
+            </div>
+
+            <lua-code-block title="GameManager — gameLoop() 핵심 흐름">
+while true do
+    -- [1] 인터미션 (8초 대기)
+    -- [2] 맵 로드 (ServerStorage → ActiveMap Clone)
+    -- [3] 스폰/클리어 파트 자동 탐색
+    -- [4] 모든 플레이어 텔레포트
+    -- [5] WinPart Touched 이벤트 연결
+    -- [6] 높이 추적 스레드 시작
+    -- [7] 타이머 시작 (480초)
+    -- [8] 라운드 종료 → 보상 → 로비 → 맵 제거
+end
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 6: CONFIG ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">CONFIG 설정값 일람</h2>
+            <p class="text-ink-light mb-6">이 테이블 하나만 수정하면 게임 밸런스를 조절할 수 있습니다.</p>
+
+            <lua-code-block title="GameManager.server.luau" show-line-numbers>
+local CONFIG = &#123;
+    ROUND_TIME = 480,         -- 라운드 시간 (초) — 실제 TOH는 8분
+    EXTRA_TIME = 120,         -- "추가 시간" 아이템 효과 (2분)
+    INTERMISSION = 8,         -- 라운드 사이 대기 시간
+    HEIGHT_UPDATE_RATE = 0.5, -- 높이 업데이트 주기 (초)
+    WIN_COINS = 50,           -- 타워 클리어 보상 코인
+    PARTICIPATE_COINS = 10,   -- 라운드 참여 보상 코인
+    HEIGHT_BONUS_COINS = 5,   -- 50% 이상 올라간 보상
+    LEVEL_XP_BASE = 100,      -- 레벨업 기본 XP (레벨 × 100)
+&#125;
+            </lua-code-block>
+
+            <HintBox type="tip" title="밸런스 팁">
+                WIN_COINS을 높이면 클리어 동기가 강해지고, PARTICIPATE_COINS를 높이면 참여만으로도 보상감이 있습니다.
+                실제 TOH는 섹션당 코인을 줍니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 7: 리더보드 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">리더보드 시스템</h2>
+
+            <lua-code-block title="setupLeaderstats()" show-line-numbers>
+local function setupLeaderstats(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"  -- 이 이름이어야 자동 리더보드
+    leaderstats.Parent = player
+
+    local wins = Instance.new("IntValue")
+    wins.Name = "Wins"
+    wins.Value = 0
+    wins.Parent = leaderstats
+
+    local coins = Instance.new("IntValue")
+    coins.Name = "Coins"
+    coins.Value = 0
+    coins.Parent = leaderstats
+
+    local level = Instance.new("IntValue")
+    level.Name = "Level"
+    level.Value = 0
+    level.Parent = leaderstats
+end
+
+Players.PlayerAdded:Connect(setupLeaderstats)
+            </lua-code-block>
+
+            <HintBox type="info" title="자동 리더보드">
+                Roblox는 <code>leaderstats</code>라는 이름의 Folder를 감지하여 우상단에 자동으로 리더보드를 표시합니다.
+                안의 IntValue/StringValue 이름이 컬럼명이 됩니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 8: 코인 & XP ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">코인 &amp; XP 시스템</h2>
+
+            <lua-code-block title="레벨업 공식" show-line-numbers>
+local function giveXP(player, amount)
+    playerXP[player.UserId] += amount
+
+    -- 레벨업: 필요 XP = (현재레벨 + 1) × 100
+    local requiredXP = (level.Value + 1) * CONFIG.LEVEL_XP_BASE
+    while playerXP[player.UserId] >= requiredXP do
+        playerXP[player.UserId] -= requiredXP
+        level.Value += 1
+        requiredXP = (level.Value + 1) * CONFIG.LEVEL_XP_BASE
+    end
+end
+
+-- 코인 = XP (실제 TOH 방식)
+local function giveCoins(player, amount)
+    coins.Value += amount
+    giveXP(player, amount)  -- 코인만큼 XP도 부여
+end
+            </lua-code-block>
+
+            <div class="bg-ink-deep rounded-xl p-4 mt-4">
+                <h4 class="text-neon-gold font-bold mb-2">레벨업 필요 XP</h4>
+                <div class="grid grid-cols-5 gap-2 text-white text-sm text-center">
+                    <div>Lv 0→1<br><strong>100</strong></div>
+                    <div>Lv 1→2<br><strong>200</strong></div>
+                    <div>Lv 2→3<br><strong>300</strong></div>
+                    <div>Lv 9→10<br><strong>1,000</strong></div>
+                    <div>Lv 79→80<br><strong>8,000</strong></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 9: 맵 로테이션 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">맵 로테이션 시스템</h2>
+
+            <!-- 맵 로테이션 플로우 (HTML) -->
+            <div class="diagram-box mb-6">
+                <div class="flow-horizontal">
+                    <span class="flow-step" style="background:#2d2640;">ServerStorage<br><small>Maps 폴더</small></span>
+                    <span class="flow-arrow-label">GetChildren</span>
+                    <span class="flow-step" style="background:#2d2640;">맵 목록</span>
+                    <span class="flow-arrow-label">math.random</span>
+                    <span class="flow-step" style="background:#FFD93D;color:#1a1625;">랜덤 선택<br><small>연속 방지</small></span>
+                    <span class="flow-arrow-label">Clone</span>
+                    <span class="flow-step" style="background:#3DFFA2;color:#1a1625;">Workspace<br><small>ActiveMap</small></span>
+                    <span class="flow-arrow-label">라운드 종료</span>
+                    <span class="flow-step" style="background:#FF6B6B;color:#1a1625;">Destroy</span>
+                </div>
+            </div>
+
+            <lua-code-block title="pickRandomMap()" show-line-numbers>
+local function pickRandomMap()
+    local maps = mapsFolder:GetChildren()
+    if #maps == 0 then
+        warn("Maps 폴더가 비어있습니다!")
+        return nil
+    end
+    if #maps &lt;= 1 then return maps[1] end
+
+    local chosen
+    repeat
+        chosen = maps[math.random(1, #maps)]
+    until chosen.Name ~= lastMapName  -- 같은 맵 연속 방지
+
+    lastMapName = chosen.Name
+    return chosen
+end
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 10: 맵 자동 탐색 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">맵 자동 탐색 시스템</h2>
+            <p class="text-ink-light mb-4">어떤 맵이든 스폰/클리어 파트를 자동으로 찾아줍니다.</p>
+
+            <lua-code-block title="탐색 이름 목록">
+local SPAWN_NAMES = &#123;"SpawnPoint", "start", "Spawn", "SpawnLocation"&#125;
+local WIN_NAMES   = &#123;"FinishGlow", "WinPart", "Win", "End"&#125;
+            </lua-code-block>
+
+            <div class="bg-ink-deep rounded-xl p-4 mt-4 mb-4">
+                <h4 class="text-neon-mint font-bold mb-2">탐색 우선순위</h4>
+                <div class="text-white text-sm space-y-2">
+                    <p><strong>스폰 탐색:</strong> 이름 매칭 → Model이면 center Part 우선 → 재귀 탐색</p>
+                    <p><strong>클리어 탐색:</strong> 이름 매칭 → Model이면 CanCollide=true Part 우선 → 재귀 탐색</p>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="중요">
+                클리어 파트는 반드시 <code>CanCollide = true</code>여야 <code>Touched</code> 이벤트가 발동합니다.
+                RoLive Map의 FinishGlow가 바로 이 역할을 합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 11: 타이머 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">타이머 시스템</h2>
+
+            <lua-code-block title="startTimer()" show-line-numbers>
+local function startTimer()
+    currentRemainingTime = CONFIG.ROUND_TIME  -- 480초
+
+    while currentRemainingTime > 0 do
+        -- "추가 시간" 아이템 체크
+        if workspace:GetAttribute("ExtraTimeRequested") then
+            workspace:SetAttribute("ExtraTimeRequested", nil)
+            currentRemainingTime += CONFIG.EXTRA_TIME
+            RoundInfo:FireAllClients("Announcement",
+                "추가 시간 +" .. CONFIG.EXTRA_TIME .. "초!")
+        end
+
+        local minutes = math.floor(currentRemainingTime / 60)
+        local seconds = currentRemainingTime % 60
+        local timeText = string.format("%d:%02d", minutes, seconds)
+
+        TimerUpdate:FireAllClients(timeText, currentRemainingTime)
+        task.wait(1)
+        currentRemainingTime -= 1
+    end
+end
+            </lua-code-block>
+
+            <HintBox type="info" title="추가 시간 패턴">
+                ShopHandler가 <code>workspace:SetAttribute("ExtraTimeRequested", true)</code>를 설정하면,
+                타이머 루프가 이를 감지하여 시간을 추가합니다. 스크립트 간 통신의 간단한 패턴입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 12: 높이 추적 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">높이 추적 시스템</h2>
+
+            <lua-code-block title="trackHeights()" show-line-numbers>
+local function trackHeights(currentMap)
+    local baseY = spawnPart.Position.Y   -- 타워 바닥 (Y=8)
+    local topY = winPart.Position.Y      -- 타워 꼭대기 (Y=885)
+    local totalHeight = topY - baseY     -- 877 스터드
+
+    task.spawn(function()  -- 별도 스레드에서 실행
+        while currentMap.Parent ~= nil do  -- 맵 삭제되면 자동 종료
+            local heightData = &#123;&#125;
+            for _, plr in Players:GetPlayers() do
+                local hrp = character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    local progress = (hrp.Position.Y - baseY) / totalHeight
+                    progress = math.clamp(progress, 0, 1)
+                    table.insert(heightData, &#123;
+                        name = plr.Name,
+                        progress = progress,
+                    &#125;)
+                end
+            end
+            HeightUpdate:FireAllClients(heightData)
+            task.wait(0.5)  -- CONFIG.HEIGHT_UPDATE_RATE
+        end
+    end)
+end
+            </lua-code-block>
+
+            <HintBox type="tip" title="자동 종료 트릭">
+                <code>currentMap.Parent ~= nil</code> — 맵이 Destroy되면 Parent가 nil이 되어 루프가 자동 종료됩니다.
+                별도의 종료 신호가 필요 없는 깔끔한 패턴입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 13: Win 판정 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">Win 판정 시스템</h2>
+
+            <lua-code-block title="클리어 감지 흐름" show-line-numbers>
+-- [gameLoop 내부] WinPart에 Touched 이벤트 연결
+winConnection = winPart.Touched:Connect(function(hit)
+    local plr = Players:GetPlayerFromCharacter(hit.Parent)
+    if plr then
+        onPlayerWin(plr)
+    end
+end)
+
+-- Win 처리
+local function onPlayerWin(player)
+    -- 중복 클리어 방지 (같은 라운드에서 1번만)
+    if player:GetAttribute("HasWon") then return end
+    player:SetAttribute("HasWon", true)
+
+    wins.Value += 1
+    giveCoins(player, CONFIG.WIN_COINS)  -- 50코인 + 50XP
+    RoundInfo:FireAllClients("PlayerWon", player.Name, wins.Value)
+end
+            </lua-code-block>
+
+            <HintBox type="warning" title="중복 방지">
+                <code>HasWon</code> Attribute가 없으면, FinishGlow를 여러 번 터치할 때마다 보상이 중복 지급됩니다.
+                라운드 시작 시 모든 플레이어의 HasWon을 false로 초기화합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 14: 상점 서버 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">상점 시스템 — 서버 보안</h2>
+
+            <lua-code-block title="ShopHandler 검증 로직" show-line-numbers>
+PurchaseRF.OnServerInvoke = function(player, itemId)
+    -- [1] 타입 검증 (해킹 방지)
+    if typeof(itemId) ~= "string" then
+        return false, "잘못된 요청"
+    end
+
+    -- [2] 스팸 방지 (0.5초 쿨다운)
+    local lastPurchase = player:GetAttribute("LastPurchaseTime") or 0
+    if tick() - lastPurchase &lt; 0.5 then
+        return false, "너무 빠릅니다"
+    end
+
+    -- [3] 아이템 유효성
+    local item = ITEMS[itemId]
+    if not item then return false, "존재하지 않는 아이템" end
+
+    -- [4] 코인 잔액 확인
+    if coins.Value &lt; item.price then
+        return false, "코인 부족"
+    end
+
+    -- [5] 코인 차감 → 효과 적용
+    coins.Value -= item.price
+    item.apply(player.Character)
+    return true, item.name .. " 적용!"
+end
+            </lua-code-block>
+
+            <HintBox type="warning" title="절대 규칙">
+                <strong>클라이언트를 절대 믿지 마세요!</strong> 가격, 잔액, 아이템 유효성 검증은 반드시 서버에서 수행합니다.
+                클라이언트가 보낸 데이터는 언제든 조작될 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 15: 상점 아이템 상세 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-lua mb-4">Part 2 — 서버 시스템</span>
+            <h2 class="title-section mb-6">상점 아이템 일람</h2>
+
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-sm" style="border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--ink-deep); color: white;">
+                            <th class="p-3 text-left rounded-tl-lg">아이템</th>
+                            <th class="p-3 text-center">가격</th>
+                            <th class="p-3 text-center">지속</th>
+                            <th class="p-3 text-left rounded-tr-lg">효과</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">추가 시간</td><td class="p-3 text-center">50</td><td class="p-3 text-center">즉시</td><td class="p-3">타이머 +120초</td></tr>
+                        <tr><td class="p-3">과속</td><td class="p-3 text-center">100</td><td class="p-3 text-center">60초</td><td class="p-3">WalkSpeed ×1.5</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">무중력</td><td class="p-3 text-center">130</td><td class="p-3 text-center">45초</td><td class="p-3">JumpPower ×2</td></tr>
+                        <tr><td class="p-3">안개</td><td class="p-3 text-center">150</td><td class="p-3 text-center">60초</td><td class="p-3">Atmosphere.Density = 0.5</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">색 반전</td><td class="p-3 text-center">150</td><td class="p-3 text-center">60초</td><td class="p-3">ColorCorrection.Saturation = -1</td></tr>
+                        <tr><td class="p-3">더블 점프</td><td class="p-3 text-center">300</td><td class="p-3 text-center">60초</td><td class="p-3">DoubleJumpEnabled Attribute</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">무적 상태</td><td class="p-3 text-center">500</td><td class="p-3 text-center">30초</td><td class="p-3">ForceField 생성</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <lua-code-block title="아이템 구조 예시 — 과속">
+speed = &#123;
+    name = "과속",
+    price = 100,
+    duration = 60,
+    apply = function(character)
+        local humanoid = character:FindFirstChild("Humanoid")
+        character:SetAttribute("OriginalWalkSpeed", humanoid.WalkSpeed)
+        humanoid.WalkSpeed = humanoid.WalkSpeed * 1.5
+    end,
+    remove = function(character)
+        local humanoid = character:FindFirstChild("Humanoid")
+        humanoid.WalkSpeed = character:GetAttribute("OriginalWalkSpeed") or 16
+    end,
+&#125;
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 16: UI 레이아웃 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">UI 전체 레이아웃</h2>
+
+            <div class="bg-ink-deep rounded-xl p-6 font-mono text-sm text-white mb-6" style="line-height: 1.8;">
+                <pre style="margin:0; white-space:pre; overflow-x:auto;">
+┌──────────────────────────────────────────────────────┐
+│                                                      │
+│              ┌─────────┐     ┌──────────────┐        │
+│              │  7:32    │     │ Wins Lv Coins│        │
+│              │ (타이머) │     │ (리더보드)   │   ┌─┐  │
+│              └─────────┘     └──────────────┘   │T│  │
+│                                                 │O│  │
+│                                                 │P│  │
+│                                                 │ │  │
+│                   [ 게임 화면 ]                  │●│  │
+│                                                 │ │  │
+│                                                 │ │  │
+│                                                 │B│  │
+│                                                 │A│  │
+│                                                 │S│  │
+│ ┌────┐                                         │E│  │
+│ │상점│  0 Coins      Level 0             [M]    └─┘  │
+│ └────┘                                               │
+└──────────────────────────────────────────────────────┘</pre>
+            </div>
+
+            <HintBox type="info" title="코드로 생성">
+                모든 UI는 <code>GameUI.client.luau</code>에서 <code>Instance.new()</code>로 생성합니다.
+                StarterGui에 아무것도 넣지 않습니다 — 코드 한 곳에서 전체 HUD를 관리하는 패턴입니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 17: 타이머 UI ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">타이머 UI 상세</h2>
+
+            <lua-code-block title="색상 변경 로직" show-line-numbers>
+TimerUpdate.OnClientEvent:Connect(function(timeText, remaining)
+    timerLabel.Text = timeText
+
+    if remaining &lt;= 30 then
+        timerLabel.TextColor3 = Color3.fromRGB(255, 80, 80)   -- 빨강 (긴급)
+    elseif remaining &lt;= 60 then
+        timerLabel.TextColor3 = Color3.fromRGB(255, 210, 60)  -- 노랑 (경고)
+    else
+        timerLabel.TextColor3 = Color3.new(1, 1, 1)           -- 흰색 (평상시)
+    end
+end)
+            </lua-code-block>
+
+            <div class="flex gap-4 mt-4">
+                <div class="flex-1 bg-ink-deep rounded-xl p-4 text-center">
+                    <span class="text-3xl font-bold" style="color: white;">7:32</span>
+                    <p class="text-sm text-white mt-1">60초 이상 — 흰색</p>
+                </div>
+                <div class="flex-1 bg-ink-deep rounded-xl p-4 text-center">
+                    <span class="text-3xl font-bold" style="color: #FFD23C;">0:45</span>
+                    <p class="text-sm text-white mt-1">30~60초 — 노란색</p>
+                </div>
+                <div class="flex-1 bg-ink-deep rounded-xl p-4 text-center">
+                    <span class="text-3xl font-bold" style="color: #FF5050;">0:15</span>
+                    <p class="text-sm text-white mt-1">30초 이하 — 빨간색</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 18: 높이 바 UI ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">높이 바 UI</h2>
+
+            <lua-code-block title="마커 생성 & 업데이트" show-line-numbers>
+HeightUpdate.OnClientEvent:Connect(function(heightData)
+    -- 기존 마커 숨기기
+    for _, marker in markers do
+        marker.Visible = false
+    end
+
+    for _, data in heightData do
+        if not markers[data.name] then
+            -- 새 마커 생성
+            local marker = Instance.new("Frame")
+            local bar = Instance.new("Frame")
+
+            -- 내 마커는 초록, 남은 파랑
+            if data.name == player.Name then
+                bar.BackgroundColor3 = Color3.fromRGB(61, 255, 162)
+            else
+                bar.BackgroundColor3 = Color3.fromRGB(107, 207, 255)
+            end
+            markers[data.name] = marker
+        end
+
+        -- 위치 업데이트 (progress 0=바닥, 1=꼭대기)
+        markers[data.name].Position =
+            UDim2.new(-0.3, 0, 1 - data.progress, -9)
+        markers[data.name].Visible = true
+    end
+end)
+            </lua-code-block>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 19: 상점 UI ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">상점 UI</h2>
+
+            <lua-code-block title="구매 버튼 클릭 처리" show-line-numbers>
+card.MouseButton1Click:Connect(function()
+    card.Text = "  구매 중..."
+    card.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+
+    -- 서버에 구매 요청 (RemoteFunction)
+    local success, message = PurchaseRF:InvokeServer(item.id)
+
+    if success then
+        card.Text = "  OK " .. message
+        card.BackgroundColor3 = Color3.fromRGB(30, 100, 50)
+    else
+        card.Text = "  X " .. message
+        card.BackgroundColor3 = Color3.fromRGB(100, 30, 30)
+    end
+
+    -- 2초 후 원래 텍스트로 복원
+    task.delay(2, function()
+        card.Text = originalText
+        card.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    end)
+end)
+            </lua-code-block>
+
+            <HintBox type="info" title="UI 구조">
+                상점 패널은 <code>ScrollingFrame</code> + <code>UIListLayout</code>으로 아이템이 자동 정렬됩니다.
+                <code>AutomaticCanvasSize = Enum.AutomaticSize.Y</code>로 스크롤도 자동 조절됩니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 20: 음악 & 알림 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">음악 토글 &amp; 알림</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <lua-code-block title="BGM 시스템">
+local bgm = Instance.new("Sound")
+bgm.SoundId = "rbxassetid://1846862087"
+bgm.Volume = 0.3
+bgm.Looped = true
+bgm.Parent = SoundService  -- 글로벌 재생
+bgm:Play()
+
+-- 토글 버튼
+musicButton.MouseButton1Click:Connect(function()
+    isPlaying = not isPlaying
+    if isPlaying then
+        bgm:Resume()
+    else
+        bgm:Pause()
+    end
+end)
+                    </lua-code-block>
+                </div>
+                <div>
+                    <lua-code-block title="알림 페이드 아웃">
+local function showAnnouncement(text, duration)
+    announcementLabel.Text = text
+    announcementLabel.TextTransparency = 0
+
+    task.delay(duration or 3, function()
+        local tween = TweenService:Create(
+            announcementLabel,
+            TweenInfo.new(0.5),
+            &#123;
+                TextTransparency = 1,
+                TextStrokeTransparency = 1,
+            &#125;
+        )
+        tween:Play()
+    end)
+end
+                    </lua-code-block>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 21: 더블 점프 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">더블 점프 시스템</h2>
+
+            <lua-code-block title="JumpRequest 패턴" show-line-numbers>
+UserInputService.JumpRequest:Connect(function()
+    local character = player.Character
+    if not character then return end
+    -- 상점에서 구매한 경우만 활성화
+    if not character:GetAttribute("DoubleJumpEnabled") then return end
+
+    local humanoid = character:FindFirstChild("Humanoid")
+    if not humanoid then return end
+
+    -- 공중(Freefall)이고 아직 더블점프 안 했으면
+    if humanoid:GetState() == Enum.HumanoidStateType.Freefall
+        and not hasDoubleJumped then
+        hasDoubleJumped = true
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+            </lua-code-block>
+
+            <HintBox type="info" title="서버-클라이언트 연동">
+                서버(ShopHandler)가 <code>character:SetAttribute("DoubleJumpEnabled", true)</code>를 설정하면,
+                클라이언트(GameUI)가 이를 감지하여 더블점프를 활성화합니다.
+                duration 후 서버가 false로 변경 → 더블점프 비활성화.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 22: 실시간 표시 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-roblox mb-4">Part 3 — 클라이언트 시스템</span>
+            <h2 class="title-section mb-6">코인/레벨 실시간 표시</h2>
+
+            <lua-code-block title="안전한 데이터 바인딩 패턴" show-line-numbers>
+task.spawn(function()
+    -- [1] 안전하게 대기 (최대 10초)
+    local leaderstats = player:WaitForChild("leaderstats", 10)
+    if not leaderstats then return end
+
+    local coins = leaderstats:WaitForChild("Coins", 10)
+    if not coins then return end
+
+    -- [2] 초기값 표시
+    coinLabel.Text = coins.Value .. " Coins"
+
+    -- [3] 변경 시 자동 업데이트
+    coins.Changed:Connect(function(newValue)
+        coinLabel.Text = newValue .. " Coins"
+    end)
+end)
+            </lua-code-block>
+
+            <HintBox type="warning" title="WaitForChild 필수!">
+                클라이언트 스크립트가 서버보다 먼저 실행될 수 있습니다.
+                <code>WaitForChild</code> 없이 바로 접근하면 nil 에러가 발생합니다.
+                항상 타임아웃(10초)을 지정하여 무한 대기를 방지하세요.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 23: 새 맵 추가 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-success mb-4">Part 4 — 커스터마이징</span>
+            <h2 class="title-section mb-6">새 맵 추가하기</h2>
+
+            <div class="space-y-4 mb-6">
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-sky flex items-center justify-center text-ink-deep font-bold">1</div>
+                    <div class="text-white">
+                        <strong>Toolbox에서 맵 검색</strong> → "Tower of Hell map" 또는 "obby tower" 검색 → Insert
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-sky flex items-center justify-center text-ink-deep font-bold">2</div>
+                    <div class="text-white">
+                        <strong>스폰 파트 확인</strong> — 맵 안에 <code style="color:#3DFFA2;">start</code>, <code style="color:#3DFFA2;">SpawnPoint</code>, 또는 <code style="color:#3DFFA2;">Spawn</code> 이름의 Part가 있는지 확인
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-sky flex items-center justify-center text-ink-deep font-bold">3</div>
+                    <div class="text-white">
+                        <strong>클리어 파트 확인</strong> — <code style="color:#FF6B6B;">FinishGlow</code>, <code style="color:#FF6B6B;">WinPart</code>, 또는 <code style="color:#FF6B6B;">Win</code> 이름의 Part (CanCollide=true!)
+                    </div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-sky flex items-center justify-center text-ink-deep font-bold">4</div>
+                    <div class="text-white">
+                        <strong>ServerStorage.Maps에 이동</strong> — 맵을 Maps 폴더에 넣으면 자동으로 로테이션에 포함됩니다
+                    </div>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="맵이 로드 안 되면?">
+                Output 창에서 <code>[GameManager] 스폰 파트를 찾을 수 없음</code> 메시지를 확인하세요.
+                스폰 Part가 없으면 해당 맵은 자동 스킵됩니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 24: RoLive Map 구조 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-success mb-4">Part 4 — 커스터마이징</span>
+            <h2 class="title-section mb-6">RoLive Map 섹션 구조</h2>
+
+            <lua-code-block title="각 섹션(예: Balance)의 내부 구조">
+Balance (Model)
+├── start (Part)       -- 섹션 시작점 (아래쪽)
+├── stop (Part)        -- 섹션 끝점 (위쪽)
+├── center (Part)      -- 중심/피벗 (PrimaryPart)
+├── walls (Model)      -- 벽 파트들
+├── rotate (NumberValue)  -- 회전값 (0, 90, 180, 270)
+├── weight (IntValue)     -- 가중치 (난이도)
+├── i (IntValue)          -- 인덱스 번호
+├── Model (×3)            -- 장애물 그룹
+└── Part (×25)            -- 개별 장애물 파트
+            </lua-code-block>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-mint font-bold mb-2">특수 모델</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• <strong>start</strong> — 맨 아래 시작 구역 (floor, steps, logo)</li>
+                        <li>• <strong>Finish</strong> — 맨 위 완주 구역 (finishPublic, FinishGlow)</li>
+                    </ul>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-sky font-bold mb-2">높이 정보</h4>
+                    <ul class="text-white text-sm space-y-1">
+                        <li>• start.center — Y ≈ <strong>8</strong> (바닥)</li>
+                        <li>• FinishGlow — Y ≈ <strong>885</strong> (꼭대기)</li>
+                        <li>• 총 높이: 약 <strong>877 스터드</strong></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 25: 새 아이템 추가 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-success mb-4">Part 4 — 커스터마이징</span>
+            <h2 class="title-section mb-6">새 상점 아이템 추가하기</h2>
+            <p class="text-ink-light mb-4"><strong>서버 + 클라이언트 양쪽 모두</strong> 수정해야 합니다!</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <lua-code-block title="① ShopHandler (서버)">
+-- ITEMS 테이블에 추가
+invisible = &#123;
+    name = "투명인간",
+    price = 200,
+    duration = 30,
+    apply = function(character)
+        for _, part in character:GetDescendants() do
+            if part:IsA("BasePart") then
+                part.Transparency = 1
+            end
+        end
+    end,
+    remove = function(character)
+        for _, part in character:GetDescendants() do
+            if part:IsA("BasePart") then
+                part.Transparency = 0
+            end
+        end
+    end,
+&#125;
+                    </lua-code-block>
+                </div>
+                <div>
+                    <lua-code-block title="② GameUI (클라이언트)">
+-- shopItems 테이블에 추가
+&#123;
+    id = "invisible",
+    name = "투명인간",
+    price = 200,
+    icon = "I"
+&#125;
+
+-- 이것만 추가하면 버튼이
+-- 자동으로 생성됩니다!
+                    </lua-code-block>
+                </div>
+            </div>
+
+            <HintBox type="warning" title="양쪽 동기화 필수!">
+                서버에만 추가하면 버튼이 안 보이고, 클라이언트에만 추가하면 서버가 "존재하지 않는 아이템"을 반환합니다.
+                <strong>id 값이 정확히 일치</strong>해야 합니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 26: 서버 전체 효과 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-success mb-4">Part 4 — 커스터마이징</span>
+            <h2 class="title-section mb-6">서버 전체 효과 만들기</h2>
+
+            <lua-code-block title="Lighting 조작 패턴" show-line-numbers>
+-- _character를 무시하고 Lighting을 직접 조작
+fog = &#123;
+    apply = function(_character)  -- _ 접두사 = 사용 안 함
+        local lighting = game:GetService("Lighting")
+        local atmo = Instance.new("Atmosphere")
+        atmo.Name = "ShopAtmosphere"
+        atmo.Density = 0.5
+        atmo.Parent = lighting
+    end,
+    remove = function(_character)
+        local lighting = game:GetService("Lighting")
+        local atmo = lighting:FindFirstChild("ShopAtmosphere")
+        if atmo then atmo:Destroy() end
+    end,
+&#125;
+            </lua-code-block>
+
+            <div class="bg-ink-deep rounded-xl p-4 mt-4">
+                <h4 class="text-neon-gold font-bold mb-2">사용 가능한 Lighting 이펙트</h4>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-white text-sm">
+                    <div>Atmosphere — 안개/대기</div>
+                    <div>BloomEffect — 빛 번짐</div>
+                    <div>BlurEffect — 화면 흐림</div>
+                    <div>ColorCorrectionEffect — 색 보정</div>
+                    <div>DepthOfFieldEffect — 심도</div>
+                    <div>SunRaysEffect — 햇살</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 27: CONFIG 튜닝 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-success mb-4">Part 4 — 커스터마이징</span>
+            <h2 class="title-section mb-6">CONFIG 튜닝 가이드</h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm" style="border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--ink-deep); color: white;">
+                            <th class="p-3 text-left rounded-tl-lg">설정값</th>
+                            <th class="p-3 text-center">기본값</th>
+                            <th class="p-3 text-center">권장 범위</th>
+                            <th class="p-3 text-left rounded-tr-lg">변경 영향</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">ROUND_TIME</td><td class="p-3 text-center">480</td><td class="p-3 text-center">120~600</td><td class="p-3">짧으면 긴장감↑, 길면 여유↑</td></tr>
+                        <tr><td class="p-3">INTERMISSION</td><td class="p-3 text-center">8</td><td class="p-3 text-center">5~15</td><td class="p-3">맵 전환 대기 시간</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">WIN_COINS</td><td class="p-3 text-center">50</td><td class="p-3 text-center">10~200</td><td class="p-3">클리어 보상 (상점 가격과 밸런스)</td></tr>
+                        <tr><td class="p-3">PARTICIPATE_COINS</td><td class="p-3 text-center">10</td><td class="p-3 text-center">5~50</td><td class="p-3">참여만으로도 보상</td></tr>
+                        <tr style="background: rgba(26,22,37,0.05);"><td class="p-3">HEIGHT_UPDATE_RATE</td><td class="p-3 text-center">0.5</td><td class="p-3 text-center">0.2~1.0</td><td class="p-3">낮을수록 부드럽지만 네트워크↑</td></tr>
+                        <tr><td class="p-3">LEVEL_XP_BASE</td><td class="p-3 text-center">100</td><td class="p-3 text-center">50~500</td><td class="p-3">레벨업 속도 (낮을수록 빠름)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 28: BGM 변경 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-success mb-4">Part 4 — 커스터마이징</span>
+            <h2 class="title-section mb-6">BGM 변경 방법</h2>
+
+            <div class="space-y-4 mb-6">
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-gold flex items-center justify-center text-ink-deep font-bold">1</div>
+                    <div class="text-white"><strong>Roblox Creator Hub</strong> → Audio → 원하는 음악 검색</div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-gold flex items-center justify-center text-ink-deep font-bold">2</div>
+                    <div class="text-white"><strong>에셋 ID 복사</strong> (URL의 숫자 부분)</div>
+                </div>
+                <div class="bg-ink-deep rounded-xl p-4 flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-full bg-neon-gold flex items-center justify-center text-ink-deep font-bold">3</div>
+                    <div class="text-white"><strong>GameUI</strong>에서 <code style="color:#3DFFA2;">bgm.SoundId</code> 변경</div>
+                </div>
+            </div>
+
+            <lua-code-block title="Sound 속성">
+bgm.SoundId = "rbxassetid://여기에_새_ID"
+bgm.Volume = 0.3           -- 0 (무음) ~ 10 (최대)
+bgm.PlaybackSpeed = 1.0    -- 0.5 (느리게) ~ 2.0 (빠르게)
+bgm.Looped = true           -- true = 반복 재생
+            </lua-code-block>
+
+            <HintBox type="warning" title="저작권 주의">
+                Roblox 공식 라이브러리에서 제공하는 음원만 사용하세요.
+                외부 음원을 업로드하면 저작권 문제가 발생할 수 있습니다.
+            </HintBox>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 29: 고도화 로드맵 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">Part 5 — 고도화</span>
+            <h2 class="title-section mb-6">고도화 로드맵</h2>
+
+            <div class="space-y-4">
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-mint font-bold mb-1">1. DataStore 영구 저장</h4>
+                    <p class="text-white text-sm mb-2">코인/레벨을 서버에 저장, 재접속 시 복원</p>
+                    <lua-code-block title="핵심 API">
+local DataStoreService = game:GetService("DataStoreService")
+local store = DataStoreService:GetDataStore("PlayerData")
+-- 저장: store:SetAsync(player.UserId, &#123;coins = 100, level = 5&#125;)
+-- 불러오기: local data = store:GetAsync(player.UserId)
+                    </lua-code-block>
+                </div>
+
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-sky font-bold mb-1">2. 랜덤 타워 생성</h4>
+                    <p class="text-white text-sm">섹션을 무작위로 쌓아 매 라운드 새로운 타워 — start/stop Part로 섹션을 연결</p>
+                </div>
+
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-gold font-bold mb-1">3. 스킬 트리</h4>
+                    <p class="text-white text-sm">레벨업 시 스킬 포인트 → 점프/스피드 영구 강화 (실제 TOH는 Lv80에 풀 트리)</p>
+                </div>
+
+                <div class="bg-ink-deep rounded-xl p-4">
+                    <h4 class="text-neon-coral font-bold mb-1">4. 이펙트 &amp; 게임패스</h4>
+                    <p class="text-white text-sm">캐릭터 트레일, 해로, 코일 스킨 + 2배 코인 게임패스로 수익화</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== 슬라이드 30: 최종 종합 ==================== -->
+    <section class="slide">
+        <div class="max-w-5xl mx-auto px-6 py-12">
+            <span class="badge badge-quiz mb-4">Part 5 — 마무리</span>
+            <h2 class="title-section mb-6">전체 연결 구조 종합</h2>
+
+            <!-- 전체 연결 구조 종합 (HTML) -->
+            <div class="diagram-box mb-6">
+                <div class="arch-diagram">
+                    <!-- 서버 영역 -->
+                    <div class="arch-zone">
+                        <div class="arch-zone-title" style="color:#3DFFA2;">서버</div>
+                        <div class="arch-zone-items">
+                            <span class="diagram-node node-server">GameManager</span>
+                            <span class="diagram-node node-server">ShopHandler</span>
+                            <span class="diagram-node" style="background:#3d3654;">Maps</span>
+                        </div>
+                    </div>
+                    <!-- 통신 채널 -->
+                    <div class="arch-zone">
+                        <div class="arch-zone-title" style="color:#FFD93D;">통신 채널</div>
+                        <div class="arch-connectors">
+                            <div class="arch-conn"><span class="arch-conn-from">GM</span> → <span class="diagram-chip">TimerUpdate</span> → <span class="arch-conn-to">타이머</span></div>
+                            <div class="arch-conn"><span class="arch-conn-from">GM</span> → <span class="diagram-chip">HeightUpdate</span> → <span class="arch-conn-to">높이 바</span></div>
+                            <div class="arch-conn"><span class="arch-conn-from">GM</span> → <span class="diagram-chip">RoundInfo</span> → <span class="arch-conn-to">GameUI</span></div>
+                            <div class="arch-conn"><span class="arch-conn-to">GUI</span> → <span class="diagram-chip">PurchaseItem</span> → <span class="arch-conn-from">SH</span></div>
+                        </div>
+                    </div>
+                    <!-- 클라이언트 영역 -->
+                    <div class="arch-zone">
+                        <div class="arch-zone-title" style="color:#6BCFFF;">클라이언트</div>
+                        <div class="arch-zone-items">
+                            <span class="diagram-node node-client">GameUI</span>
+                            <span class="diagram-node" style="background:#3d3654;">타이머</span>
+                            <span class="diagram-node" style="background:#3d3654;">높이 바</span>
+                            <span class="diagram-node" style="background:#3d3654;">상점</span>
+                            <span class="diagram-node" style="background:#3d3654;">음악</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-8">
+                <h3 class="text-2xl font-bold mb-4" style="color: var(--neon-mint);">
+                    "이 구조를 이해했다면,<br>여기서부터는 네 게임이다."
+                </h3>
+                <p class="text-ink-light">직접 코드를 수정하고, 새로운 기능을 추가해보세요!</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        import('../../../components/lit/index').catch(console.error);
+    </script>
+</LessonLayout>
+
+<style>
+    table td, table th {
+        border-bottom: 1px solid rgba(26,22,37,0.1);
+    }
+
+    /* === 다이어그램 공통 === */
+    .diagram-box {
+        background: var(--ink-deep, #1a1625);
+        border-radius: 12px;
+        padding: 1.5rem;
+        overflow-x: auto;
+    }
+    .diagram-row {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+    .diagram-row:last-child { margin-bottom: 0; }
+    .diagram-service {
+        flex: 1;
+        min-width: 200px;
+        background: #2d2640;
+        border-radius: 10px;
+        padding: 0.75rem;
+    }
+    .diagram-label {
+        color: #fdfcfb;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 2px;
+    }
+    .diagram-label-sub {
+        color: #9CA3AF;
+        font-size: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+    .diagram-children {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .diagram-sub-children {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        margin-top: 4px;
+    }
+    .diagram-node {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #1a1625;
+        font-weight: 600;
+        text-align: center;
+    }
+    .node-server { background: #3DFFA2; }
+    .node-client { background: #6BCFFF; }
+    .node-remote { background: #FFD93D; }
+    .diagram-chip {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        background: #3d3654;
+        color: #fdfcfb;
+        font-weight: 500;
+    }
+
+    /* === 시퀀스 다이어그램 === */
+    .seq-diagram { padding: 0.5rem 0; }
+    .seq-participants {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 1rem;
+    }
+    .seq-actor {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-align: center;
+        color: #1a1625;
+    }
+    .seq-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .seq-msg {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        background: #2d2640;
+        border-radius: 8px;
+        font-size: 0.78rem;
+    }
+    .seq-from, .seq-to {
+        font-weight: 700;
+        color: #3DFFA2;
+        min-width: 28px;
+        text-align: center;
+    }
+    .seq-msg-reverse .seq-from { color: #6BCFFF; }
+    .seq-msg-reverse .seq-to { color: #3DFFA2; }
+    .seq-arrow { color: #FFD93D; font-size: 1.1rem; }
+    .seq-label { color: #E8E6E3; flex: 1; }
+
+    /* === 플로우 다이어그램 === */
+    .flow-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .flow-step {
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        color: #fdfcfb;
+        min-width: 80px;
+    }
+    .flow-arrow {
+        color: #6BCFFF;
+        font-size: 1.4rem;
+        font-weight: 700;
+    }
+    .flow-arrow-label {
+        color: #9CA3AF;
+        font-size: 0.7rem;
+        padding: 0 2px;
+    }
+    .flow-arrow-label::before { content: '→ '; color: #6BCFFF; font-size: 1rem; }
+
+    /* === 아키텍처 다이어그램 === */
+    .arch-diagram {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .arch-zone {
+        background: #2d2640;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+    }
+    .arch-zone-title {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    .arch-zone-items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .arch-connectors {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    .arch-conn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        color: #E8E6E3;
+    }
+    .arch-conn-from { color: #3DFFA2; font-weight: 700; }
+    .arch-conn-to { color: #6BCFFF; font-weight: 700; }
+</style>
